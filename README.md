@@ -48,6 +48,12 @@ dependencies:
 
 TODO: Update documentation and add link.
 
+## Packages
+
+| Package | Description | Version |
+| --- | --- | --- |
+| [google_generative_ai](pkgs/google_generative_ai/) | The Google Generative AI SDK for Dart - allows access to state-of-the-art LLMs. |  |
+
 ## Contributing
 
 See [Contributing](docs/CONTRIBUTING.md) for more information on contributing to

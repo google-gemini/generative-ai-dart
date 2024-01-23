@@ -1,0 +1,46 @@
+name: package:google_generative_ai
+
+permissions: read-all
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/google_generative_ai.yml'
+      - 'pkgs/google_generative_ai/**'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/google_generative_ai.yml'
+      - 'pkgs/google_generative_ai/**'
+  schedule:
+    - cron: '0 0 * * 0' # weekly
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pkgs/google_generative_ai
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: ['3.0', stable, dev]
+        include:
+          - sdk: stable
+            run-tests: true
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
+        with:
+          sdk: ${{ matrix.sdk }}
+
+      - run: dart pub get
+
+      - run: dart analyze --fatal-infos
+
+      - run: dart format --output=none --set-exit-if-changed .
+        if: ${{matrix.run-tests}}
+
+      - run: dart test
+        if: ${{matrix.run-tests}}

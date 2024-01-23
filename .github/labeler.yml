@@ -1,0 +1,7 @@
+# Configuration for .github/workflows/pull_request_label.yml.
+
+'type-infra':
+  - '.github/**'
+
+'package:google_generative_ai':
+  - 'pkgs/google_generative_ai/**'
