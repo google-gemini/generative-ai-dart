@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: ['3.0', stable, dev]
+        sdk: ['3.2', stable, dev]
         include:
           - sdk: stable
             run-tests: true
