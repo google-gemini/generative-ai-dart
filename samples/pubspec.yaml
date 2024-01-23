@@ -1,0 +1,13 @@
+name: generative_ai_samples
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  path: ^1.9.0
+  google_generative_ai:
+    path: ../pkgs/google_generative_ai
+
+dev_dependencies:
+  lints: ^3.0.0
