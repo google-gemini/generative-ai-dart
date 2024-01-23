@@ -17,6 +17,8 @@ steps:
 ## Using the SDK in your own app
 
 Add a dependency on this repository to the path `pkgs/google_generative_ai`.
+Once the API is stable the package will be available from pub.
+We welcome pre-publish feedback through GitHub issues.
 
 ```yaml
 dependencies:
@@ -44,7 +46,7 @@ dependencies:
 
 ## Documentation
 
-TODO: You can find the documentation for the
+TODO: Update documentation and add link.
 
 ## Contributing
 
