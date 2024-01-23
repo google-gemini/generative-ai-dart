@@ -2,3 +2,9 @@
 .atom/
 .idea/
 .vscode/*
+
+# Dart project
+**/doc/api/
+.dart_tool/
+build/
+pubspec.lock
