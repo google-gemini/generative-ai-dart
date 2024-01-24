@@ -46,7 +46,8 @@ dependencies:
 
 ## Documentation
 
-TODO: Update documentation and add link.
+Find complete documentation for the Google AI SDKs and the Gemini model in the Google
+documentation: https://ai.google.dev/docs
 
 ## Packages
 
@@ -56,7 +57,7 @@ TODO: Update documentation and add link.
 
 ## Contributing
 
-See [Contributing](docs/CONTRIBUTING.md) for more information on contributing to
+See [Contributing](CONTRIBUTING.md) for more information on contributing to
 the Generative AI SDK for Dart.
 
 ## License
