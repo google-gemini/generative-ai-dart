@@ -12,6 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// The Google Generative AI SDK for Dart allows developers to use
+/// state-of-the-art Large Language Models (LLMs) to build language
+/// applications.
+///
+/// Most uses of this library will want to start with the [GenerativeModel]
+/// class. Here's a simple example of using this API:
+///
+/// ```dart
+/// const apiKey = ...;
+///
+/// void main() async {
+///   final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+///
+///   final prompt = 'Write a story about a magic backpack.';
+///   final content = [Content.text(prompt)];
+///   final response = await model.generateContent(content);
+///
+///   print(response.text);
+/// };
+/// ```
+library;
+
 export 'src/api.dart'
     show
         BlockReason,
