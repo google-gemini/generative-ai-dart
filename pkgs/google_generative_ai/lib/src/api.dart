@@ -75,7 +75,7 @@ final class EmbedContentResponse {
   EmbedContentResponse(this.embedding);
 }
 
-/// A list of floats representing an embedding.
+/// A list of values representing an embedding.
 final class ContentEmbedding {
   final List<double> values;
   ContentEmbedding(this.values);
