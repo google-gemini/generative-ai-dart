@@ -12,7 +12,7 @@ steps:
 - Export a `$GOOGLE_API_KEY` environment variable with an API key with access to
   the Gemini generative models, or run the below commands with an environment
   containing this variable.
-- Run any sample from the `bin` directory. `dart bin/simple_text.dart`.
+- Run any sample from the `bin` directory (e.g., `dart bin/simple_text.dart`).
 
 ## Using the SDK in your own app
 
@@ -32,16 +32,16 @@ dependencies:
 ### Initializing the API client
 
 ```dart
-  final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
 ```
 
 ### Calling the API
 
 ```dart
-  final prompt = 'Write a story about a magic backpack.';
-  final content = [Content.text(prompt)];
-  final response = await model.generateContent(content);
-  print(response.text);
+final prompt = 'Write a story about a magic backpack.';
+final content = [Content.text(prompt)];
+final response = await model.generateContent(content);
+print(response.text);
 ```
 
 ## Documentation
@@ -53,10 +53,11 @@ TODO: Update documentation and add link.
 | Package | Description | Version |
 | --- | --- | --- |
 | [google_generative_ai](pkgs/google_generative_ai/) | The Google Generative AI SDK for Dart - allows access to state-of-the-art LLMs. |  |
+| [samples](samples/) | Dart samples for `package:google_generative_ai`. |  |
 
 ## Contributing
 
-See [Contributing](docs/CONTRIBUTING.md) for more information on contributing to
+See [Contributing](CONTRIBUTING.md) for more information on contributing to
 the Generative AI SDK for Dart.
 
 ## License
