@@ -1,0 +1,43 @@
+name: samples
+
+permissions: read-all
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/samples.yml'
+      - 'samples/**'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/samples.yml'
+      - 'samples/**'
+  schedule:
+    - cron: '0 0 * * 0' # weekly
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: samples
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [stable, dev]
+        include:
+          - sdk: stable
+            check-formatting: true
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
+        with:
+          sdk: ${{ matrix.sdk }}
+
+      - run: dart pub get
+
+      - run: dart analyze --fatal-infos
+
+      - run: dart format --output=none --set-exit-if-changed .
+        if: ${{matrix.check-formatting}}

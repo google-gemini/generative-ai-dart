@@ -1,4 +1,9 @@
 name: google_generative_ai
+description: >-
+  The Google Generative AI SDK for Dart - allows access to state-of-the-art
+  LLMs.
+repository: https://github.com/google/generative-ai-dart/tree/main/pkgs/google_generative_ai
+
 publish_to: none
 
 environment:

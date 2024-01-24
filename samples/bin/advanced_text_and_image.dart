@@ -44,10 +44,12 @@ void main() async {
     e.errors.forEach(print);
   }
   final content = [
-    Content.multi([Text(prompt),
-    // The only accepted mime types are image/*.
-    Data('image/jpeg', catBytes),
-    Data('image/jpeg', sconeBytes),])
+    Content.multi([
+      Text(prompt),
+      // The only accepted mime types are image/*.
+      Data('image/jpeg', catBytes),
+      Data('image/jpeg', sconeBytes),
+    ])
   ];
   // final tokenCount = await model.countTokens(content);
   // print('Token count: ${tokenCount.totalTokens}');
