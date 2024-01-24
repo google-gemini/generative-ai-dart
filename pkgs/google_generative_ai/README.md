@@ -12,10 +12,15 @@ https://ai.google.dev/tutorials/setup for how to create one.
 
 ### Add the package to your project
 
-Add the package via:
+Add a dependency on the package via:
 
-```bash
-dart pub add google_generative_ai
+```yaml
+dependencies:
+  google_generative_ai:
+    git:
+      url: git@github.com:google/generative-ai-dart.git
+      path: pkgs/google_generative_ai
+      ref: main
 ```
 
 And import:
