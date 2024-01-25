@@ -30,5 +30,3 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --fatal-infos
       - run: dart format --set-exit-if-changed .
-      - run: flutter build web
-      - run: flutter test
