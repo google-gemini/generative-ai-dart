@@ -1,3 +1,15 @@
+# env.json contains the API key for this sample app.
+env.json
+
+# Ignore platform-specific directories, since the user will run
+# `flutter create` as described in the README
+android/
+web/
+ios/
+macos/
+linux/
+windows/
+
 # Miscellaneous
 *.class
 *.log
