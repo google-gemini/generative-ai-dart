@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart' hide Text;
+import 'package:google_generative_ai/google_generative_ai.dart' as gen_ai;
 
 void main() {
   runApp(const GenerativeAISample());
@@ -64,16 +64,15 @@ class ChatWidget extends StatefulWidget {
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
-  late final GenerativeModel _model;
-  late final ChatSession _chat;
+  late final gen_ai.GenerativeModel _model;
+  late final gen_ai.ChatSession _chat;
   late final _textController = TextEditingController();
-  final List<Message> _messages = [];
   bool _loading = false;
 
   @override
   void initState() {
     super.initState();
-    _model = GenerativeModel(
+    _model = gen_ai.GenerativeModel(
         model: 'gemini-pro', apiKey: const String.fromEnvironment('api_key'));
     _chat = _model.startChat();
   }
@@ -89,10 +88,16 @@ class _ChatWidgetState extends State<ChatWidget> {
           Expanded(
             child: ListView.builder(
               itemBuilder: (context, idx) {
-                var message = _messages[idx];
-                return MessageWidget(message: message);
+                var content = _chat.history.toList()[idx];
+                var text = content.parts
+                    .whereType<gen_ai.Text>()
+                    .map<String>((e) => e.text)
+                    .fold('',
+                        (previousValue, element) => previousValue + element);
+                return MessageWidget(
+                    text: text, isFromUser: content.role == 'user');
               },
-              itemCount: _messages.length,
+              itemCount: _chat.history.length,
             ),
           ),
           Row(
@@ -125,12 +130,11 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   Future<void> _sendChatMessage(String message) async {
     setState(() {
-      _messages.add(Message(message, isFromUser: true));
       _loading = true;
     });
 
     try {
-      var response = await _chat.sendMessage(Content.text(message));
+      var response = await _chat.sendMessage(gen_ai.Content.text(message));
       var text = response.text;
 
       if (text == null) {
@@ -138,7 +142,6 @@ class _ChatWidgetState extends State<ChatWidget> {
         return;
       } else {
         setState(() {
-          _messages.add(Message(text));
           _loading = false;
         });
       }
@@ -178,31 +181,27 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 }
 
-class Message {
-  final bool isFromUser;
-  final String text;
-  Message(this.text, {this.isFromUser = false});
-}
-
 class MessageWidget extends StatelessWidget {
-  final Message message;
+  final String text;
+  final bool isFromUser;
 
   const MessageWidget({
     super.key,
-    required this.message,
+    required this.text,
+    required this.isFromUser,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment:
-          message.isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+          isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         Flexible(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 600),
             decoration: BoxDecoration(
-              color: message.isFromUser
+              color: isFromUser
                   ? Theme.of(context).colorScheme.primaryContainer
                   : Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(8.0),
@@ -210,7 +209,7 @@ class MessageWidget extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             margin: const EdgeInsets.only(bottom: 8),
             child: SelectionArea(
-              child: Text(message.text),
+              child: Text(text),
             ),
           ),
         ),
