@@ -3,6 +3,7 @@
 A Flutter chat application that uses the `google_generative_ai` package.
 
 ## Getting started
+
 Create the project files for each target platform by using the `flutter create`
 command in this project's directory.
 
