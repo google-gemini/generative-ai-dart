@@ -6,13 +6,20 @@ A Flutter chat application that uses the `google_generative_ai` package.
 Create the project files for each target platform by using the `flutter create`
 command in this project's directory.
 
-```
+```bash
 flutter create .
 ```
 
-Add your API key to `lib/main.dart`:
+Create a new file, `env.json` to store your API key:
 
+```json
+{
+  "api_key": "<YOUR_API_KEY_HERE>"
+}
 ```
-// Add your API key here.
-const _apiKey = '';
+
+Specify the `env.json` file when you run the app:
+
+```bash
+flutter run -d android --dart-define-from-file=env.json
 ```
