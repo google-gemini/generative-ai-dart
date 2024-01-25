@@ -93,8 +93,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                 var text = content.parts
                     .whereType<gen_ai.Text>()
                     .map<String>((e) => e.text)
-                    .fold('',
-                        (previousValue, element) => previousValue + element);
+                    .join('');
                 return MessageWidget(
                     text: text, isFromUser: content.role == 'user');
               },
