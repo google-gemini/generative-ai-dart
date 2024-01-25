@@ -73,7 +73,8 @@ class _ChatWidgetState extends State<ChatWidget> {
   @override
   void initState() {
     super.initState();
-    _model = GenerativeModel(model: 'gemini-pro', apiKey: const String.fromEnvironment('api_key'));
+    _model = GenerativeModel(
+        model: 'gemini-pro', apiKey: const String.fromEnvironment('api_key'));
     _chat = _model.startChat();
   }
 
