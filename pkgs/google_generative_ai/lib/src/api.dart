@@ -64,7 +64,8 @@ final class GenerateContentResponse {
                   ? ': $finishMessage'
                   : ''),
         ),
-      [Candidate(content: Content(parts: [Text(:final text)])), ...] => text,
+      [Candidate(content: Content(parts: [TextPart(:final text)])), ...] =>
+        text,
       [Candidate(), ...] => null,
     };
   }
