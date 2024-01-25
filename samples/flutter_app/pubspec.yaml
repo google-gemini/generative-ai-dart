@@ -9,6 +9,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   google_generative_ai:
     path: ../../pkgs/google_generative_ai
+  flutter_markdown: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

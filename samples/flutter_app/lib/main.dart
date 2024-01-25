@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart' as gen_ai;
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 void main() {
   runApp(const GenerativeAISample());
@@ -208,9 +209,7 @@ class MessageWidget extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(8.0),
             margin: const EdgeInsets.only(bottom: 8),
-            child: SelectionArea(
-              child: Text(text),
-            ),
+            child: MarkdownBody(data: text),
           ),
         ),
       ],
