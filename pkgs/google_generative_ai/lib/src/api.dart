@@ -75,11 +75,14 @@ final class EmbedContentResponse {
   EmbedContentResponse(this.embedding);
 }
 
+/// A list of values representing an embedding.
 final class ContentEmbedding {
   final List<double> values;
   ContentEmbedding(this.values);
 }
 
+/// A set of the feedback metadata the prompt specified in
+/// [GenerateContentRequest].
 final class PromptFeedback {
   final BlockReason? blockReason;
   final String? blockReasonMessage;
@@ -87,6 +90,7 @@ final class PromptFeedback {
   PromptFeedback(this.blockReason, this.blockReasonMessage, this.safetyRatings);
 }
 
+/// A response candidate generated from the model.
 final class Candidate {
   final Content content;
   final List<SafetyRating>? safetyRatings;
@@ -98,12 +102,19 @@ final class Candidate {
       this.finishReason, this.finishMessage);
 }
 
+/// Safety rating for a piece of content.
+///
+/// The safety rating contains the category of harm and the harm probability
+/// level in that category for a piece of content. Content is classified for
+/// safety across a number of harm categories and the probability of the harm
+/// classification is included here.
 final class SafetyRating {
   final HarmCategory category;
   final HarmProbability probability;
   SafetyRating(this.category, this.probability);
 }
 
+/// Specifies what was the reason why prompt was blocked.
 enum BlockReason {
   unknown,
   unspecified,
@@ -146,11 +157,13 @@ enum HarmProbability {
   high,
 }
 
+/// A collection of source attributions for a piece of content.
 final class CitationMetadata {
   final List<CitationSource> citationSources;
   CitationMetadata(this.citationSources);
 }
 
+/// A citation to a source for a portion of a specific response.
 final class CitationSource {
   final int? startIndex;
   final int? endIndex;
@@ -159,6 +172,7 @@ final class CitationSource {
   CitationSource(this.startIndex, this.endIndex, this.uri, this.license);
 }
 
+/// Defines the reason why the model stopped generating tokens.
 enum FinishReason {
   unknown,
   unspecified,
@@ -180,6 +194,10 @@ enum FinishReason {
       };
 }
 
+/// Safety setting, affecting the safety-blocking behavior.
+///
+/// Passing a safety setting for a category changes the allowed proability that
+/// content is blocked.
 final class SafetySetting {
   final HarmCategory category;
   final HarmBlockThreshold threshold;
@@ -205,6 +223,7 @@ enum HarmBlockThreshold {
   }
 }
 
+/// Configuration options for model generation and outputs.
 final class GenerationConfig {
   final int? candidateCount;
   final List<String> stopSequences;
@@ -232,6 +251,7 @@ final class GenerationConfig {
       };
 }
 
+/// Type of task for which the embedding will be used.
 enum TaskType {
   unspecified,
   retrievalQuery,

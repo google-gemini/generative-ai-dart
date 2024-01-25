@@ -15,6 +15,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+/// The base structured datatype containing multi-part content of a message.
 final class Content {
   final String? role;
   final List<Part> parts;
@@ -50,6 +51,7 @@ Part _parsePart(Object? jsonObject) {
   };
 }
 
+/// A datatype containing media that is part of a multi-part [Content] message.
 sealed class Part {}
 
 final class Text implements Part {
