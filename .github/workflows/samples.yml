@@ -7,12 +7,12 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/samples.yml'
-      - 'samples/**'
+      - 'samples/dart/**'
   push:
     branches: [ main ]
     paths:
       - '.github/workflows/samples.yml'
-      - 'samples/**'
+      - 'samples/dart/**'
   schedule:
     - cron: '0 0 * * 0' # weekly
 
