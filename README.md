@@ -52,7 +52,7 @@ documentation: https://ai.google.dev/docs
 ## Packages
 
 | Package                                            | Description | Version |
-|----------------------------------------------------| --- | --- |
+| -------------------------------------------------- | --- | --- |
 | [google_generative_ai](pkgs/google_generative_ai/) | The Google Generative AI SDK for Dart - allows access to state-of-the-art LLMs. |  |
 | [samples/dart](samples/dart/)                      | Dart samples for `package:google_generative_ai`. |  |
 | [samples/flutter](samples/flutter/)                | Flutter sample for `package:google_generative_ai`. |  |
