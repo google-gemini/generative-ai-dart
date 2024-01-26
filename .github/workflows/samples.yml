@@ -7,11 +7,13 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/samples.yml'
+      - 'pkgs/google_generative_ai/**'
       - 'samples/dart/**'
   push:
     branches: [ main ]
     paths:
       - '.github/workflows/samples.yml'
+      - 'pkgs/google_generative_ai/**'
       - 'samples/dart/**'
   schedule:
     - cron: '0 0 * * 0' # weekly
