@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart' as gen_ai;
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 void main() {
   runApp(const GenerativeAISample());
@@ -65,15 +65,15 @@ class ChatWidget extends StatefulWidget {
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
-  late final gen_ai.GenerativeModel _model;
-  late final gen_ai.ChatSession _chat;
+  late final GenerativeModel _model;
+  late final ChatSession _chat;
   late final _textController = TextEditingController();
   bool _loading = false;
 
   @override
   void initState() {
     super.initState();
-    _model = gen_ai.GenerativeModel(
+    _model = GenerativeModel(
         model: 'gemini-pro', apiKey: const String.fromEnvironment('api_key'));
     _chat = _model.startChat();
   }
@@ -91,7 +91,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               itemBuilder: (context, idx) {
                 var content = _chat.history.toList()[idx];
                 var text = content.parts
-                    .whereType<gen_ai.Text>()
+                    .whereType<TextPart>()
                     .map<String>((e) => e.text)
                     .join('');
                 return MessageWidget(
@@ -134,7 +134,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     });
 
     try {
-      var response = await _chat.sendMessage(gen_ai.Content.text(message));
+      var response = await _chat.sendMessage(Content.text(message));
       var text = response.text;
 
       if (text == null) {
