@@ -34,6 +34,8 @@
 /// ```
 library;
 
+import 'src/model.dart';
+
 export 'src/api.dart'
     show
         BlockReason,
