@@ -28,7 +28,7 @@ Future<void> main() async {
       generationConfig: GenerationConfig(maxOutputTokens: 100));
   final chat = model.startChat(history: [
     Content.text('Hello, I have 2 dogs in my house.'),
-    Content.model([Text('Great to meet you. What would you like to know?')])
+    Content.model([TextPart('Great to meet you. What would you like to know?')])
   ]);
   var message = 'How many paws are in my house?';
   print('Message: $message');
@@ -51,7 +51,7 @@ Future<void> main() async {
     print('${content.role}:');
     for (final part in content.parts) {
       switch (part) {
-        case Text(:final text):
+        case TextPart(:final text):
           print(text);
         case _:
           print('Non text content');

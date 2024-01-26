@@ -21,9 +21,9 @@ final class Content {
   final List<Part> parts;
   Content(this.role, this.parts);
 
-  static Content text(String text) => Content('user', [Text(text)]);
+  static Content text(String text) => Content('user', [TextPart(text)]);
   static Content data(String mimeType, Uint8List bytes) =>
-      Content('user', [Data(mimeType, bytes)]);
+      Content('user', [DataPart(mimeType, bytes)]);
   static Content multi(Iterable<Part> parts) => Content('user', [...parts]);
   static Content model(Iterable<Part> parts) => Content('model', [...parts]);
 
@@ -44,7 +44,7 @@ Content parseContent(Object jsonObject) {
 
 Part _parsePart(Object? jsonObject) {
   return switch (jsonObject) {
-    {'text': String text} => Text(text),
+    {'text': String text} => TextPart(text),
     {'inlineData': {'mimeType': String _, 'data': String _}} =>
       throw UnimplementedError('inlineData content part not yet supported'),
     _ => throw FormatException('Unhandled Part format $jsonObject'),
@@ -54,16 +54,16 @@ Part _parsePart(Object? jsonObject) {
 /// A datatype containing media that is part of a multi-part [Content] message.
 sealed class Part {}
 
-final class Text implements Part {
+final class TextPart implements Part {
   final String text;
-  Text(this.text);
+  TextPart(this.text);
   Object toJson() => {'text': text};
 }
 
-final class Data implements Part {
+final class DataPart implements Part {
   final String mimeType;
   final Uint8List bytes;
-  Data(this.mimeType, this.bytes);
+  DataPart(this.mimeType, this.bytes);
   Object toJson() => {
         'inlineData': {'data': base64Encode(bytes), 'mimeType': mimeType}
       };

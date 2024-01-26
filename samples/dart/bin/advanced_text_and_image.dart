@@ -45,10 +45,10 @@ void main() async {
   }
   final content = [
     Content.multi([
-      Text(prompt),
+      TextPart(prompt),
       // The only accepted mime types are image/*.
-      Data('image/jpeg', catBytes),
-      Data('image/jpeg', sconeBytes),
+      DataPart('image/jpeg', catBytes),
+      DataPart('image/jpeg', sconeBytes),
     ])
   ];
   // final tokenCount = await model.countTokens(content);

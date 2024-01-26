@@ -117,7 +117,7 @@ Content _aggregate(Iterable<Content> content) {
   final parts = <Part>[];
   void addBufferedText() {
     if (textBuffer.isNotEmpty) {
-      parts.add(Text(textBuffer.toString()));
+      parts.add(TextPart(textBuffer.toString()));
       textBuffer.clear();
     }
   }
@@ -125,9 +125,9 @@ Content _aggregate(Iterable<Content> content) {
   for (final content in content) {
     for (final part in content.parts) {
       switch (part) {
-        case Text(:final text):
+        case TextPart(:final text):
           textBuffer.write(text);
-        case Data():
+        case DataPart():
           addBufferedText();
           parts.add(part);
       }
