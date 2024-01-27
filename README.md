@@ -59,8 +59,8 @@ documentation: https://ai.google.dev/docs
 
 ## Contributing
 
-See [Contributing](CONTRIBUTING.md) for more information on contributing to
-the Generative AI SDK for Dart.
+See [Contributing](CONTRIBUTING.md) for more information on contributing to the
+Generative AI SDK for Dart.
 
 ## License
 

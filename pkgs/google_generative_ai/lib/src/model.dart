@@ -19,7 +19,7 @@ import 'client.dart';
 import 'content.dart';
 
 final _baseUrl = Uri.https('generativelanguage.googleapis.com');
-const _apiVersion = "v1";
+const _apiVersion = 'v1';
 
 enum Task {
   generateContent('generateContent'),

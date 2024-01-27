@@ -1,3 +1,5 @@
+[![flutter_sample](https://github.com/google/generative-ai-dart/actions/workflows/flutter_sample.yml/badge.svg)](https://github.com/google/generative-ai-dart/actions/workflows/flutter_sample.yml)
+
 # Flutter generative AI sample
 
 A Flutter chat application that uses the `google_generative_ai` package.

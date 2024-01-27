@@ -1,4 +1,4 @@
-name: flutter_sample
+name: samples_flutter
 
 permissions: read-all
 
@@ -7,11 +7,13 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/flutter_sample.yml'
+      - 'pkgs/google_generative_ai/**'
       - 'samples/flutter_app/**'
   pull_request:
     branches: [ main ]
     paths:
       - '.github/workflows/flutter_sample.yml'
+      - 'pkgs/google_generative_ai/**'
       - 'samples/flutter_app/**'
   schedule:
     - cron: '0 0 * * 0' # weekly

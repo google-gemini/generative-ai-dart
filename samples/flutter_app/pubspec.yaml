@@ -1,8 +1,11 @@
 name: generative_ai_flutter
 description: "Sample app for the google_generative_ai package"
+
 publish_to: none
+
 environment:
   sdk: ^3.2.0
+
 dependencies:
   flutter:
     sdk: flutter
@@ -10,9 +13,11 @@ dependencies:
   google_generative_ai:
     path: ../../pkgs/google_generative_ai
   flutter_markdown: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+
 flutter:
   uses-material-design: true
