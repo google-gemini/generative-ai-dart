@@ -2,8 +2,8 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_generative_ai/src/model.dart';
 import 'package:test/test.dart';
 
-import 'utils/stub_client.dart';
 import 'utils/matchers.dart';
+import 'utils/stub_client.dart';
 
 void main() {
   group('GenerativeModel', () {

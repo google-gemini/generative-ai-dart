@@ -1,5 +1,5 @@
-import 'package:google_generative_ai/src/client.dart';
 import 'package:collection/collection.dart';
+import 'package:google_generative_ai/src/client.dart';
 
 const Equality<Map<String, Object?>> _mapEquality =
     MapEquality(values: DeepCollectionEquality());

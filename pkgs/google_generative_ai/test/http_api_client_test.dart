@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:google_generative_ai/src/client.dart';
-import 'package:test/test.dart';
-import 'package:http/testing.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:test/test.dart';
 
 import 'utils/matchers.dart';
 

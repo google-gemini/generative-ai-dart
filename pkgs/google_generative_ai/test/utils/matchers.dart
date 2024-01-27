@@ -1,6 +1,6 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:matcher/matcher.dart';
 import 'package:http/http.dart' as http;
+import 'package:matcher/matcher.dart';
 
 Matcher matchesPart(Part part) => switch (part) {
       TextPart(text: final text) =>
