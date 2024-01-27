@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'api.dart';
 import 'client.dart';
@@ -42,33 +41,33 @@ final class GenerativeModel {
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
-  GenerativeModel(
-      {required String model,
-      required String apiKey,
-      List<SafetySetting> safetySettings = const [],
-      GenerationConfig? generationConfig})
+
+  factory GenerativeModel(
+          {required String model,
+          required String apiKey,
+          List<SafetySetting> safetySettings = const [],
+          GenerationConfig? generationConfig}) =>
+      GenerativeModel._withClient(
+          client: HttpApiClient(apiKey: apiKey),
+          model: model,
+          safetySettings: safetySettings,
+          generationConfig: generationConfig);
+
+  GenerativeModel._withClient(
+      {required ApiClient client,
+      required String model,
+      required List<SafetySetting> safetySettings,
+      required GenerationConfig? generationConfig})
       :
         // TODO: Allow `models/` prefix and strip it.
         // https://github.com/google/generative-ai-js/blob/2be48f8e5427f2f6191f24bcb8000b450715a0de/packages/main/src/models/generative-model.ts#L59
         _model = model,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
-        _client = HttpApiClient(model: model, apiKey: apiKey);
+        _client = client;
 
-  Future<Map> _makeRequest(Task task, Map<String, Object?> parameters) async {
-    final uri = _baseUrl.resolveUri(
-        Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
-    final body = utf8.encode(jsonEncode(parameters));
-    final jsonString = await _client.makeRequest(uri, body);
-    return jsonDecode(jsonString);
-  }
-
-  Stream<Map<String, Object?>> _streamRequest(Task task, Object parameters) {
-    final uri = _baseUrl.resolveUri(
-        Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
-    final body = utf8.encode(jsonEncode(parameters));
-    return _client.streamRequest(uri, body).map(jsonDecode).cast();
-  }
+  Uri _taskUri(Task task) => _baseUrl.resolveUri(
+      Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
 
   /// Returns content responding to [prompt].
   ///
@@ -79,11 +78,14 @@ final class GenerativeModel {
   Future<GenerateContentResponse> generateContent(
       Iterable<Content> prompt) async {
     final parameters = {
-      'contents': prompt.toList(),
-      if (_safetySettings.isNotEmpty) 'safetySettings': _safetySettings,
-      if (_generationConfig case final config?) 'generationConfig': config,
+      'contents': prompt.map((p) => p.toJson()).toList(),
+      if (_safetySettings.isNotEmpty)
+        'safetySettings': _safetySettings.map((s) => s.toJson()).toList(),
+      if (_generationConfig case final config?)
+        'generationConfig': config.toJson(),
     };
-    final response = await _makeRequest(Task.generateContent, parameters);
+    final response =
+        await _client.makeRequest(_taskUri(Task.generateContent), parameters);
     return parseGenerateContentResponse(response);
   }
 
@@ -98,11 +100,14 @@ final class GenerativeModel {
   Stream<GenerateContentResponse> generateContentStream(
       Iterable<Content> prompt) {
     final parameters = <String, Object?>{
-      'contents': prompt.toList(),
-      if (_safetySettings.isNotEmpty) 'safetySettings': _safetySettings,
-      if (_generationConfig case final config?) 'generationConfig': config,
+      'contents': prompt.map((p) => p.toJson()).toList(),
+      if (_safetySettings.isNotEmpty)
+        'safetySettings': _safetySettings.map((s) => s.toJson()).toList(),
+      if (_generationConfig case final config?)
+        'generationConfig': config.toJson(),
     };
-    final response = _streamRequest(Task.streamGenerateContent, parameters);
+    final response =
+        _client.streamRequest(_taskUri(Task.streamGenerateContent), parameters);
     return response.map(parseGenerateContentResponse);
   }
 
@@ -119,8 +124,11 @@ final class GenerativeModel {
   ///       print(response.text);
   ///     }
   Future<CountTokensResponse> countTokens(Iterable<Content> content) async {
-    final parameters = <String, Object?>{'contents': content.toList()};
-    final response = await _makeRequest(Task.countTokens, parameters);
+    final parameters = <String, Object?>{
+      'contents': content.map((c) => c.toJson()).toList()
+    };
+    final response =
+        await _client.makeRequest(_taskUri(Task.countTokens), parameters);
     return parseCountTokensResponse(response);
   }
 
@@ -133,11 +141,23 @@ final class GenerativeModel {
   Future<EmbedContentResponse> embedContent(Content content,
       {TaskType? taskType, String? title}) async {
     final parameters = <String, Object?>{
-      'content': content,
-      if (taskType != null) 'taskType': taskType,
+      'content': content.toJson(),
+      if (taskType != null) 'taskType': taskType.toJson(),
       if (title != null) 'title': title
     };
-    final response = await _makeRequest(Task.embedContent, parameters);
+    final response =
+        await _client.makeRequest(_taskUri(Task.embedContent), parameters);
     return parseEmbedContentReponse(response);
   }
 }
+
+GenerativeModel createModelwithClient(
+        {required String model,
+        required ApiClient client,
+        List<SafetySetting> safetySettings = const [],
+        GenerationConfig? generationConfig}) =>
+    GenerativeModel._withClient(
+        client: client,
+        model: model,
+        safetySettings: safetySettings,
+        generationConfig: generationConfig);
