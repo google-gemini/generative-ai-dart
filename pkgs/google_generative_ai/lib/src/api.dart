@@ -14,6 +14,7 @@
 
 import 'content.dart';
 import 'error.dart';
+import 'model.dart';
 
 final class CountTokensResponse {
   final int totalTokens;
@@ -82,8 +83,8 @@ final class ContentEmbedding {
   ContentEmbedding(this.values);
 }
 
-/// A set of the feedback metadata the prompt specified in
-/// [GenerateContentRequest].
+/// A set of the feedback metadata the prompt specified in the [GenerativeModel]
+/// request.
 final class PromptFeedback {
   final BlockReason? blockReason;
   final String? blockReasonMessage;
@@ -263,12 +264,12 @@ enum TaskType {
 
   Object toJson() {
     return switch (this) {
-      unspecified => "TASK_TYPE_UNSPECIFIED",
-      retrievalQuery => "RETRIEVAL_QUERY",
-      retrievalDocument => "RETRIEVAL_DOCUMENT",
-      semanticSimilarity => "SEMANTIC_SIMILARITY",
-      classification => "CLASSIFICATION",
-      clustering => "CLUSTERING",
+      unspecified => 'TASK_TYPE_UNSPECIFIED',
+      retrievalQuery => 'RETRIEVAL_QUERY',
+      retrievalDocument => 'RETRIEVAL_DOCUMENT',
+      semanticSimilarity => 'SEMANTIC_SIMILARITY',
+      classification => 'CLASSIFICATION',
+      clustering => 'CLUSTERING',
     };
   }
 }
@@ -366,7 +367,9 @@ SafetyRating _parseSafetyRating(Object? jsonObject) {
 
 ContentEmbedding _parseContentEmbedding(Object? jsonObject) {
   return switch (jsonObject) {
-    {'values': List values} => ContentEmbedding(<double>[...values]),
+    {'values': List values} => ContentEmbedding(<double>[
+        ...values.cast<double>(),
+      ]),
     _ => throw FormatException('Unhandled ContentEmbedding format $jsonObject'),
   };
 }

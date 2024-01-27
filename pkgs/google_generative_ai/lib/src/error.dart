@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-final class GenerativeAIException {
+final class GenerativeAIException implements Exception {
   final String message;
+
   GenerativeAIException(this.message);
+
   @override
   String toString() => 'GenerateiveAIException: $message';
 }

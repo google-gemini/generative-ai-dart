@@ -20,7 +20,7 @@ import 'client.dart';
 import 'content.dart';
 
 final _baseUrl = Uri.https('generativelanguage.googleapis.com');
-const _apiVersion = "v1";
+const _apiVersion = 'v1';
 
 enum Task {
   generateContent('generateContent'),
@@ -55,12 +55,13 @@ final class GenerativeModel {
         _generationConfig = generationConfig,
         _client = HttpApiClient(model: model, apiKey: apiKey);
 
-  Future<Map> _makeRequest(Task task, Map<String, Object?> parameters) async {
+  Future<Object> _makeRequest(
+      Task task, Map<String, Object?> parameters) async {
     final uri = _baseUrl.resolveUri(
         Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
     final body = utf8.encode(jsonEncode(parameters));
     final jsonString = await _client.makeRequest(uri, body);
-    return jsonDecode(jsonString);
+    return jsonDecode(jsonString) as Object;
   }
 
   Stream<Map<String, Object?>> _streamRequest(Task task, Object parameters) {
