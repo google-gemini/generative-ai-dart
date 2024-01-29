@@ -15,6 +15,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
+
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
@@ -46,14 +48,16 @@ final class GenerativeModel {
       {required String model,
       required String apiKey,
       List<SafetySetting> safetySettings = const [],
-      GenerationConfig? generationConfig})
+      GenerationConfig? generationConfig,
+      http.Client? httpClient})
       :
         // TODO: Allow `models/` prefix and strip it.
         // https://github.com/google/generative-ai-js/blob/2be48f8e5427f2f6191f24bcb8000b450715a0de/packages/main/src/models/generative-model.ts#L59
         _model = model,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
-        _client = HttpApiClient(model: model, apiKey: apiKey);
+        _client =
+            HttpApiClient(model: model, apiKey: apiKey, httpClient: httpClient);
 
   Future<Object> _makeRequest(
       Task task, Map<String, Object?> parameters) async {

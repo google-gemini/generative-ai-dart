@@ -28,13 +28,16 @@ const _clientName = 'genai-dart/$_packageVersion';
 
 final class HttpApiClient implements ApiClient {
   final String _apiKey;
+  final http.Client? _httpClient;
   late final _headers = {
     'x-goog-api-key': _apiKey,
     'x-goog-api-client': _clientName
   };
 
-  HttpApiClient({required String model, required String apiKey})
-      : _apiKey = apiKey;
+  HttpApiClient(
+      {required String model, required String apiKey, http.Client? httpClient})
+      : _apiKey = apiKey,
+        _httpClient = httpClient ?? http.Client();
 
   @override
   Future<String> makeRequest(Uri uri, Uint8List body) async {
@@ -52,7 +55,9 @@ final class HttpApiClient implements ApiClient {
         ..bodyBytes = body
         ..headers.addAll(_headers)
         ..headers['Content-Type'] = 'application/json';
-      final response = await request.send();
+      final response = _httpClient == null
+          ? await request.send()
+          : await _httpClient.send(request);
       await response.stream
           .toStringStream()
           .transform(const LineSplitter())
