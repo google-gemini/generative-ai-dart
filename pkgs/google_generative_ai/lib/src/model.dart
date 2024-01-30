@@ -14,6 +14,8 @@
 
 import 'dart:async';
 
+import 'package:http/http.dart' as http;
+
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
@@ -47,9 +49,10 @@ final class GenerativeModel {
     required String apiKey,
     List<SafetySetting> safetySettings = const [],
     GenerationConfig? generationConfig,
+    http.Client? httpClient,
   }) =>
       GenerativeModel._withClient(
-          client: HttpApiClient(apiKey: apiKey),
+          client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
           model: model,
           safetySettings: safetySettings,
           generationConfig: generationConfig);
