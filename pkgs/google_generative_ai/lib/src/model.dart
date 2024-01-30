@@ -62,13 +62,16 @@ final class GenerativeModel {
     required String model,
     required List<SafetySetting> safetySettings,
     required GenerationConfig? generationConfig,
-  })  :
-        // TODO: Allow `models/` prefix and strip it.
-        // https://github.com/google/generative-ai-js/blob/2be48f8e5427f2f6191f24bcb8000b450715a0de/packages/main/src/models/generative-model.ts#L59
-        _model = model,
+  })  : _model = _normalizeModelName(model),
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
         _client = client;
+
+  static const _modelsPrefix = 'models/';
+  static String _normalizeModelName(String modelName) =>
+      modelName.startsWith(_modelsPrefix)
+          ? modelName.substring(_modelsPrefix.length)
+          : modelName;
 
   Uri _taskUri(Task task) => _baseUrl.resolveUri(
       Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
