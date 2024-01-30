@@ -1,3 +1,17 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_generative_ai/src/model.dart';
 import 'package:test/test.dart';
@@ -21,30 +35,31 @@ void main() {
         final prompt = 'Some prompt';
         final result = 'Some response';
         client.stub(
-            Uri.parse('https://generativelanguage.googleapis.com/v1/'
-                'models/some-model:generateContent'),
-            {
-              'contents': [
-                {
-                  'role': 'user',
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ]
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
                   'parts': [
-                    {'text': prompt}
+                    {'text': result}
                   ]
                 }
-              ]
-            },
-            {
-              'candidates': [
-                {
-                  'content': {
-                    'role': 'model',
-                    'parts': [
-                      {'text': result}
-                    ]
-                  }
-                }
-              ]
-            });
+              }
+            ]
+          },
+        );
         final response = await model.generateContent([Content.text(prompt)]);
         expect(
             response,
@@ -60,33 +75,34 @@ void main() {
         final prompt = 'Some prompt';
         final results = {'First response', 'Second Response'};
         client.stubStream(
-            Uri.parse('https://generativelanguage.googleapis.com/v1/'
-                'models/some-model:streamGenerateContent'),
-            {
-              'contents': [
-                {
-                  'role': 'user',
-                  'parts': [
-                    {'text': prompt}
-                  ]
-                }
-              ]
-            },
-            [
-              for (final result in results)
-                {
-                  'candidates': [
-                    {
-                      'content': {
-                        'role': 'model',
-                        'parts': [
-                          {'text': result}
-                        ]
-                      }
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:streamGenerateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ]
+          },
+          [
+            for (final result in results)
+              {
+                'candidates': [
+                  {
+                    'content': {
+                      'role': 'model',
+                      'parts': [
+                        {'text': result}
+                      ]
                     }
-                  ]
-                }
-            ]);
+                  }
+                ]
+              }
+          ],
+        );
         final response = model.generateContentStream([Content.text(prompt)]);
         expect(
             response,
@@ -128,21 +144,22 @@ void main() {
       test('can make successful request', () async {
         final prompt = 'Some prompt';
         client.stub(
-            Uri.parse('https://generativelanguage.googleapis.com/v1/'
-                'models/some-model:embedContent'),
-            {
-              'content': {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            },
-            {
-              'embedding': {
-                'values': [0.1, 0.2, 0.3]
-              }
-            });
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:embedContent'),
+          {
+            'content': {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          },
+          {
+            'embedding': {
+              'values': [0.1, 0.2, 0.3]
+            }
+          },
+        );
         final response = await model.embedContent(Content.text(prompt));
         expect(
             response,

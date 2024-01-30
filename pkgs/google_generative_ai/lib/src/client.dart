@@ -38,9 +38,11 @@ final class HttpApiClient implements ApiClient {
   @override
   Future<Map<String, Object?>> makeRequest(
       Uri uri, Map<String, Object?> body) async {
-    final response = await http.post(uri,
-        headers: {..._headers, 'Content-Type': 'application/json'},
-        body: utf8.encode(jsonEncode(body)));
+    final response = await http.post(
+      uri,
+      headers: {..._headers, 'Content-Type': 'application/json'},
+      body: utf8.encode(jsonEncode(body)),
+    );
     return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, Object?>;
   }
 

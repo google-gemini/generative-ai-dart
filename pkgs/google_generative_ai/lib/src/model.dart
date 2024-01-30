@@ -42,23 +42,24 @@ final class GenerativeModel {
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
 
-  factory GenerativeModel(
-          {required String model,
-          required String apiKey,
-          List<SafetySetting> safetySettings = const [],
-          GenerationConfig? generationConfig}) =>
+  factory GenerativeModel({
+    required String model,
+    required String apiKey,
+    List<SafetySetting> safetySettings = const [],
+    GenerationConfig? generationConfig,
+  }) =>
       GenerativeModel._withClient(
           client: HttpApiClient(apiKey: apiKey),
           model: model,
           safetySettings: safetySettings,
           generationConfig: generationConfig);
 
-  GenerativeModel._withClient(
-      {required ApiClient client,
-      required String model,
-      required List<SafetySetting> safetySettings,
-      required GenerationConfig? generationConfig})
-      :
+  GenerativeModel._withClient({
+    required ApiClient client,
+    required String model,
+    required List<SafetySetting> safetySettings,
+    required GenerationConfig? generationConfig,
+  })  :
         // TODO: Allow `models/` prefix and strip it.
         // https://github.com/google/generative-ai-js/blob/2be48f8e5427f2f6191f24bcb8000b450715a0de/packages/main/src/models/generative-model.ts#L59
         _model = model,
@@ -151,6 +152,9 @@ final class GenerativeModel {
   }
 }
 
+/// Create a model with an overridden [ApiClient] for testing.
+///
+/// Package private test only method.
 GenerativeModel createModelwithClient(
         {required String model,
         required ApiClient client,
