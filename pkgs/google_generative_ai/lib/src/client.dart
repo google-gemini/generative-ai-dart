@@ -14,45 +14,49 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
 abstract interface class ApiClient {
-  Future<String> makeRequest(Uri uri, Uint8List body);
-  Stream<String> streamRequest(Uri uri, Uint8List body);
+  Future<Map<String, Object?>> makeRequest(Uri uri, Map<String, Object?> body);
+  Stream<Map<String, Object?>> streamRequest(
+      Uri uri, Map<String, Object?> body);
 }
 
 const _packageVersion = '0.0.1';
-const _clientName = 'genai-dart/$_packageVersion';
+const clientName = 'genai-dart/$_packageVersion';
 
 final class HttpApiClient implements ApiClient {
   final String _apiKey;
   final http.Client? _httpClient;
   late final _headers = {
     'x-goog-api-key': _apiKey,
-    'x-goog-api-client': _clientName
+    'x-goog-api-client': clientName
   };
 
-  HttpApiClient(
-      {required String model, required String apiKey, http.Client? httpClient})
+  HttpApiClient({required String apiKey, http.Client? httpClient})
       : _apiKey = apiKey,
         _httpClient = httpClient ?? http.Client();
 
   @override
-  Future<String> makeRequest(Uri uri, Uint8List body) async {
-    final response = await http.post(uri,
-        headers: {..._headers, 'Content-Type': 'application/json'}, body: body);
-    return utf8.decode(response.bodyBytes);
+  Future<Map<String, Object?>> makeRequest(
+      Uri uri, Map<String, Object?> body) async {
+    final response = await http.post(
+      uri,
+      headers: {..._headers, 'Content-Type': 'application/json'},
+      body: utf8.encode(jsonEncode(body)),
+    );
+    return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, Object?>;
   }
 
   @override
-  Stream<String> streamRequest(Uri uri, Uint8List body) {
-    final controller = StreamController<String>();
+  Stream<Map<String, Object?>> streamRequest(
+      Uri uri, Map<String, Object?> body) {
+    final controller = StreamController<Map<String, Object?>>();
     () async {
       uri = uri.replace(queryParameters: {'alt': 'sse'});
       final request = http.Request('POST', uri)
-        ..bodyBytes = body
+        ..bodyBytes = utf8.encode(jsonEncode(body))
         ..headers.addAll(_headers)
         ..headers['Content-Type'] = 'application/json';
       final response = _httpClient == null
@@ -63,6 +67,8 @@ final class HttpApiClient implements ApiClient {
           .transform(const LineSplitter())
           .where((line) => line.startsWith('data: '))
           .map((line) => line.substring(6))
+          .map(jsonDecode)
+          .cast<Map<String, Object?>>()
           .pipe(controller);
     }();
     return controller.stream;

@@ -27,7 +27,10 @@ final class Content {
   static Content multi(Iterable<Part> parts) => Content('user', [...parts]);
   static Content model(Iterable<Part> parts) => Content('model', [...parts]);
 
-  Map toJson() => {if (role case final role?) 'role': role, 'parts': parts};
+  Map toJson() => {
+        if (role case final role?) 'role': role,
+        'parts': parts.map((p) => p.toJson()).toList()
+      };
 }
 
 Content parseContent(Object jsonObject) {
@@ -52,11 +55,14 @@ Part _parsePart(Object? jsonObject) {
 }
 
 /// A datatype containing media that is part of a multi-part [Content] message.
-sealed class Part {}
+sealed class Part {
+  Object toJson();
+}
 
 final class TextPart implements Part {
   final String text;
   TextPart(this.text);
+  @override
   Object toJson() => {'text': text};
 }
 
@@ -64,6 +70,7 @@ final class DataPart implements Part {
   final String mimeType;
   final Uint8List bytes;
   DataPart(this.mimeType, this.bytes);
+  @override
   Object toJson() => {
         'inlineData': {'data': base64Encode(bytes), 'mimeType': mimeType}
       };
