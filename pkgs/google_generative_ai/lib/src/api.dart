@@ -26,18 +26,17 @@ final class GenerateContentResponse {
   final PromptFeedback? promptFeedback;
   GenerateContentResponse(this.candidates, this.promptFeedback);
 
-  /// The text content of the first part of the first candidate in [candidates],
-  /// if it exists.
+  /// The text content of the first part of the first of [candidates], if any.
   ///
-  /// If the prompt was blocked, or the first candidate is finished for a reason
-  /// of [FinishReason.recitation] or [FinishReason.safety], throws a
-  /// [GenerativeAIException].
+  /// If the prompt was blocked, or the first candidate was finished for a reason
+  /// of [FinishReason.recitation] or [FinishReason.safety], accessing this text
+  /// will throw a [GenerativeAIException].
   ///
-  /// If the first candidate content starts with a text part, that text is
-  /// returned.
+  /// If the first candidate's content starts with a text part, this value is
+  /// that text.
   ///
   /// If there are no candidates, or if the first candidate does not start with
-  /// a text part, returns `null`.
+  /// a text part, this value is `null`.
   String? get text {
     return switch (candidates) {
       [] => switch (promptFeedback) {
@@ -77,14 +76,13 @@ final class EmbedContentResponse {
   EmbedContentResponse(this.embedding);
 }
 
-/// A list of values representing an embedding.
+/// An embedding, as defined by a list of values.
 final class ContentEmbedding {
   final List<double> values;
   ContentEmbedding(this.values);
 }
 
-/// A set of the feedback metadata the prompt specified in the [GenerativeModel]
-/// request.
+/// Feedback metadata of a prompt specified in a [GenerativeModel] request.
 final class PromptFeedback {
   final BlockReason? blockReason;
   final String? blockReasonMessage;
@@ -92,7 +90,7 @@ final class PromptFeedback {
   PromptFeedback(this.blockReason, this.blockReasonMessage, this.safetyRatings);
 }
 
-/// A response candidate generated from the model.
+/// Response candidate generated from a [GenerativeModel].
 final class Candidate {
   final Content content;
   final List<SafetyRating>? safetyRatings;
@@ -116,7 +114,7 @@ final class SafetyRating {
   SafetyRating(this.category, this.probability);
 }
 
-/// Specifies what was the reason why prompt was blocked.
+/// The reason why a prompt was blocked.
 enum BlockReason {
   unknown,
   unspecified,
@@ -124,30 +122,21 @@ enum BlockReason {
   other;
 
   @override
-  String toString() => switch (this) {
-        unknown => 'unknown',
-        unspecified => 'unspecified',
-        safety => 'safety',
-        other => 'other',
-      };
+  String toString() => this.name;
 }
 
 enum HarmCategory {
-  unknown,
-  harassment,
-  hateSpeech,
-  sexuallyExplicit,
-  dangerousContent;
+  unknown('HARM_CATEGORY_UNSPECIFIED'),
+  harassment('HARM_CATEGORY_HARASSMENT'),
+  hateSpeech('HARM_CATEGORY_HATE_SPEECH'),
+  sexuallyExplicit('HARM_CATEGORY_SEXUALLY_EXPLICIT'),
+  dangerousContent('HARM_CATEGORY_DANGEROUS_CONTENT');
 
-  String toJson() {
-    return switch (this) {
-      unknown => 'HARM_CATEGORY_UNSPECIFIED',
-      harassment => 'HARM_CATEGORY_HARASSMENT',
-      hateSpeech => 'HARM_CATEGORY_HATE_SPEECH',
-      sexuallyExplicit => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-      dangerousContent => 'HARM_CATEGORY_DANGEROUS_CONTENT',
-    };
-  }
+  const HarmCategory(this._jsonString);
+
+  final String _jsonString;
+
+  String toJson() => _jsonString;
 }
 
 enum HarmProbability {
@@ -159,13 +148,13 @@ enum HarmProbability {
   high,
 }
 
-/// A collection of source attributions for a piece of content.
+/// Source attributions for a piece of content.
 final class CitationMetadata {
   final List<CitationSource> citationSources;
   CitationMetadata(this.citationSources);
 }
 
-/// A citation to a source for a portion of a specific response.
+/// Citation to a source for a portion of a specific response.
 final class CitationSource {
   final int? startIndex;
   final int? endIndex;
@@ -174,7 +163,7 @@ final class CitationSource {
   CitationSource(this.startIndex, this.endIndex, this.uri, this.license);
 }
 
-/// Defines the reason why the model stopped generating tokens.
+/// Reason why a model stopped generating tokens.
 enum FinishReason {
   unknown,
   unspecified,
@@ -185,15 +174,7 @@ enum FinishReason {
   other;
 
   @override
-  String toString() => switch (this) {
-        unknown => 'unknown',
-        unspecified => 'unspecified',
-        stop => 'stop',
-        maxTokens => 'max tokens',
-        safety => 'safety',
-        recitation => 'recitation',
-        other => 'other',
-      };
+  String toString() => this.name;
 }
 
 /// Safety setting, affecting the safety-blocking behavior.
@@ -204,25 +185,21 @@ final class SafetySetting {
   final HarmCategory category;
   final HarmBlockThreshold threshold;
   SafetySetting(this.category, this.threshold);
-  Object toJson() => {'category': category, 'threshold': threshold};
+  Object toJson() =>
+      {'category': category.toJson(), 'threshold': threshold.toJson()};
 }
 
 enum HarmBlockThreshold {
-  unspecified,
-  low,
-  medium,
-  high,
-  none;
+  unspecified('HARM_BLOCK_THRESHOLD_UNSPECIFIED'),
+  low('BLOCK_LOW_AND_ABOVE'),
+  medium('BLOCK_MEDIUM_AND_ABOVE'),
+  high('BLOCK_ONLY_HIGH'),
+  none('BLOCK_NONE');
 
-  Object toJson() {
-    return switch (this) {
-      unspecified => 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
-      low => 'BLOCK_LOW_AND_ABOVE',
-      medium => 'BLOCK_MEDIUM_AND_ABOVE',
-      high => 'BLOCK_ONLY_HIGH',
-      none => 'BLOCK_NONE',
-    };
-  }
+  final String _jsonString;
+  const HarmBlockThreshold(this._jsonString);
+
+  Object toJson() => _jsonString;
 }
 
 /// Configuration options for model generation and outputs.
@@ -255,23 +232,18 @@ final class GenerationConfig {
 
 /// Type of task for which the embedding will be used.
 enum TaskType {
-  unspecified,
-  retrievalQuery,
-  retrievalDocument,
-  semanticSimilarity,
-  classification,
-  clustering;
+  unspecified('TASK_TYPE_UNSPECIFIED'),
+  retrievalQuery('RETRIEVAL_QUERY'),
+  retrievalDocument('RETRIEVAL_DOCUMENT'),
+  semanticSimilarity('SEMANTIC_SIMILARITY'),
+  classification('CLASSIFICATION'),
+  clustering('CLUSTERING');
 
-  Object toJson() {
-    return switch (this) {
-      unspecified => 'TASK_TYPE_UNSPECIFIED',
-      retrievalQuery => 'RETRIEVAL_QUERY',
-      retrievalDocument => 'RETRIEVAL_DOCUMENT',
-      semanticSimilarity => 'SEMANTIC_SIMILARITY',
-      classification => 'CLASSIFICATION',
-      clustering => 'CLUSTERING',
-    };
-  }
+  final String _jsonString;
+
+  const TaskType(this._jsonString);
+
+  Object toJson() => _jsonString;
 }
 
 GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
@@ -290,7 +262,7 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
 
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
   return switch (jsonObject) {
-    {'totalTokens': int totalTokens} => CountTokensResponse(totalTokens),
+    {'totalTokens': final int totalTokens} => CountTokensResponse(totalTokens),
     _ =>
       throw FormatException('Unhandled CountTokensReponse format: $jsonObject')
   };
@@ -298,7 +270,7 @@ CountTokensResponse parseCountTokensResponse(Object jsonObject) {
 
 EmbedContentResponse parseEmbedContentReponse(Object jsonObject) {
   return switch (jsonObject) {
-    {'embedding': Object embedding} =>
+    {'embedding': final Object embedding} =>
       EmbedContentResponse(_parseContentEmbedding(embedding)),
     _ => throw FormatException(
         'Unhandled EmbedContentResponse format: $jsonObject')
@@ -318,8 +290,8 @@ Candidate _parseCandidate(Object? jsonObject) {
             _ => null
           },
           switch (jsonObject) {
-            {'citationMetadata': final Object citationMedata} =>
-              _parseCitationMetadata(citationMedata),
+            {'citationMetadata': final Object citationMetadata} =>
+              _parseCitationMetadata(citationMetadata),
             _ => null
           },
           switch (jsonObject) {
@@ -338,16 +310,16 @@ Candidate _parseCandidate(Object? jsonObject) {
 PromptFeedback _parsePromptFeedback(Object jsonObject) {
   return switch (jsonObject) {
     {
-      'safetyRatings': List<Object?> safetyRatings,
+      'safetyRatings': final List<Object?> safetyRatings,
     } =>
       PromptFeedback(
           switch (jsonObject) {
-            {'blockReason': String blockReason} =>
+            {'blockReason': final String blockReason} =>
               _parseBlockReason(blockReason),
             _ => null,
           },
           switch (jsonObject) {
-            {'blockReasonMessage': String blockReasonMessage} =>
+            {'blockReasonMessage': final String blockReasonMessage} =>
               blockReasonMessage,
             _ => null,
           },
@@ -358,7 +330,10 @@ PromptFeedback _parsePromptFeedback(Object jsonObject) {
 
 SafetyRating _parseSafetyRating(Object? jsonObject) {
   return switch (jsonObject) {
-    {'category': Object category, 'probability': Object probability} =>
+    {
+      'category': final Object category,
+      'probability': final Object probability
+    } =>
       SafetyRating(
           _parseHarmCategory(category), _parseHarmProbability(probability)),
     _ => throw FormatException('Unhandled SafetyRating format $jsonObject'),
@@ -367,7 +342,7 @@ SafetyRating _parseSafetyRating(Object? jsonObject) {
 
 ContentEmbedding _parseContentEmbedding(Object? jsonObject) {
   return switch (jsonObject) {
-    {'values': List values} => ContentEmbedding(<double>[
+    {'values': final List values} => ContentEmbedding(<double>[
         ...values.cast<double>(),
       ]),
     _ => throw FormatException('Unhandled ContentEmbedding format $jsonObject'),
@@ -399,7 +374,7 @@ HarmProbability _parseHarmProbability(Object jsonObject) {
 
 CitationMetadata _parseCitationMetadata(Object? jsonObject) {
   return switch (jsonObject) {
-    {'citationSources': List<Object?> citationSources} =>
+    {'citationSources': final List<Object?> citationSources} =>
       CitationMetadata(citationSources.map(_parseCitationSource).toList()),
     _ => throw FormatException('Unhandled CitationMetadata format $jsonObject'),
   };
@@ -408,10 +383,10 @@ CitationMetadata _parseCitationMetadata(Object? jsonObject) {
 CitationSource _parseCitationSource(Object? jsonObject) {
   return switch (jsonObject) {
     {
-      'startIndex': int startIndex,
-      'endIndex': int endIndex,
-      'uri': String uri,
-      'license': String license
+      'startIndex': final int startIndex,
+      'endIndex': final int endIndex,
+      'uri': final String uri,
+      'license': final String license,
     } =>
       CitationSource(startIndex, endIndex, Uri.parse(uri), license),
     _ => throw FormatException('Unhandled CitationSource format $jsonObject'),
