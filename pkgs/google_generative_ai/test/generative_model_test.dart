@@ -21,17 +21,57 @@ import 'utils/stub_client.dart';
 
 void main() {
   group('GenerativeModel', () {
-    late GenerativeModel model;
-    late StubClient client;
-    const modelName = 'some-model';
+    const defaultModelName = 'some-model';
 
-    setUp(() {
-      client = StubClient();
-      model = createModelwithClient(model: modelName, client: client);
+    (StubClient, GenerativeModel) createModel(
+        [String modelName = defaultModelName]) {
+      final client = StubClient();
+      final model = createModelwithClient(model: modelName, client: client);
+      return (client, model);
+    }
+
+    test('strips leading "models/" from model name', () async {
+      final (client, model) = createModel('models/$defaultModelName');
+      final prompt = 'Some prompt';
+      final result = 'Some response';
+      client.stub(
+        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+            'models/some-model:generateContent'),
+        {
+          'contents': [
+            {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          ]
+        },
+        {
+          'candidates': [
+            {
+              'content': {
+                'role': 'model',
+                'parts': [
+                  {'text': result}
+                ]
+              }
+            }
+          ]
+        },
+      );
+      final response = await model.generateContent([Content.text(prompt)]);
+      expect(
+          response,
+          matchesGeenrateContentResponse(GenerateContentResponse([
+            Candidate(
+                Content('model', [TextPart(result)]), null, null, null, null),
+          ], null)));
     });
 
     group('generate unary content', () {
       test('can make successful request', () async {
+        final (client, model) = createModel();
         final prompt = 'Some prompt';
         final result = 'Some response';
         client.stub(
@@ -72,6 +112,7 @@ void main() {
 
     group('generate content stream', () {
       test('can make successful request', () async {
+        final (client, model) = createModel();
         final prompt = 'Some prompt';
         final results = {'First response', 'Second Response'};
         client.stubStream(
@@ -118,6 +159,7 @@ void main() {
 
     group('count tokens', () {
       test('can make successful request', () async {
+        final (client, model) = createModel();
         final prompt = 'Some prompt';
         client.stub(
             Uri.parse('https://generativelanguage.googleapis.com/v1/'
@@ -142,6 +184,7 @@ void main() {
 
     group('embed content', () {
       test('can make successful request', () async {
+        final (client, model) = createModel();
         final prompt = 'Some prompt';
         client.stub(
           Uri.parse('https://generativelanguage.googleapis.com/v1/'
