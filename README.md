@@ -5,20 +5,26 @@ Large Language Models (LLMs) to build language applications.
 
 ## Getting Started
 
-This repository contains a few sample apps. To try them out, follow these
-steps:
+### API keys
 
-- Change directory to the samples package.
-- Export a `$GOOGLE_API_KEY` environment variable with an API key with access to
-  the Gemini generative models, or run the below commands with an environment
-  containing this variable.
-- Run any sample from the `bin` directory (e.g., `dart bin/simple_text.dart`).
+To use the Gemini API, you'll need an API key. If you don't already have one, 
+create a key in Google AI Studio: https://makersuite.google.com/app/apikey.
+
+### Dart samples
+
+See the Dart sample apps at [samples/dart](samples/dart/), including getting
+some started instructions.
+
+### Flutter sample
+
+See a Flutter sample app at [samples/flutter_app](samples/flutter_app/),
+including some getting started instructions.
 
 ## Using the SDK in your own app
 
 Add a dependency on this repository to the path `pkgs/google_generative_ai`.
-Once the API is stable the package will be available from pub.
-We welcome pre-publish feedback through GitHub issues.
+Once the API is stable the package will be available from pub. We welcome
+pre-publish feedback through GitHub issues.
 
 ```yaml
 dependencies:
@@ -46,8 +52,8 @@ print(response.text);
 
 ## Documentation
 
-Find complete documentation for the Google AI SDKs and the Gemini model in the Google
-documentation: https://ai.google.dev/docs
+Find complete documentation for the Google AI SDKs and the Gemini model in the
+Google documentation: https://ai.google.dev/docs.
 
 ## Packages
 

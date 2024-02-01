@@ -7,7 +7,7 @@ A Flutter chat application that uses the `google_generative_ai` package.
 ## Getting started
 
 To use the Gemini API, you'll need an API key. If you don't already have one, 
-create a key in Google AI Studio: https://makersuite.google.com/app/apikey
+create a key in Google AI Studio: https://makersuite.google.com/app/apikey.
 
 Create the project files for each target platform by using the `flutter create`
 command in this project's directory.
