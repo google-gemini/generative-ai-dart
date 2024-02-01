@@ -28,7 +28,10 @@ class GenerativeAISample extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter + Generative AI',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          brightness: Brightness.dark,
+          seedColor: const Color.fromARGB(255, 171, 222, 244),
+        ),
         useMaterial3: true,
       ),
       home: const ChatScreen(title: 'Flutter + Generative AI'),
@@ -74,7 +77,11 @@ class _ChatWidgetState extends State<ChatWidget> {
   void initState() {
     super.initState();
     _model = GenerativeModel(
-        model: 'gemini-pro', apiKey: const String.fromEnvironment('api_key'));
+      model: 'gemini-pro',
+      apiKey: const String.fromEnvironment(
+        'api_key',
+      ),
+    );
     _chat = _model.startChat();
   }
 
@@ -95,33 +102,69 @@ class _ChatWidgetState extends State<ChatWidget> {
                     .map<String>((e) => e.text)
                     .join('');
                 return MessageWidget(
-                    text: text, isFromUser: content.role == 'user');
+                  text: text,
+                  isFromUser: content.role == 'user',
+                );
               },
               itemCount: _chat.history.length,
             ),
+            // end copy
           ),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration:
-                      const InputDecoration(hintText: 'Enter a prompt...'),
-                  controller: _textController,
-                  onSubmitted: (String value) {
-                    _sendChatMessage(value);
-                  },
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 25,
+              horizontal: 15,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 15,
+                      ),
+                      hintText: 'Enter a prompt...',
+                      border: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(14),
+                        ),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(14),
+                        ),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                    ),
+                    controller: _textController,
+                    onSubmitted: (String value) {
+                      _sendChatMessage(value);
+                    },
+                  ),
                 ),
-              ),
-              if (!_loading)
-                IconButton(
-                  onPressed: () async {
-                    _sendChatMessage(_textController.text);
-                  },
-                  icon: const Icon(Icons.send),
-                )
-              else
-                const CircularProgressIndicator(),
-            ],
+                const SizedBox.square(
+                  dimension: 15,
+                ),
+                if (!_loading)
+                  IconButton(
+                    onPressed: () async {
+                      _sendChatMessage(_textController.text);
+                    },
+                    icon: Icon(
+                      Icons.send,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                else
+                  const CircularProgressIndicator(),
+              ],
+            ),
           ),
         ],
       ),
@@ -134,7 +177,9 @@ class _ChatWidgetState extends State<ChatWidget> {
     });
 
     try {
-      var response = await _chat.sendMessage(Content.text(message));
+      var response = await _chat.sendMessage(
+        Content.text(message),
+      );
       var text = response.text;
 
       if (text == null) {
@@ -204,9 +249,12 @@ class MessageWidget extends StatelessWidget {
               color: isFromUser
                   ? Theme.of(context).colorScheme.primaryContainer
                   : Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(18),
             ),
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 15,
+              horizontal: 20,
+            ),
             margin: const EdgeInsets.only(bottom: 8),
             child: MarkdownBody(data: text),
           ),
