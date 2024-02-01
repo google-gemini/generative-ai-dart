@@ -207,8 +207,8 @@ final class GenerationConfig {
   final int? candidateCount;
   final List<String> stopSequences;
   final int? maxOutputTokens;
-  final int? temperature;
-  final int? topP;
+  final double? temperature;
+  final double? topP;
   final int? topK;
   GenerationConfig(
       {this.candidateCount,
