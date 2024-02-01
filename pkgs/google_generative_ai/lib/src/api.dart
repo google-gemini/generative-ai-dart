@@ -122,7 +122,7 @@ enum BlockReason {
   other;
 
   @override
-  String toString() => this.name;
+  String toString() => name;
 }
 
 enum HarmCategory {
@@ -174,7 +174,7 @@ enum FinishReason {
   other;
 
   @override
-  String toString() => this.name;
+  String toString() => name;
 }
 
 /// Safety setting, affecting the safety-blocking behavior.
