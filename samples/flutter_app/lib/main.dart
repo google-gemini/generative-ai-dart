@@ -88,10 +88,7 @@ class _ChatWidgetState extends State<ChatWidget> {
   @override
   Widget build(BuildContext context) {
     var textFieldDecoration = InputDecoration(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 15,
-      ),
+      contentPadding: const EdgeInsets.all(15),
       hintText: 'Enter a prompt...',
       border: OutlineInputBorder(
         borderRadius: const BorderRadius.all(
