@@ -87,6 +87,30 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var textFieldDecoration = InputDecoration(
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 15,
+        horizontal: 15,
+      ),
+      hintText: 'Enter a prompt...',
+      border: OutlineInputBorder(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(14),
+        ),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(14),
+        ),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+      ),
+    );
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -119,29 +143,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               children: [
                 Expanded(
                   child: TextField(
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: 15,
-                      ),
-                      hintText: 'Enter a prompt...',
-                      border: OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(14),
-                        ),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(14),
-                        ),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
-                    ),
+                    decoration: textFieldDecoration,
                     controller: _textController,
                     onSubmitted: (String value) {
                       _sendChatMessage(value);
