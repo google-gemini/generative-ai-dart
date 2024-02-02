@@ -79,7 +79,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     _model = GenerativeModel(
       model: 'gemini-pro',
       apiKey: const String.fromEnvironment(
-        'API_KEY',
+        'API_KEY'
       ),
     );
     _chat = _model.startChat();
