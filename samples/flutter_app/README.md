@@ -16,16 +16,12 @@ command in this project's directory.
 flutter create .
 ```
 
-Create a new file, `env.json` to store your API key:
-
-```json
-{
-  "api_key": "<YOUR_API_KEY_HERE>"
-}
-```
-
-Specify the `env.json` file when you run the app:
+When running the app, include your API key using the `--dart-define` flag:
 
 ```bash
-flutter run -d android --dart-define-from-file=env.json
+flutter run --dart-define=API_KEY=$GOOGLE_API_KEY
 ```
+
+If you use VSCode, you can [specify `--dart-define`
+variables](https://dartcode.org/docs/using-dart-define-in-flutter/) in your
+launch.json file.
