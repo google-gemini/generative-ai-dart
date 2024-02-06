@@ -25,3 +25,6 @@ flutter run --dart-define=API_KEY=$GOOGLE_API_KEY
 If you use VSCode, you can [specify `--dart-define`
 variables](https://dartcode.org/docs/using-dart-define-in-flutter/) in your
 launch.json file.
+
+If you use Android Studio or IntelliJ you can use use run/debug
+configurations (https://www.jetbrains.com/help/idea/run-debug-configuration.html)
