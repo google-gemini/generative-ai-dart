@@ -56,7 +56,7 @@ final class ChatSession {
   ///
   /// Waits for any ongoing or pending requests to [sendMessage] or
   /// [sendMessageStream] to complete before generating new content.
-  /// Successesful messages and responses for ongoing or pending requests will
+  /// Successful messages and responses for ongoing or pending requests will
   /// be reflected in the history sent for this message.
   Future<GenerateContentResponse> sendMessage(Content message) async {
     final resource = await _pool.request();
@@ -84,7 +84,7 @@ final class ChatSession {
   ///
   /// Waits for any ongoing or pending requests to [sendMessage] or
   /// [sendMessageStream] to complete before generating new content.
-  /// Successesful messages and responses for ongoing or pending requests will
+  /// Successful messages and responses for ongoing or pending requests will
   /// be reflected in the history sent for this message.
   ///
   /// Waits to read the entire streamed response before recording the message
