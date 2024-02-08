@@ -104,7 +104,6 @@ final class GenerativeModel {
     try {
       return parseGenerateContentResponse(response);
     } on FormatException {
-      // TODO - will the HTTP request fail?
       if (response case {'error': final Object error}) {
         throw parseError(error);
       }
