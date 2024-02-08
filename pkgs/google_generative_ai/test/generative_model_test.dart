@@ -235,6 +235,98 @@ void main() {
           throwsA(isA<ServerException>()),
         );
       });
+
+      test('can override safety settings', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'safetySettings': [
+              {
+                'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                'threshold': 'BLOCK_ONLY_HIGH'
+              }
+            ],
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([
+          Content.text(prompt)
+        ], safetySettings: [
+          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
+        ]);
+        expect(
+            response,
+            matchesGeenrateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can override generation config', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'generationConfig': {
+              'stopSequences': ['a']
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([Content.text(prompt)],
+            generationConfig: GenerationConfig(stopSequences: ['a']));
+        expect(
+            response,
+            matchesGeenrateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
     });
 
     group('generate content stream', () {
@@ -272,6 +364,110 @@ void main() {
           ],
         );
         final response = model.generateContentStream([Content.text(prompt)]);
+        expect(
+            response,
+            emitsInOrder([
+              for (final result in results)
+                matchesGeenrateContentResponse(GenerateContentResponse([
+                  Candidate(Content('model', [TextPart(result)]), null, null,
+                      null, null),
+                ], null))
+            ]));
+      });
+
+      test('can override safety settings', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final results = {'First response', 'Second Response'};
+        client.stubStream(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:streamGenerateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'safetySettings': [
+              {
+                'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                'threshold': 'BLOCK_ONLY_HIGH'
+              }
+            ],
+          },
+          [
+            for (final result in results)
+              {
+                'candidates': [
+                  {
+                    'content': {
+                      'role': 'model',
+                      'parts': [
+                        {'text': result}
+                      ]
+                    }
+                  }
+                ]
+              }
+          ],
+        );
+        final response = model.generateContentStream([
+          Content.text(prompt)
+        ], safetySettings: [
+          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
+        ]);
+        expect(
+            response,
+            emitsInOrder([
+              for (final result in results)
+                matchesGeenrateContentResponse(GenerateContentResponse([
+                  Candidate(Content('model', [TextPart(result)]), null, null,
+                      null, null),
+                ], null))
+            ]));
+      });
+
+      test('can override generation config', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final results = {'First response', 'Second Response'};
+        client.stubStream(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:streamGenerateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'generationConfig': {
+              'stopSequences': ['a']
+            },
+          },
+          [
+            for (final result in results)
+              {
+                'candidates': [
+                  {
+                    'content': {
+                      'role': 'model',
+                      'parts': [
+                        {'text': result}
+                      ]
+                    }
+                  }
+                ]
+              }
+          ],
+        );
+        final response = model.generateContentStream([Content.text(prompt)],
+            generationConfig: GenerationConfig(stopSequences: ['a']));
         expect(
             response,
             emitsInOrder([
