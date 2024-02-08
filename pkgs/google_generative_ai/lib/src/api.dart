@@ -180,7 +180,7 @@ enum FinishReason {
 
 /// Safety setting, affecting the safety-blocking behavior.
 ///
-/// Passing a safety setting for a category changes the allowed proability that
+/// Passing a safety setting for a category changes the allowed probability that
 /// content is blocked.
 final class SafetySetting {
   final HarmCategory category;
@@ -371,7 +371,7 @@ HarmProbability _parseHarmProbability(Object jsonObject) {
     'LOW' => HarmProbability.low,
     'MEDIUM' => HarmProbability.medium,
     'HIGH' => HarmProbability.high,
-    _ => throw FormatException('Unhandled HarmPropbability format', jsonObject),
+    _ => throw FormatException('Unhandled HarmProbability format', jsonObject),
   };
 }
 

@@ -45,7 +45,7 @@ final class GenerativeModel {
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
 
-  /// Create a [GenerativeModel] backed by the generative modeal named [model].
+  /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
   /// The [model] argument can be a model name (such as `'gemini-pro'`) or a
   /// model code (such as `'models/gemini-pro'`).
