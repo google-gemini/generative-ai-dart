@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -33,16 +32,10 @@ void main() async {
       'What do you see? Use lists. Start with a headline for each image.';
   print('Prompt: $prompt');
 
-  late final Uint8List catBytes, sconeBytes;
-  try {
-    (catBytes, sconeBytes) = await (
-      readResource('cat.jpg'),
-      readResource('scones.jpg'),
-    ).wait;
-  } on ParallelWaitError catch (e) {
-    print('Error:');
-    e.errors.forEach(print);
-  }
+  final (catBytes, sconeBytes) = await (
+    readResource('cat.jpg'),
+    readResource('scones.jpg'),
+  ).wait;
   final content = [
     Content.multi([
       TextPart(prompt),

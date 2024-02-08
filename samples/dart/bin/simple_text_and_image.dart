@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -29,8 +28,7 @@ void main() async {
   final prompt = 'What do you see?';
   print('Prompt: $prompt');
 
-  late final Uint8List catBytes, sconeBytes;
-  (catBytes, sconeBytes) = await (
+  final (catBytes, sconeBytes) = await (
     readResource('cat.jpg'),
     readResource('scones.jpg'),
   ).wait;
