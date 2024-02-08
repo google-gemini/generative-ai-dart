@@ -161,7 +161,7 @@ final class GenerativeModel {
     };
     final response =
         await _client.makeRequest(_taskUri(Task.embedContent), parameters);
-    return parseEmbedContentReponse(response);
+    return parseEmbedContentResponse(response);
   }
 }
 

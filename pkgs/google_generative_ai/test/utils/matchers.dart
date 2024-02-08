@@ -40,7 +40,22 @@ Matcher matchesGeenrateContentResponse(GenerateContentResponse response) =>
             'promptFeedback',
             response.promptFeedback == null
                 ? isNull
-                : throw UnimplementedError('Prompt Feedback Matching'));
+                : matchesPromptFeedback(response.promptFeedback!));
+
+Matcher matchesPromptFeedback(PromptFeedback promptFeedback) =>
+    isA<PromptFeedback>()
+        .having((p) => p.blockReason, 'blockReason', promptFeedback.blockReason)
+        .having((p) => p.blockReasonMessage, 'blockReasonMessage',
+            promptFeedback.blockReasonMessage)
+        .having(
+            (p) => p.safetyRatings,
+            'safetyRatings',
+            unorderedMatches(
+                promptFeedback.safetyRatings.map(matchesSafetyRating)));
+
+Matcher matchesSafetyRating(SafetyRating safetyRating) => isA<SafetyRating>()
+    .having((s) => s.category, 'category', safetyRating.category)
+    .having((s) => s.probability, 'probability', safetyRating.probability);
 
 Matcher matchesEmbedding(ContentEmbedding embedding) =>
     isA<ContentEmbedding>().having((e) => e.values, 'values', embedding.values);
