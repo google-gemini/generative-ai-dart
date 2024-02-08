@@ -17,7 +17,16 @@ import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
 
+/// Reads a file from the `resources/` directory of this Pub package root
+/// directory.
+///
+/// The [name] is the entire file name, including extension.
+///
+/// Assumes the script is run from the `bin/` directory or another immediate
+/// subdirectory of the package root directory.
 Future<Uint8List> readResource(String name) {
-  final uri = Platform.script.resolve(path.join('..', 'resources', name));
-  return File.fromUri(uri).readAsBytes();
+  return File(path.join(_resourceDirectory.path, name)).readAsBytes();
 }
+
+final _resourceDirectory =
+    Directory.fromUri(Platform.script.resolve('../resources/'));

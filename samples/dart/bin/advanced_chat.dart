@@ -19,7 +19,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 Future<void> main() async {
   final apiKey = Platform.environment['GOOGLE_API_KEY'];
   if (apiKey == null) {
-    print('No \$GOOGLE_API_KEY environment variable');
+    stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
   final model = GenerativeModel(
@@ -32,7 +32,7 @@ Future<void> main() async {
   ]);
   var message = 'How many paws are in my house?';
   print('Message: $message');
-  var content = Content.text('How many paws are in my house?');
+  var content = Content.text(message);
   var CountTokensResponse(:totalTokens) =
       await model.countTokens([...chat.history, content]);
   print('Token count: $totalTokens');

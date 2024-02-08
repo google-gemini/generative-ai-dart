@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -22,15 +21,14 @@ import 'util/resource.dart';
 void main() async {
   final apiKey = Platform.environment['GOOGLE_API_KEY'];
   if (apiKey == null) {
-    print('No \$GOOGLE_API_KEY environment variable');
+    stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
   final model = GenerativeModel(model: 'gemini-pro-vision', apiKey: apiKey);
   final prompt = 'What do you see?';
   print('Prompt: $prompt');
 
-  late final Uint8List catBytes, sconeBytes;
-  (catBytes, sconeBytes) = await (
+  final (catBytes, sconeBytes) = await (
     readResource('cat.jpg'),
     readResource('scones.jpg'),
   ).wait;
