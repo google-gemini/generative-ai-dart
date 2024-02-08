@@ -19,6 +19,7 @@ import 'package:http/http.dart' as http;
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
+import 'error.dart';
 
 final _baseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
@@ -103,7 +104,14 @@ final class GenerativeModel {
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
-    return parseGenerateContentResponse(response);
+    try {
+      return parseGenerateContentResponse(response);
+    } on FormatException {
+      if (response case {'error': final Object error}) {
+        throw parseError(error);
+      }
+      rethrow;
+    }
   }
 
   /// Returns a stream of content responding to [prompt].
@@ -168,7 +176,7 @@ final class GenerativeModel {
     };
     final response =
         await _client.makeRequest(_taskUri(Task.embedContent), parameters);
-    return parseEmbedContentReponse(response);
+    return parseEmbedContentResponse(response);
   }
 }
 

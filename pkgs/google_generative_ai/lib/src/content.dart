@@ -41,7 +41,7 @@ Content parseContent(Object jsonObject) {
           _ => null,
         },
         parts.map(_parsePart).toList()),
-    _ => throw FormatException('Unhandled Content format $jsonObject'),
+    _ => throw FormatException('Unhandled Content format', jsonObject),
   };
 }
 
@@ -50,7 +50,7 @@ Part _parsePart(Object? jsonObject) {
     {'text': String text} => TextPart(text),
     {'inlineData': {'mimeType': String _, 'data': String _}} =>
       throw UnimplementedError('inlineData content part not yet supported'),
-    _ => throw FormatException('Unhandled Part format $jsonObject'),
+    _ => throw FormatException('Unhandled Part format', jsonObject),
   };
 }
 

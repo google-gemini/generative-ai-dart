@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:convert';
+
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_generative_ai/src/model.dart';
 import 'package:test/test.dart';
@@ -107,6 +109,131 @@ void main() {
               Candidate(
                   Content('model', [TextPart(result)]), null, null, null, null),
             ], null)));
+      });
+
+      test('throws errors for invalid API key', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final response = '''
+{
+  "error": {
+    "code": 400,
+    "message": "API key not valid. Please pass a valid API key.",
+    "status": "INVALID_ARGUMENT",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+        "reason": "API_KEY_INVALID",
+        "domain": "googleapis.com",
+        "metadata": {
+          "service": "generativelanguage.googleapis.com"
+        }
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.DebugInfo",
+        "detail": "Invalid API key: AIzv00G7VmUCUeC-5OglO3hcXM"
+      }
+    ]
+  }
+}
+''';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ]
+          },
+          jsonDecode(response) as Map<String, Object?>,
+        );
+        expect(
+          model.generateContent([Content.text(prompt)]),
+          throwsA(isA<InvalidApiKey>()),
+        );
+      });
+
+      test('throws errors for unsupported user location', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final response = r'''
+{
+  "error": {
+    "code": 400,
+    "message": "User location is not supported for the API use.",
+    "status": "FAILED_PRECONDITION",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.DebugInfo",
+        "detail": "[ORIGINAL ERROR] generic::failed_precondition: User location is not supported for the API use. [google.rpc.error_details_ext] { message: \"User location is not supported for the API use.\" }"
+      }
+    ]
+  }
+}
+''';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ]
+          },
+          jsonDecode(response) as Map<String, Object?>,
+        );
+        expect(
+          model.generateContent([Content.text(prompt)]),
+          throwsA(isA<UnsupportedUserLocation>()),
+        );
+      });
+
+      test('throws general server errors', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final response = r'''
+{
+  "error": {
+    "code": 404,
+    "message": "models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.DebugInfo",
+        "detail": "[ORIGINAL ERROR] generic::not_found: models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods. [google.rpc.error_details_ext] { message: \"models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods.\" }"
+      }
+    ]
+  }
+}
+''';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ]
+          },
+          jsonDecode(response) as Map<String, Object?>,
+        );
+        expect(
+          model.generateContent([Content.text(prompt)]),
+          throwsA(isA<ServerException>()),
+        );
       });
 
       test('can override safety settings', () async {
