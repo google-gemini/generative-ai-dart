@@ -183,7 +183,7 @@ final class GenerativeModel {
 /// Create a model with an overridden [ApiClient] for testing.
 ///
 /// Package private test only method.
-GenerativeModel createModelwithClient(
+GenerativeModel createModelWithClient(
         {required String model,
         required ApiClient client,
         List<SafetySetting> safetySettings = const [],

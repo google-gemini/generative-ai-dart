@@ -12,8 +12,8 @@ create a key in Google AI Studio: https://makersuite.google.com/app/apikey.
 
 ### Dart samples
 
-See the Dart sample apps at [samples/dart](samples/dart/), including getting
-some started instructions.
+See the Dart sample apps at [samples/dart](samples/dart/),
+including some getting started instructions.
 
 ### Flutter sample
 

@@ -31,7 +31,7 @@ Matcher matchesContent(Content content) => isA<Content>()
 Matcher matchesCandidate(Candidate candidate) => isA<Candidate>()
     .having((c) => c.content, 'content', matchesContent(candidate.content));
 
-Matcher matchesGeenrateContentResponse(GenerateContentResponse response) =>
+Matcher matchesGenerateContentResponse(GenerateContentResponse response) =>
     isA<GenerateContentResponse>()
         .having((r) => r.candidates, 'candidates',
             response.candidates.map(matchesCandidate).toList())

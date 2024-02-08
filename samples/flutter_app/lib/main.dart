@@ -141,7 +141,6 @@ class _ChatWidgetState extends State<ChatWidget> {
               },
               itemCount: _chat.history.length,
             ),
-            // end copy
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
