@@ -28,7 +28,7 @@ void main() {
     (StubClient, GenerativeModel) createModel(
         [String modelName = defaultModelName]) {
       final client = StubClient();
-      final model = createModelwithClient(model: modelName, client: client);
+      final model = createModelWithClient(model: modelName, client: client);
       return (client, model);
     }
 
@@ -65,7 +65,7 @@ void main() {
       final response = await model.generateContent([Content.text(prompt)]);
       expect(
           response,
-          matchesGeenrateContentResponse(GenerateContentResponse([
+          matchesGenerateContentResponse(GenerateContentResponse([
             Candidate(
                 Content('model', [TextPart(result)]), null, null, null, null),
           ], null)));
@@ -105,7 +105,7 @@ void main() {
         final response = await model.generateContent([Content.text(prompt)]);
         expect(
             response,
-            matchesGeenrateContentResponse(GenerateContentResponse([
+            matchesGenerateContentResponse(GenerateContentResponse([
               Candidate(
                   Content('model', [TextPart(result)]), null, null, null, null),
             ], null)));
@@ -279,7 +279,7 @@ void main() {
         ]);
         expect(
             response,
-            matchesGeenrateContentResponse(GenerateContentResponse([
+            matchesGenerateContentResponse(GenerateContentResponse([
               Candidate(
                   Content('model', [TextPart(result)]), null, null, null, null),
             ], null)));
@@ -322,7 +322,7 @@ void main() {
             generationConfig: GenerationConfig(stopSequences: ['a']));
         expect(
             response,
-            matchesGeenrateContentResponse(GenerateContentResponse([
+            matchesGenerateContentResponse(GenerateContentResponse([
               Candidate(
                   Content('model', [TextPart(result)]), null, null, null, null),
             ], null)));
@@ -368,7 +368,7 @@ void main() {
             response,
             emitsInOrder([
               for (final result in results)
-                matchesGeenrateContentResponse(GenerateContentResponse([
+                matchesGenerateContentResponse(GenerateContentResponse([
                   Candidate(Content('model', [TextPart(result)]), null, null,
                       null, null),
                 ], null))
@@ -423,7 +423,7 @@ void main() {
             response,
             emitsInOrder([
               for (final result in results)
-                matchesGeenrateContentResponse(GenerateContentResponse([
+                matchesGenerateContentResponse(GenerateContentResponse([
                   Candidate(Content('model', [TextPart(result)]), null, null,
                       null, null),
                 ], null))
@@ -472,7 +472,7 @@ void main() {
             response,
             emitsInOrder([
               for (final result in results)
-                matchesGeenrateContentResponse(GenerateContentResponse([
+                matchesGenerateContentResponse(GenerateContentResponse([
                   Candidate(Content('model', [TextPart(result)]), null, null,
                       null, null),
                 ], null))

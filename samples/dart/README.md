@@ -1,6 +1,6 @@
 [![samples](https://github.com/google/generative-ai-dart/actions/workflows/samples.yml/badge.svg)](https://github.com/google/generative-ai-dart/actions/workflows/samples.yml)
 
-## Getting Started
+## Getting started
 
 To try these samples out, follow these steps:
 

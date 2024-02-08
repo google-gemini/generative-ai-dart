@@ -90,7 +90,7 @@ void main() {
       final generateContentResponse = parseGenerateContentResponse(decoded);
       expect(
           generateContentResponse,
-          matchesGeenrateContentResponse(GenerateContentResponse(
+          matchesGenerateContentResponse(GenerateContentResponse(
               [],
               PromptFeedback(BlockReason.safety, null, [
                 SafetyRating(
@@ -170,7 +170,7 @@ void main() {
       final generateContentResponse = parseGenerateContentResponse(decoded);
       expect(
           generateContentResponse,
-          matchesGeenrateContentResponse(GenerateContentResponse(
+          matchesGenerateContentResponse(GenerateContentResponse(
               [
                 Candidate(
                     Content.model(
@@ -278,7 +278,7 @@ void main() {
       final generateContentResponse = parseGenerateContentResponse(decoded);
       expect(
           generateContentResponse,
-          matchesGeenrateContentResponse(GenerateContentResponse(
+          matchesGenerateContentResponse(GenerateContentResponse(
               [
                 Candidate(
                     Content.model([TextPart('placeholder')]),
