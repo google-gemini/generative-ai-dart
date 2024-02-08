@@ -89,13 +89,16 @@ final class GenerativeModel {
   ///
   ///     final response = await model.generateContent([Content.text(prompt)]);
   ///     print(response.text);
-  Future<GenerateContentResponse> generateContent(
-      Iterable<Content> prompt) async {
+  Future<GenerateContentResponse> generateContent(Iterable<Content> prompt,
+      {List<SafetySetting>? safetySettings,
+      GenerationConfig? generationConfig}) async {
+    safetySettings ??= _safetySettings;
+    generationConfig ??= _generationConfig;
     final parameters = {
       'contents': prompt.map((p) => p.toJson()).toList(),
-      if (_safetySettings.isNotEmpty)
-        'safetySettings': _safetySettings.map((s) => s.toJson()).toList(),
-      if (_generationConfig case final config?)
+      if (safetySettings.isNotEmpty)
+        'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
+      if (generationConfig case final config?)
         'generationConfig': config.toJson(),
     };
     final response =
@@ -112,12 +115,16 @@ final class GenerativeModel {
   ///       print(response.text);
   ///     }
   Stream<GenerateContentResponse> generateContentStream(
-      Iterable<Content> prompt) {
+      Iterable<Content> prompt,
+      {List<SafetySetting>? safetySettings,
+      GenerationConfig? generationConfig}) {
+    safetySettings ??= _safetySettings;
+    generationConfig ??= _generationConfig;
     final parameters = <String, Object?>{
       'contents': prompt.map((p) => p.toJson()).toList(),
-      if (_safetySettings.isNotEmpty)
-        'safetySettings': _safetySettings.map((s) => s.toJson()).toList(),
-      if (_generationConfig case final config?)
+      if (safetySettings.isNotEmpty)
+        'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
+      if (generationConfig case final config?)
         'generationConfig': config.toJson(),
     };
     final response =
