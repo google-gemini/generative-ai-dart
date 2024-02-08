@@ -44,7 +44,8 @@ final class GenerateContentResponse {
             :final blockReason,
             :final blockReasonMessage,
           ) =>
-            throw GenerativeAIException('Reponse was blocked'
+            // TODO: Add a specific subtype for this exception?
+            throw GenerativeAIException('Response was blocked'
                 '${blockReason != null ? ' due to $blockReason' : ''}'
                 '${blockReasonMessage != null ? ': $blockReasonMessage' : ''}'),
           _ => null,
@@ -255,8 +256,10 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
             _parsePromptFeedback(promptFeedback),
           _ => null
         }),
+    {'promptFeedback': final Map promptFeedback} =>
+      GenerateContentResponse([], _parsePromptFeedback(promptFeedback)),
     _ => throw FormatException(
-        'Unhandled GenerateContentResponse format: $jsonObject')
+        'Unhandled GenerateContentResponse format', jsonObject)
   };
 }
 
@@ -264,16 +267,16 @@ CountTokensResponse parseCountTokensResponse(Object jsonObject) {
   return switch (jsonObject) {
     {'totalTokens': final int totalTokens} => CountTokensResponse(totalTokens),
     _ =>
-      throw FormatException('Unhandled CountTokensReponse format: $jsonObject')
+      throw FormatException('Unhandled CountTokensResponse format', jsonObject)
   };
 }
 
-EmbedContentResponse parseEmbedContentReponse(Object jsonObject) {
+EmbedContentResponse parseEmbedContentResponse(Object jsonObject) {
   return switch (jsonObject) {
     {'embedding': final Object embedding} =>
       EmbedContentResponse(_parseContentEmbedding(embedding)),
-    _ => throw FormatException(
-        'Unhandled EmbedContentResponse format: $jsonObject')
+    _ =>
+      throw FormatException('Unhandled EmbedContentResponse format', jsonObject)
   };
 }
 
@@ -303,7 +306,7 @@ Candidate _parseCandidate(Object? jsonObject) {
             {'finishMessage': final String finishMessage} => finishMessage,
             _ => null
           }),
-    _ => throw FormatException('Unhandled Candidate format: $jsonObject'),
+    _ => throw FormatException('Unhandled Candidate format', jsonObject),
   };
 }
 
@@ -324,7 +327,7 @@ PromptFeedback _parsePromptFeedback(Object jsonObject) {
             _ => null,
           },
           safetyRatings.map(_parseSafetyRating).toList()),
-    _ => throw FormatException('Unhandled PromptFeedback format $jsonObject'),
+    _ => throw FormatException('Unhandled PromptFeedback format', jsonObject),
   };
 }
 
@@ -336,7 +339,7 @@ SafetyRating _parseSafetyRating(Object? jsonObject) {
     } =>
       SafetyRating(
           _parseHarmCategory(category), _parseHarmProbability(probability)),
-    _ => throw FormatException('Unhandled SafetyRating format $jsonObject'),
+    _ => throw FormatException('Unhandled SafetyRating format', jsonObject),
   };
 }
 
@@ -345,7 +348,7 @@ ContentEmbedding _parseContentEmbedding(Object? jsonObject) {
     {'values': final List values} => ContentEmbedding(<double>[
         ...values.cast<double>(),
       ]),
-    _ => throw FormatException('Unhandled ContentEmbedding format $jsonObject'),
+    _ => throw FormatException('Unhandled ContentEmbedding format', jsonObject),
   };
 }
 
@@ -356,7 +359,7 @@ HarmCategory _parseHarmCategory(Object jsonObject) {
     'HARM_CATEGORY_HATE_SPEECH' => HarmCategory.hateSpeech,
     'HARM_CATEGORY_SEXUALLY_EXPLICIT' => HarmCategory.sexuallyExplicit,
     'HARM_CATEGORY_DANGEROUS_CONTENT' => HarmCategory.dangerousContent,
-    _ => throw FormatException('Unhandled HarmCategory format $jsonObject'),
+    _ => throw FormatException('Unhandled HarmCategory format', jsonObject),
   };
 }
 
@@ -368,7 +371,7 @@ HarmProbability _parseHarmProbability(Object jsonObject) {
     'LOW' => HarmProbability.low,
     'MEDIUM' => HarmProbability.medium,
     'HIGH' => HarmProbability.high,
-    _ => throw FormatException('Unhandled HarmPropbability format $jsonObject'),
+    _ => throw FormatException('Unhandled HarmPropbability format', jsonObject),
   };
 }
 
@@ -376,7 +379,7 @@ CitationMetadata _parseCitationMetadata(Object? jsonObject) {
   return switch (jsonObject) {
     {'citationSources': final List<Object?> citationSources} =>
       CitationMetadata(citationSources.map(_parseCitationSource).toList()),
-    _ => throw FormatException('Unhandled CitationMetadata format $jsonObject'),
+    _ => throw FormatException('Unhandled CitationMetadata format', jsonObject),
   };
 }
 
@@ -389,7 +392,7 @@ CitationSource _parseCitationSource(Object? jsonObject) {
       'license': final String license,
     } =>
       CitationSource(startIndex, endIndex, Uri.parse(uri), license),
-    _ => throw FormatException('Unhandled CitationSource format $jsonObject'),
+    _ => throw FormatException('Unhandled CitationSource format', jsonObject),
   };
 }
 
@@ -402,7 +405,7 @@ FinishReason _parseFinishReason(Object jsonObject) {
     'SAFETY' => FinishReason.safety,
     'RECITATION' => FinishReason.recitation,
     'OTHER' => FinishReason.other,
-    _ => throw FormatException('Unhandled FinishReason format $jsonObject'),
+    _ => throw FormatException('Unhandled FinishReason format', jsonObject),
   };
 }
 
@@ -412,6 +415,6 @@ BlockReason _parseBlockReason(String jsonObject) {
     'UNSPECIFIED' => BlockReason.unspecified,
     'SAFETY' => BlockReason.safety,
     'OTHER' => BlockReason.other,
-    _ => throw FormatException('Unhandled BlockReason format $jsonObject'),
+    _ => throw FormatException('Unhandled BlockReason format', jsonObject),
   };
 }
