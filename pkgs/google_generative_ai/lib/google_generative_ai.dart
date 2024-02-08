@@ -57,5 +57,10 @@ export 'src/api.dart'
         TaskType;
 export 'src/chat.dart' show ChatSession, StartChatExtension;
 export 'src/content.dart' show Content, DataPart, Part, TextPart;
-export 'src/error.dart' show GenerativeAIException;
+export 'src/error.dart'
+    show
+        GenerativeAIException,
+        InvalidApiKey,
+        ServerException,
+        UnsupportedUserLocation;
 export 'src/model.dart' show GenerativeModel;
