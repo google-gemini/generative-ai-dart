@@ -3,8 +3,8 @@ description: >-
   Google generative AI SDK API bindings for Dart - allows access to state-of-the-art
   LLMs.
 repository: https://github.com/google/generative-ai-dart/tree/main/pkgs/google_generative_ai
+version: 0.1.0
 
-publish_to: none
 
 environment:
   sdk: ^3.2.0
