@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'api.dart';
 import 'content.dart';
 import 'model.dart';
@@ -95,9 +97,8 @@ final class ChatSession {
   /// Waits to read the entire streamed response before recording the message
   /// and response and allowing pending messages to be sent.
   Stream<GenerateContentResponse> sendMessageStream(Content message) {
-    final mutexLock = _mutex.acquire(); // Acquire lock synchronously.
-    return () async* {
-      final lock = await mutexLock;
+    final controller = StreamController<GenerateContentResponse>(sync: true);
+    _mutex.acquire().then((lock) async {
       try {
         final responses =
             _generateContentStream(_history.followedBy([message]));
@@ -106,16 +107,19 @@ final class ChatSession {
           if (response.candidates case [final candidate, ...]) {
             content.add(candidate.content);
           }
-          yield response;
+          controller.add(response);
         }
         if (content.isNotEmpty) {
           _history.add(message);
           _history.add(_aggregate(content));
         }
-      } finally {
-        lock.release();
+      } catch (e, s) {
+        controller.addError(e, s);
       }
-    }();
+      lock.release();
+      unawaited(controller.close());
+    });
+    return controller.stream;
   }
 
   /// Aggregates a list of [Content] responses into a single [Content].
