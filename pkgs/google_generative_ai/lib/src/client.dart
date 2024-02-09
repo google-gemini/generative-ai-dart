@@ -23,8 +23,8 @@ abstract interface class ApiClient {
       Uri uri, Map<String, Object?> body);
 }
 
-const _packageVersion = '0.0.1';
-const clientName = 'genai-dart/$_packageVersion';
+const packageVersion = '0.0.1';
+const clientName = 'genai-dart/$packageVersion';
 
 final class HttpApiClient implements ApiClient {
   final String _apiKey;
