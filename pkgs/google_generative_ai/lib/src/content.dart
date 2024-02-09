@@ -17,8 +17,17 @@ import 'dart:typed_data';
 
 /// The base structured datatype containing multi-part content of a message.
 final class Content {
+  /// The producer of the content.
+  ///
+  /// Must be either 'user' or 'model'. Useful to set for multi-turn
+  /// conversations, otherwise can be left blank or unset.
   final String? role;
+
+  /// Ordered `Parts` that constitute a single message.
+  ///
+  /// Parts may have different MIME types.
   final List<Part> parts;
+
   Content(this.role, this.parts);
 
   static Content text(String text) => Content('user', [TextPart(text)]);
