@@ -130,19 +130,28 @@ final class ChatSession {
     assert(contents.isNotEmpty);
     final role = contents.first.role ?? 'model';
     final textBuffer = StringBuffer();
+    // If non-null, only a single text part has been seen.
+    TextPart? previousText;
     final parts = <Part>[];
     void addBufferedText() {
-      if (textBuffer.isNotEmpty) {
+      if (textBuffer.isEmpty) return;
+      if (previousText case var singleText?) {
+        parts.add(singleText);
+        previousText = null;
+      } else {
         parts.add(TextPart(textBuffer.toString()));
-        textBuffer.clear();
       }
+      textBuffer.clear();
     }
 
     for (final content in contents) {
       for (final part in content.parts) {
         switch (part) {
           case TextPart(:final text):
-            textBuffer.write(text);
+            if (text.isNotEmpty) {
+              previousText = textBuffer.isEmpty ? part : null;
+              textBuffer.write(text);
+            }
           case DataPart():
             addBufferedText();
             parts.add(part);
