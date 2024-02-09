@@ -158,7 +158,6 @@ final class SafetyRating {
 
 /// The reason why a prompt was blocked.
 enum BlockReason {
-  unknown,
   unspecified,
   safety,
   other;
@@ -521,8 +520,7 @@ FinishReason _parseFinishReason(Object jsonObject) {
 
 BlockReason _parseBlockReason(String jsonObject) {
   return switch (jsonObject) {
-    'UNKNOWN' => BlockReason.unknown,
-    'UNSPECIFIED' => BlockReason.unspecified,
+    'BLOCK_REASON_UNSPECIFIED' => BlockReason.unspecified,
     'SAFETY' => BlockReason.safety,
     'OTHER' => BlockReason.other,
     _ => throw FormatException('Unhandled BlockReason format', jsonObject),
