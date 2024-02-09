@@ -83,6 +83,7 @@ final class GenerateContentResponse {
 final class EmbedContentResponse {
   /// The embedding generated from the input content.
   final ContentEmbedding embedding;
+
   EmbedContentResponse(this.embedding);
 }
 
@@ -169,10 +170,31 @@ enum BlockReason {
 
 enum HarmCategory {
   unknown('HARM_CATEGORY_UNSPECIFIED'),
+
+  /// Malicious, intimidating, bullying, or abusive comments targeting another
+  /// individual.
   harassment('HARM_CATEGORY_HARASSMENT'),
+
+  /// Negative or harmful comments targeting identity and/or protected
+  /// attributes.
   hateSpeech('HARM_CATEGORY_HATE_SPEECH'),
+
+  /// Contains references to sexual acts or other lewd content.
   sexuallyExplicit('HARM_CATEGORY_SEXUALLY_EXPLICIT'),
+
+  /// Promotes or enables access to harmful goods, services, and activities.
   dangerousContent('HARM_CATEGORY_DANGEROUS_CONTENT');
+
+  static HarmCategory _parseValue(Object jsonObject) {
+    return switch (jsonObject) {
+      'HARM_CATEGORY_UNSPECIFIED' => HarmCategory.unknown,
+      'HARM_CATEGORY_HARASSMENT' => HarmCategory.harassment,
+      'HARM_CATEGORY_HATE_SPEECH' => HarmCategory.hateSpeech,
+      'HARM_CATEGORY_SEXUALLY_EXPLICIT' => HarmCategory.sexuallyExplicit,
+      'HARM_CATEGORY_DANGEROUS_CONTENT' => HarmCategory.dangerousContent,
+      _ => throw FormatException('Unhandled HarmCategory format', jsonObject),
+    };
+  }
 
   const HarmCategory(this._jsonString);
 
@@ -184,10 +206,31 @@ enum HarmCategory {
 enum HarmProbability {
   unknown,
   unspecified,
+
+  /// Content has a negligible probability of being unsafe.
   negligible,
+
+  /// Content has a low probability of being unsafe.
   low,
+
+  /// Content has a medium probability of being unsafe.
   medium,
-  high,
+
+  /// Content has a high probability of being unsafe.
+  high;
+
+  static HarmProbability _parseValue(Object jsonObject) {
+    return switch (jsonObject) {
+      'UNKNOWN' => HarmProbability.unknown,
+      'UNSPECIFIED' => HarmProbability.unspecified,
+      'NEGLIGIBLE' => HarmProbability.negligible,
+      'LOW' => HarmProbability.low,
+      'MEDIUM' => HarmProbability.medium,
+      'HIGH' => HarmProbability.high,
+      _ =>
+        throw FormatException('Unhandled HarmProbability format', jsonObject),
+    };
+  }
 }
 
 /// Source attributions for a piece of content.
@@ -229,6 +272,19 @@ enum FinishReason {
   recitation,
   other;
 
+  static FinishReason _parseValue(Object jsonObject) {
+    return switch (jsonObject) {
+      'UNKNOWN' => FinishReason.unknown,
+      'UNSPECIFIED' => FinishReason.unspecified,
+      'STOP' => FinishReason.stop,
+      'MAX_TOKENS' => FinishReason.maxTokens,
+      'SAFETY' => FinishReason.safety,
+      'RECITATION' => FinishReason.recitation,
+      'OTHER' => FinishReason.other,
+      _ => throw FormatException('Unhandled FinishReason format', jsonObject),
+    };
+  }
+
   @override
   String toString() => name;
 }
@@ -251,13 +307,23 @@ final class SafetySetting {
 }
 
 enum HarmBlockThreshold {
+  /// Threshold is unspecified, block using default threshold.
   unspecified('HARM_BLOCK_THRESHOLD_UNSPECIFIED'),
+
+  /// Block when medium or high probability of unsafe content.
   low('BLOCK_LOW_AND_ABOVE'),
+
+  /// Block when medium or high probability of unsafe content.
   medium('BLOCK_MEDIUM_AND_ABOVE'),
+
+  /// Block when high probability of unsafe content.
   high('BLOCK_ONLY_HIGH'),
+
+  /// Always show regardless of probability of unsafe content.
   none('BLOCK_NONE');
 
   final String _jsonString;
+
   const HarmBlockThreshold(this._jsonString);
 
   Object toJson() => _jsonString;
@@ -409,7 +475,7 @@ Candidate _parseCandidate(Object? jsonObject) {
           },
           switch (jsonObject) {
             {'finishReason': final Object finishReason} =>
-              _parseFinishReason(finishReason),
+              FinishReason._parseValue(finishReason),
             _ => null
           },
           switch (jsonObject) {
@@ -447,8 +513,8 @@ SafetyRating _parseSafetyRating(Object? jsonObject) {
       'category': final Object category,
       'probability': final Object probability
     } =>
-      SafetyRating(
-          _parseHarmCategory(category), _parseHarmProbability(probability)),
+      SafetyRating(HarmCategory._parseValue(category),
+          HarmProbability._parseValue(probability)),
     _ => throw FormatException('Unhandled SafetyRating format', jsonObject),
   };
 }
@@ -459,29 +525,6 @@ ContentEmbedding _parseContentEmbedding(Object? jsonObject) {
         ...values.cast<double>(),
       ]),
     _ => throw FormatException('Unhandled ContentEmbedding format', jsonObject),
-  };
-}
-
-HarmCategory _parseHarmCategory(Object jsonObject) {
-  return switch (jsonObject) {
-    'HARM_CATEGORY_UNSPECIFIED' => HarmCategory.unknown,
-    'HARM_CATEGORY_HARASSMENT' => HarmCategory.harassment,
-    'HARM_CATEGORY_HATE_SPEECH' => HarmCategory.hateSpeech,
-    'HARM_CATEGORY_SEXUALLY_EXPLICIT' => HarmCategory.sexuallyExplicit,
-    'HARM_CATEGORY_DANGEROUS_CONTENT' => HarmCategory.dangerousContent,
-    _ => throw FormatException('Unhandled HarmCategory format', jsonObject),
-  };
-}
-
-HarmProbability _parseHarmProbability(Object jsonObject) {
-  return switch (jsonObject) {
-    'UNKNOWN' => HarmProbability.unknown,
-    'UNSPECIFIED' => HarmProbability.unspecified,
-    'NEGLIGIBLE' => HarmProbability.negligible,
-    'LOW' => HarmProbability.low,
-    'MEDIUM' => HarmProbability.medium,
-    'HIGH' => HarmProbability.high,
-    _ => throw FormatException('Unhandled HarmProbability format', jsonObject),
   };
 }
 
@@ -503,19 +546,6 @@ CitationSource _parseCitationSource(Object? jsonObject) {
     } =>
       CitationSource(startIndex, endIndex, Uri.parse(uri), license),
     _ => throw FormatException('Unhandled CitationSource format', jsonObject),
-  };
-}
-
-FinishReason _parseFinishReason(Object jsonObject) {
-  return switch (jsonObject) {
-    'UNKNOWN' => FinishReason.unknown,
-    'UNSPECIFIED' => FinishReason.unspecified,
-    'STOP' => FinishReason.stop,
-    'MAX_TOKENS' => FinishReason.maxTokens,
-    'SAFETY' => FinishReason.safety,
-    'RECITATION' => FinishReason.recitation,
-    'OTHER' => FinishReason.other,
-    _ => throw FormatException('Unhandled FinishReason format', jsonObject),
   };
 }
 
