@@ -22,17 +22,11 @@ including some getting started instructions.
 
 ## Using the SDK in your own app
 
-Add a dependency on this repository to the path `pkgs/google_generative_ai`.
-Once the API is stable the package will be available from pub. We welcome
-pre-publish feedback through GitHub issues.
+Add a dependency on the `package:google_generative_ai` package:
 
 ```yaml
 dependencies:
-  google_generative_ai:
-    git:
-      url: git@github.com:google/generative-ai-dart.git
-      path: pkgs/google_generative_ai
-      ref: main
+  google_generative_ai: ^0.1.0
 ```
 
 ### Initializing the API client
@@ -59,9 +53,9 @@ Google documentation: https://ai.google.dev/docs.
 
 | Package                                            | Description | Version |
 | -------------------------------------------------- | --- | --- |
-| [google_generative_ai](pkgs/google_generative_ai/) | The Google Generative AI SDK for Dart - allows access to state-of-the-art LLMs. |  |
+| [google_generative_ai](pkgs/google_generative_ai/) | The Google Generative AI SDK for Dart - allows access to state-of-the-art LLMs. | [![pub package](https://img.shields.io/pub/v/google_generative_ai.svg)](https://pub.dev/packages/google_generative_ai) |
 | [samples/dart](samples/dart/)                      | Dart samples for `package:google_generative_ai`. |  |
-| [samples/flutter_app](samples/flutter_app/)        | Flutter sample for `package:google_generative_ai`. |  |
+| [samples/flutter_app](samples/flutter_app/)        | A Flutter sample for `package:google_generative_ai`. |  |
 
 ## Contributing
 
