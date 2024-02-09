@@ -49,9 +49,24 @@ final class GenerativeModel {
   ///
   /// The [model] argument can be a model name (such as `'gemini-pro'`) or a
   /// model code (such as `'models/gemini-pro'`).
+  /// There is no creation time check for whether the `model` string identifies
+  /// a known and supported model. If not, attempts to generate content
+  /// will fail.
   ///
-  /// A default [http.Client] will be created for each request.
-  /// Pass a [httpClient] to override with a custom client instance.
+  /// A Google Cloud [apiKey] is required for all requests.
+  /// See documentation about [API keys][] for more information.
+  ///
+  /// [API keys]: https://cloud.google.com/docs/authentication/api-keys "Google Cloud API keys"
+  ///
+  /// The optional [safetySettings] and [generationConfig] can be used to
+  /// control and guide the generation. See [SafetySetting] and
+  /// [GenerationConfig] for details.
+  ///
+  /// Content creation requests are sent to a server through the [httpClient],
+  /// which can be used to control, for example, the number of allowed
+  /// concurrent requests.
+  /// If the `httpClient` is omitted, a new [http.Client] is created for each
+  /// request.
   factory GenerativeModel({
     required String model,
     required String apiKey,
@@ -84,12 +99,16 @@ final class GenerativeModel {
   Uri _taskUri(Task task) => _baseUrl.resolveUri(
       Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
 
-  /// Returns content responding to [prompt].
+  /// Generates content responding to [prompt].
   ///
-  /// Calls the `generateContent` API on this model.
+  /// Sends a "generateContent" API request for the configured model,
+  /// and waits for the response.
   ///
-  ///     final response = await model.generateContent([Content.text(prompt)]);
-  ///     print(response.text);
+  /// Example:
+  /// ```dart
+  /// final response = await model.generateContent([Content.text(prompt)]);
+  /// print(response.text);
+  /// ```
   Future<GenerateContentResponse> generateContent(Iterable<Content> prompt,
       {List<SafetySetting>? safetySettings,
       GenerationConfig? generationConfig}) async {
@@ -114,14 +133,18 @@ final class GenerativeModel {
     }
   }
 
-  /// Returns a stream of content responding to [prompt].
+  /// Generates a stream of content responding to [prompt].
   ///
-  /// Calls the `streamGenerateContent` API on this model.
+  /// Sends a "streamGenerateContent" API request for the configured model,
+  /// and waits for the response.
   ///
-  ///     final responses = await model.generateContent([Content.text(prompt)]);
-  ///     await for (final response in responses) {
-  ///       print(response.text);
-  ///     }
+  /// Example:
+  /// ```dart
+  /// final responses = await model.generateContent([Content.text(prompt)]);
+  /// await for (final response in responses) {
+  ///   print(response.text);
+  /// }
+  /// ```
   Stream<GenerateContentResponse> generateContentStream(
       Iterable<Content> prompt,
       {List<SafetySetting>? safetySettings,
@@ -140,33 +163,42 @@ final class GenerativeModel {
     return response.map(parseGenerateContentResponse);
   }
 
-  /// Returns the total number of tokens in [content].
+  /// Counts the total number of tokens in [contents].
   ///
-  /// Calls the `countTokens` API on this model.
+  /// Sends a "countTokens" API request for the configured model,
+  /// and waits for the response.
   ///
-  ///     final totalTokens =
-  ///         (await model.countTokens([Content.text(prompt)])).totalTokens;
-  ///     if (totalTokens > maxPromptSize) {
-  ///       print('Prompt is too long!');
-  ///     } else {
-  ///       final response = await model.generateContent();
-  ///       print(response.text);
-  ///     }
-  Future<CountTokensResponse> countTokens(Iterable<Content> content) async {
+  /// Example:
+  /// ```dart
+  /// final promptContent = [Content.text(prompt)];
+  /// final totalTokens =
+  ///     (await model.countTokens(promptContent)).totalTokens;
+  /// if (totalTokens > maxPromptSize) {
+  ///   print('Prompt is too long!');
+  /// } else {
+  ///   final response = await model.generateContent(promptContent);
+  ///   print(response.text);
+  /// }
+  /// ```
+  Future<CountTokensResponse> countTokens(Iterable<Content> contents) async {
     final parameters = <String, Object?>{
-      'contents': content.map((c) => c.toJson()).toList()
+      'contents': contents.map((c) => c.toJson()).toList()
     };
     final response =
         await _client.makeRequest(_taskUri(Task.countTokens), parameters);
     return parseCountTokensResponse(response);
   }
 
-  /// Returns an embedding (list of float values) representing [content].
+  /// Creates an embedding (list of float values) representing [content].
   ///
-  /// Calls the `embedContent` API on this model.
+  /// Sends a "embedContent" API request for the configured model,
+  /// and waits for the response.
   ///
-  ///     final promptEmbedding =
-  ///         (await model.([Content.text(prompt)])).embedding.values;
+  /// Example:
+  /// ```dart
+  /// final promptEmbedding =
+  ///     (await model.embedContent([Content.text(prompt)])).embedding.values;
+  /// ```
   Future<EmbedContentResponse> embedContent(Content content,
       {TaskType? taskType, String? title}) async {
     final parameters = <String, Object?>{
@@ -180,9 +212,9 @@ final class GenerativeModel {
   }
 }
 
-/// Create a model with an overridden [ApiClient] for testing.
+/// Creates a model with an overridden [ApiClient] for testing.
 ///
-/// Package private test only method.
+/// Package private test-only method.
 GenerativeModel createModelWithClient(
         {required String model,
         required ApiClient client,
