@@ -26,13 +26,13 @@ abstract interface class ApiClient {
 const packageVersion = '0.0.1';
 const clientName = 'genai-dart/$packageVersion';
 
+// Encodes first by `json.encode`, then `utf8.encode`.
+// Decodes first by `utf8.decode`, then `json.decode`.
+final _utf8Json = json.fuse(utf8);
+
 final class HttpApiClient implements ApiClient {
   final String _apiKey;
   final http.Client? _httpClient;
-  late final _headers = {
-    'x-goog-api-key': _apiKey,
-    'x-goog-api-client': clientName
-  };
 
   HttpApiClient({required String apiKey, http.Client? httpClient})
       : _apiKey = apiKey,
@@ -43,34 +43,36 @@ final class HttpApiClient implements ApiClient {
       Uri uri, Map<String, Object?> body) async {
     final response = await http.post(
       uri,
-      headers: {..._headers, 'Content-Type': 'application/json'},
-      body: utf8.encode(jsonEncode(body)),
+      headers: {
+        'x-goog-api-key': _apiKey,
+        'x-goog-api-client': clientName,
+        'Content-Type': 'application/json'
+      },
+      body: _utf8Json.encode(body),
     );
-    return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, Object?>;
+    return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
   }
 
   @override
   Stream<Map<String, Object?>> streamRequest(
-      Uri uri, Map<String, Object?> body) {
-    final controller = StreamController<Map<String, Object?>>();
-    () async {
-      uri = uri.replace(queryParameters: {'alt': 'sse'});
-      final request = http.Request('POST', uri)
-        ..bodyBytes = utf8.encode(jsonEncode(body))
-        ..headers.addAll(_headers)
-        ..headers['Content-Type'] = 'application/json';
-      final response = _httpClient == null
-          ? await request.send()
-          : await _httpClient.send(request);
-      await response.stream
-          .toStringStream()
-          .transform(const LineSplitter())
-          .where((line) => line.startsWith('data: '))
-          .map((line) => line.substring(6))
-          .map(jsonDecode)
-          .cast<Map<String, Object?>>()
-          .pipe(controller);
-    }();
-    return controller.stream;
+      Uri uri, Map<String, Object?> body) async* {
+    uri = uri.replace(queryParameters: {'alt': 'sse'});
+    final request = http.Request('POST', uri)
+      ..bodyBytes = _utf8Json.encode(body)
+      ..headers['x-goog-api-key'] = _apiKey
+      ..headers['x-goog-api-client'] = clientName
+      ..headers['Content-Type'] = 'application/json';
+    final response = _httpClient == null
+        ? await request.send()
+        : await _httpClient.send(request);
+    final lines =
+        response.stream.toStringStream().transform(const LineSplitter());
+    await for (final line in lines) {
+      const dataPrefix = 'data: ';
+      if (line.startsWith(dataPrefix)) {
+        final jsonText = line.substring(dataPrefix.length);
+        yield jsonDecode(jsonText) as Map<String, Object?>;
+      }
+    }
   }
 }
