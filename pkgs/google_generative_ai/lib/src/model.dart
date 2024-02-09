@@ -182,7 +182,7 @@ final class GenerativeModel {
   /// ```
   Future<CountTokensResponse> countTokens(Iterable<Content> contents) async {
     final parameters = <String, Object?>{
-      'contents': content.map((c) => c.toJson()).toList()
+      'contents': contents.map((c) => c.toJson()).toList()
     };
     final response =
         await _client.makeRequest(_taskUri(Task.countTokens), parameters);
