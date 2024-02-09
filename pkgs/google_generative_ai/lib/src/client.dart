@@ -46,7 +46,7 @@ final class HttpApiClient implements ApiClient {
       headers: {
         'x-goog-api-key': _apiKey,
         'x-goog-api-client': clientName,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: _utf8Json.encode(body),
     );
