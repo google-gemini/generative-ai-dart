@@ -24,7 +24,7 @@ Future<void> generate(GenerationConfig? generationConfig, String apiKey) async {
   print('Prompt: $prompt');
   final content = [Content.text(prompt)];
 
-  print('Options: ${jsonEncode(generationConfig)}');
+  print('Options: ${jsonEncode(generationConfig?.toJson())}');
 
   final response = await model.generateContent(content);
   print('Response:');
@@ -34,7 +34,7 @@ Future<void> generate(GenerationConfig? generationConfig, String apiKey) async {
 Future<void> main() async {
   final apiKey = Platform.environment['GOOGLE_API_KEY'];
   if (apiKey == null) {
-    print('No \$GOOGLE_API_KEY environment variable');
+    stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
   await generate(null, apiKey);
