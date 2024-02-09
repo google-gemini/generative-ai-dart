@@ -15,24 +15,23 @@
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
 import 'error.dart';
+import 'utils/json.dart';
 
 final _baseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
 
 enum Task {
-  generateContent('generateContent'),
-  streamGenerateContent('streamGenerateContent'),
-  countTokens('countTokens'),
-  embedContent('embedContent'),
-  batchEmbedContents('batchEmbedContents');
-
-  final String _name;
-  const Task(this._name);
+  generateContent,
+  streamGenerateContent,
+  countTokens,
+  embedContent,
+  batchEmbedContents;
 }
 
 /// A multimodel generative model (like Gemini).
@@ -44,6 +43,10 @@ final class GenerativeModel {
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
+
+  /// Caches URIs for the individual tasks, instead of rebuilding for every
+  /// request.
+  final List<Uri?> _taskUriCache = List<Uri?>.filled(Task.values.length, null);
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -96,8 +99,8 @@ final class GenerativeModel {
           ? modelName.substring(_modelsPrefix.length)
           : modelName;
 
-  Uri _taskUri(Task task) => _baseUrl.resolveUri(
-      Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
+  Uri _taskUri(Task task) => _taskUriCache[task.index] ??= _baseUrl
+      .replace(pathSegments: [_apiVersion, 'models', '$_model:${task.name}']);
 
   /// Generates content responding to [prompt].
   ///
@@ -115,9 +118,9 @@ final class GenerativeModel {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
     final parameters = {
-      'contents': prompt.map((p) => p.toJson()).toList(),
+      'contents': prompt.toJsonList(),
       if (safetySettings.isNotEmpty)
-        'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
+        'safetySettings': safetySettings.toJsonList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
     };
@@ -152,9 +155,9 @@ final class GenerativeModel {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
     final parameters = <String, Object?>{
-      'contents': prompt.map((p) => p.toJson()).toList(),
+      'contents': prompt.toJsonList(),
       if (safetySettings.isNotEmpty)
-        'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
+        'safetySettings': safetySettings.toJsonList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
     };
@@ -181,9 +184,7 @@ final class GenerativeModel {
   /// }
   /// ```
   Future<CountTokensResponse> countTokens(Iterable<Content> contents) async {
-    final parameters = <String, Object?>{
-      'contents': contents.map((c) => c.toJson()).toList()
-    };
+    final parameters = <String, Object?>{'contents': contents.toJsonList()};
     final response =
         await _client.makeRequest(_taskUri(Task.countTokens), parameters);
     return parseCountTokensResponse(response);
@@ -215,6 +216,7 @@ final class GenerativeModel {
 /// Creates a model with an overridden [ApiClient] for testing.
 ///
 /// Package private test-only method.
+@visibleForTesting
 GenerativeModel createModelWithClient(
         {required String model,
         required ApiClient client,

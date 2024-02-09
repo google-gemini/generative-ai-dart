@@ -15,8 +15,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'utils/json.dart';
+
 /// The base structured datatype containing multi-part content of a message.
-final class Content {
+final class Content implements JsonConvertible {
   /// The producer of the content.
   ///
   /// Must be either 'user' or 'model'. Useful to set for multi-turn
@@ -36,10 +38,9 @@ final class Content {
   static Content multi(Iterable<Part> parts) => Content('user', [...parts]);
   static Content model(Iterable<Part> parts) => Content('model', [...parts]);
 
-  Map toJson() => {
-        if (role case final role?) 'role': role,
-        'parts': parts.map((p) => p.toJson()).toList()
-      };
+  @override
+  Map<String, Object?> toJson() =>
+      {if (role case final role?) 'role': role, 'parts': parts.toJsonList()};
 }
 
 Content parseContent(Object jsonObject) {
@@ -64,7 +65,8 @@ Part _parsePart(Object? jsonObject) {
 }
 
 /// A datatype containing media that is part of a multi-part [Content] message.
-sealed class Part {
+sealed class Part implements JsonConvertible {
+  @override
   Object toJson();
 }
 

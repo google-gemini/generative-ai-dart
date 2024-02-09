@@ -31,6 +31,9 @@ class Mutex {
   /// lock is released.
   final Queue<Completer<Lock>> _pending = Queue();
 
+  /// Creates a mutex.
+  Mutex();
+
   /// Acquire a lock on the mutex.
   ///
   /// The future will complete with an active [Lock] object

@@ -64,7 +64,7 @@ final class ChatSession {
   Future<GenerateContentResponse> sendMessage(Content message) async {
     final lock = await _mutex.acquire();
     try {
-      final response = await _generateContent([..._history, message],
+      final response = await _generateContent(_history.followedBy([message]),
           safetySettings: _safetySettings, generationConfig: _generationConfig);
       if (response.candidates case [final candidate, ...]) {
         _history.add(message);
@@ -96,14 +96,11 @@ final class ChatSession {
   /// and response and allowing pending messages to be sent.
   Stream<GenerateContentResponse> sendMessageStream(Content message) {
     final mutexLock = _mutex.acquire(); // Acquire lock synchronously.
-    // TODO: Eagerly listen to the response and append to history, even if the
-    // returned stream doesn't have a listener.
     return () async* {
       final lock = await mutexLock;
       try {
-        final responses = _generateContentStream([..._history, message],
-            safetySettings: _safetySettings,
-            generationConfig: _generationConfig);
+        final responses =
+            _generateContentStream(_history.followedBy([message]));
         final content = <Content>[];
         await for (final response in responses) {
           if (response.candidates case [final candidate, ...]) {

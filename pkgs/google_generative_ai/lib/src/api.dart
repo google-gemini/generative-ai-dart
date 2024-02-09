@@ -15,6 +15,7 @@
 import 'content.dart';
 import 'error.dart';
 import 'model.dart';
+import 'utils/json.dart';
 
 final class CountTokensResponse {
   /// The number of tokens that the `model` tokenizes the `prompt` into.
@@ -137,8 +138,9 @@ final class Candidate {
   final String? finishMessage;
 
   // TODO: token count?
-  Candidate(this.content, this.safetyRatings, this.citationMetadata,
-      this.finishReason, this.finishMessage);
+  Candidate(this.content, List<SafetyRating>? safetyRatings,
+      this.citationMetadata, this.finishReason, this.finishMessage)
+      : safetyRatings = safetyRatings ?? <SafetyRating>[];
 }
 
 /// Safety rating for a piece of content.
@@ -167,7 +169,7 @@ enum BlockReason {
   String toString() => name;
 }
 
-enum HarmCategory {
+enum HarmCategory implements JsonConvertible {
   unknown('HARM_CATEGORY_UNSPECIFIED'),
 
   /// Malicious, intimidating, bullying, or abusive comments targeting another
@@ -199,6 +201,7 @@ enum HarmCategory {
 
   final String _jsonString;
 
+  @override
   String toJson() => _jsonString;
 }
 
@@ -292,8 +295,7 @@ enum FinishReason {
 ///
 /// Passing a safety setting for a category changes the allowed probability that
 /// content is blocked.
-final class SafetySetting {
-  /// The category for this setting.
+final class SafetySetting implements JsonConvertible {
   final HarmCategory category;
 
   /// Controls the probability threshold at which harm is blocked.
@@ -301,12 +303,12 @@ final class SafetySetting {
 
   SafetySetting(this.category, this.threshold);
 
+  @override
   Object toJson() =>
       {'category': category.toJson(), 'threshold': threshold.toJson()};
 }
 
-enum HarmBlockThreshold {
-  /// Threshold is unspecified, block using default threshold.
+enum HarmBlockThreshold implements JsonConvertible {
   unspecified('HARM_BLOCK_THRESHOLD_UNSPECIFIED'),
 
   /// Block when medium or high probability of unsafe content.
@@ -325,11 +327,12 @@ enum HarmBlockThreshold {
 
   const HarmBlockThreshold(this._jsonString);
 
+  @override
   Object toJson() => _jsonString;
 }
 
 /// Configuration options for model generation and outputs.
-final class GenerationConfig {
+final class GenerationConfig implements JsonConvertible {
   /// Number of generated responses to return.
   ///
   /// This value must be between [1, 8], inclusive. If unset, this will default
@@ -383,6 +386,7 @@ final class GenerationConfig {
       this.topP,
       this.topK});
 
+  @override
   Map<String, Object?> toJson() => {
         if (candidateCount case final candidateCount?)
           'candidateCount': candidateCount,
@@ -396,7 +400,7 @@ final class GenerationConfig {
 }
 
 /// Type of task for which the embedding will be used.
-enum TaskType {
+enum TaskType implements JsonConvertible {
   /// Unset value, which will default to one of the other enum values.
   unspecified('TASK_TYPE_UNSPECIFIED'),
 
@@ -419,6 +423,7 @@ enum TaskType {
 
   const TaskType(this._jsonString);
 
+  @override
   Object toJson() => _jsonString;
 }
 
@@ -465,7 +470,7 @@ Candidate _parseCandidate(Object? jsonObject) {
           switch (jsonObject) {
             {'safetyRatings': final List<Object?> safetyRatings} =>
               safetyRatings.map(_parseSafetyRating).toList(),
-            _ => null
+            _ => <SafetyRating>[]
           },
           switch (jsonObject) {
             {'citationMetadata': final Object citationMetadata} =>
