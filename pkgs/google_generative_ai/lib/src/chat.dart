@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:pool/pool.dart';
-
 import 'api.dart';
 import 'content.dart';
 import 'model.dart';
+import 'utils/mutex.dart';
 
 /// A back-and-forth chat with a generative model.
 ///
@@ -32,7 +31,7 @@ final class ChatSession {
       {List<SafetySetting>? safetySettings,
       GenerationConfig? generationConfig}) _generateContentStream;
 
-  final _pool = Pool(1);
+  final _mutex = Mutex();
 
   final List<Content> _history;
   final List<SafetySetting>? _safetySettings;
@@ -45,17 +44,17 @@ final class ChatSession {
   /// generative model.
   ///
   /// If there are outstanding requests from calls to [sendMessage] or
-  /// [sendMessageStream] they will not be reflected in the history. Messages
-  /// without a candidate in the response are not recorded in history, including
-  /// the message sent to the model.
-  Iterable<Content> get history => _history;
+  /// [sendMessageStream], these will not be reflected in the history.
+  /// Messages without a candidate in the response are not recorded in history,
+  /// including the message sent to the model.
+  Iterable<Content> get history => _history.skip(0);
 
-  /// Send [message] to the model as a continuation of the chat [history].
+  /// Sends [message] to the model as a continuation of the chat [history].
   ///
   /// Prepends the history to the request and uses the provided model to
   /// generate new content.
   ///
-  /// When there are no candidates in the response the [message] and response
+  /// When there are no candidates in the response, the [message] and response
   /// are ignored and will not be recorded in the [history].
   ///
   /// Waits for any ongoing or pending requests to [sendMessage] or
@@ -63,7 +62,7 @@ final class ChatSession {
   /// Successful messages and responses for ongoing or pending requests will
   /// be reflected in the history sent for this message.
   Future<GenerateContentResponse> sendMessage(Content message) async {
-    final resource = await _pool.request();
+    final lock = await _mutex.acquire();
     try {
       final response = await _generateContent([..._history, message],
           safetySettings: _safetySettings, generationConfig: _generationConfig);
@@ -74,17 +73,18 @@ final class ChatSession {
       }
       return response;
     } finally {
-      resource.release();
+      lock.release();
     }
   }
 
-  /// Send [message] to the model as a continuation of the chat [history] and
-  /// read the response in a stream.
+  /// Continues the chat with a new [message].
   ///
+  /// Sends [message] to the model as a continuation of the chat [history] and
+  /// reads the response in a stream.
   /// Prepends the history to the request and uses the provided model to
   /// generate new content.
   ///
-  /// When there are no candidates in any response in the stream the [message]
+  /// When there are no candidates in any response in the stream, the [message]
   /// and responses are ignored and will not be recorded in the [history].
   ///
   /// Waits for any ongoing or pending requests to [sendMessage] or
@@ -93,62 +93,75 @@ final class ChatSession {
   /// be reflected in the history sent for this message.
   ///
   /// Waits to read the entire streamed response before recording the message
-  /// and response and allow pending messages to be sent.
-  Stream<GenerateContentResponse> sendMessageStream(Content message) async* {
-    final resource = await _pool.request();
-    try {
-      final responses = _generateContentStream([..._history, message],
-          safetySettings: _safetySettings, generationConfig: _generationConfig);
-      final content = <Content>[];
-      await for (final response in responses) {
-        if (response.candidates case [final candidate, ...]) {
-          content.add(candidate.content);
+  /// and response and allowing pending messages to be sent.
+  Stream<GenerateContentResponse> sendMessageStream(Content message) {
+    final mutexLock = _mutex.acquire(); // Acquire lock synchronously.
+    // TODO: Eagerly listen to the response and append to history, even if the
+    // returned stream doesn't have a listener.
+    return () async* {
+      final lock = await mutexLock;
+      try {
+        final responses = _generateContentStream([..._history, message],
+            safetySettings: _safetySettings,
+            generationConfig: _generationConfig);
+        final content = <Content>[];
+        await for (final response in responses) {
+          if (response.candidates case [final candidate, ...]) {
+            content.add(candidate.content);
+          }
+          yield response;
         }
-        yield response;
+        if (content.isNotEmpty) {
+          _history.add(message);
+          _history.add(_aggregate(content));
+        }
+      } finally {
+        lock.release();
       }
-      if (content.isNotEmpty) {
-        _history.add(message);
-        _history.add(_aggregate(content));
-      }
-    } finally {
-      resource.release();
-    }
-  }
-}
-
-Content _aggregate(Iterable<Content> content) {
-  assert(content.isNotEmpty);
-  final role = content.first.role ?? 'model';
-  final textBuffer = StringBuffer();
-  final parts = <Part>[];
-  void addBufferedText() {
-    if (textBuffer.isNotEmpty) {
-      parts.add(TextPart(textBuffer.toString()));
-      textBuffer.clear();
-    }
+    }();
   }
 
-  for (final content in content) {
-    for (final part in content.parts) {
-      switch (part) {
-        case TextPart(:final text):
-          textBuffer.write(text);
-        case DataPart():
-          addBufferedText();
-          parts.add(part);
+  /// Aggregates a list of [Content] responses into a single [Content].
+  ///
+  /// Includes all the [Content.parts] of every element of [contents],
+  /// and concatenates adjacent [TextPart]s into a single [TextPart],
+  /// even across adjacent [Content]s.
+  Content _aggregate(List<Content> contents) {
+    assert(contents.isNotEmpty);
+    final role = contents.first.role ?? 'model';
+    final textBuffer = StringBuffer();
+    final parts = <Part>[];
+    void addBufferedText() {
+      if (textBuffer.isNotEmpty) {
+        parts.add(TextPart(textBuffer.toString()));
+        textBuffer.clear();
       }
     }
+
+    for (final content in contents) {
+      for (final part in content.parts) {
+        switch (part) {
+          case TextPart(:final text):
+            textBuffer.write(text);
+          case DataPart():
+            addBufferedText();
+            parts.add(part);
+        }
+      }
+    }
+    addBufferedText();
+    return Content(role, parts);
   }
-  addBufferedText();
-  return Content(role, parts);
 }
 
 extension StartChatExtension on GenerativeModel {
-  /// Returns a [ChatSession] that will use this model to respond to messages.
+  /// Starts a [ChatSession] that will use this model to respond to messages.
   ///
-  ///     final chat = model.startChat();
-  ///     final response = await chat.sendMessage(Content.text('Hello there.'));
-  ///     print(response.text);
+  /// ```dart
+  /// final chat = model.startChat();
+  /// final response = await chat.sendMessage(Content.text('Hello there.'));
+  /// print(response.text);
+  /// ```
   ChatSession startChat(
           {List<Content>? history,
           List<SafetySetting>? safetySettings,
