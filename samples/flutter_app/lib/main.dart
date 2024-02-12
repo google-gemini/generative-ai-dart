@@ -70,9 +70,9 @@ class ChatWidget extends StatefulWidget {
 class _ChatWidgetState extends State<ChatWidget> {
   late final GenerativeModel _model;
   late final ChatSession _chat;
-  final _scrollController = ScrollController();
-  final _textController = TextEditingController();
-  final _textFieldFocus = FocusNode();
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _textController = TextEditingController();
+  final FocusNode _textFieldFocus = FocusNode();
   bool _loading = false;
 
   @override
