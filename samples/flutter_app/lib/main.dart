@@ -68,10 +68,11 @@ class ChatWidget extends StatefulWidget {
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
-  final ScrollController _controller = ScrollController();
   late final GenerativeModel _model;
   late final ChatSession _chat;
-  late final _textController = TextEditingController();
+  final _scrollController = ScrollController();
+  final _textController = TextEditingController();
+  final _textFieldFocus = FocusNode();
   bool _loading = false;
 
   @override
@@ -86,8 +87,8 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   void _scrollDown() {
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _controller.animateTo(
-        _controller.position.maxScrollExtent,
+      (_) => _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
         duration: const Duration(
           milliseconds: 750,
         ),
@@ -127,7 +128,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         children: [
           Expanded(
             child: ListView.builder(
-              controller: _controller,
+              controller: _scrollController,
               itemBuilder: (context, idx) {
                 var content = _chat.history.toList()[idx];
                 var text = content.parts
@@ -151,6 +152,8 @@ class _ChatWidgetState extends State<ChatWidget> {
               children: [
                 Expanded(
                   child: TextField(
+                    autofocus: true,
+                    focusNode: _textFieldFocus,
                     decoration: textFieldDecoration,
                     controller: _textController,
                     onSubmitted: (String value) {
@@ -211,6 +214,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       setState(() {
         _loading = false;
       });
+      _textFieldFocus.requestFocus();
     }
   }
 
