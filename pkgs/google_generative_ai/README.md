@@ -1,4 +1,6 @@
 [![package:google_generative_ai](https://github.com/google/generative-ai-dart/actions/workflows/google_generative_ai.yml/badge.svg)](https://github.com/google/generative-ai-dart/actions/workflows/google_generative_ai.yml)
+[![pub package](https://img.shields.io/pub/v/google_generative_ai.svg)](https://pub.dev/packages/google_generative_ai)
+[![package publisher](https://img.shields.io/pub/publisher/google_generative_ai.svg)](https://pub.dev/packages/google_generative_ai/publisher)
 
 The Google Generative AI SDK for Dart allows developers to use state-of-the-art
 Large Language Models (LLMs) to build language applications.
@@ -12,18 +14,19 @@ https://ai.google.dev/tutorials/setup for how to create one.
 
 ### Add the package to your project
 
-Add a dependency on the package via:
+Add a dependency on the `package:google_generative_ai` package via:
 
-```yaml
-dependencies:
-  google_generative_ai:
-    git:
-      url: git@github.com:google/generative-ai-dart.git
-      path: pkgs/google_generative_ai
-      ref: main
+```shell
+dart pub add google_generative_ai
 ```
 
-And import:
+or:
+
+```shell
+flutter pub add google_generative_ai
+```
+
+Additionally, import:
 
 ```dart
 import 'package:google_generative_ai/google_generative_ai.dart';
