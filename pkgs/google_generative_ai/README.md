@@ -14,17 +14,16 @@ https://ai.google.dev/tutorials/setup for how to create one.
 
 ### Add the package to your project
 
-Add a dependency on the package via:
+Add a dependency on the `package:google_generative_ai` package via:
 
 ```shell
 dart pub add google_generative_ai
 ```
 
-Or, by editing your pubspec.yaml file:
+or:
 
-```yaml
-dependencies:
-  google_generative_ai: ^0.1.0
+```shell
+flutter pub add google_generative_ai
 ```
 
 Additionally, import:

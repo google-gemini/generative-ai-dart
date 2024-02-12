@@ -22,11 +22,16 @@ including some getting started instructions.
 
 ## Using the SDK in your own app
 
-Add a dependency on the `package:google_generative_ai` package:
+Add a dependency on the `package:google_generative_ai` package via:
 
-```yaml
-dependencies:
-  google_generative_ai: ^0.1.0
+```shell
+dart pub add google_generative_ai
+```
+
+or:
+
+```shell
+flutter pub add google_generative_ai
 ```
 
 ### Initializing the API client
