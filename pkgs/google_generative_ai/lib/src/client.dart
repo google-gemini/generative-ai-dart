@@ -36,12 +36,12 @@ final class HttpApiClient implements ApiClient {
 
   HttpApiClient({required String apiKey, http.Client? httpClient})
       : _apiKey = apiKey,
-        _httpClient = httpClient ?? http.Client();
+        _httpClient = httpClient;
 
   @override
   Future<Map<String, Object?>> makeRequest(
       Uri uri, Map<String, Object?> body) async {
-    final response = await http.post(
+    final response = await (_httpClient?.post ?? http.post)(
       uri,
       headers: {
         'x-goog-api-key': _apiKey,
