@@ -100,8 +100,9 @@ final class ChatSession {
     final controller = StreamController<GenerateContentResponse>(sync: true);
     _mutex.acquire().then((lock) async {
       try {
-        final responses =
-            _generateContentStream(_history.followedBy([message]));
+        final responses = _generateContentStream(_history.followedBy([message]),
+            safetySettings: _safetySettings,
+            generationConfig: _generationConfig);
         final content = <Content>[];
         await for (final response in responses) {
           if (response.candidates case [final candidate, ...]) {
