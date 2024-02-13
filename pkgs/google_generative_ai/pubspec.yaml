@@ -1,8 +1,8 @@
 name: google_generative_ai
 version: 0.1.1-wip
 description: >-
-  Google generative AI SDK API bindings for Dart - allows access to
-  state-of-the-art LLMs.
+  The Google AI Dart SDK enables developers to use Google's state-of-the-art
+  generative AI models (like Gemini).
 repository: https://github.com/google/generative-ai-dart/tree/main/pkgs/google_generative_ai
 
 environment:
