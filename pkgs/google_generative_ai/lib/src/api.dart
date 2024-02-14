@@ -475,11 +475,11 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
     {'candidates': final List<Object?> candidates} => GenerateContentResponse(
         candidates.map(_parseCandidate).toList(),
         switch (jsonObject) {
-          {'promptFeedback': final Map promptFeedback} =>
+          {'promptFeedback': final promptFeedback?} =>
             _parsePromptFeedback(promptFeedback),
           _ => null
         }),
-    {'promptFeedback': final Map promptFeedback} =>
+    {'promptFeedback': final promptFeedback?} =>
       GenerateContentResponse([], _parsePromptFeedback(promptFeedback)),
     _ => throw FormatException(
         'Unhandled GenerateContentResponse format', jsonObject)
@@ -568,7 +568,7 @@ SafetyRating _parseSafetyRating(Object? jsonObject) {
 
 ContentEmbedding _parseContentEmbedding(Object? jsonObject) {
   return switch (jsonObject) {
-    {'values': final List values} => ContentEmbedding(<double>[
+    {'values': final List<Object?> values} => ContentEmbedding(<double>[
         ...values.cast<double>(),
       ]),
     _ => throw FormatException('Unhandled ContentEmbedding format', jsonObject),

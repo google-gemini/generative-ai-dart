@@ -10,9 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  google_generative_ai:
-    path: ../../pkgs/google_generative_ai
   flutter_markdown: any
+  # Note: best practice here is to use a caret version constraint. We use `any`
+  # here just for the purpose of the sample.
+  google_generative_ai: any
 
 dev_dependencies:
   flutter_test:
@@ -21,3 +22,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# Note: this section is only used in order to resolve google_generative_ai to
+# the same repo as the sample.
+dependency_overrides:
+  google_generative_ai:
+    path: ../../pkgs/google_generative_ai

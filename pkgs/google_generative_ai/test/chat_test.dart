@@ -135,6 +135,60 @@ void main() {
           ], null)));
     });
 
+    test('forwards safety settings and config when streaming', () async {
+      final (client, model) = createModel('models/$defaultModelName');
+      final chat = model.startChat(safetySettings: [
+        SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
+      ], generationConfig: GenerationConfig(stopSequences: ['a']));
+      final prompt = 'Some prompt';
+      final result = 'Some response';
+      client.stubStream(
+        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+            'models/some-model:streamGenerateContent'),
+        {
+          'contents': [
+            {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            },
+          ],
+          'safetySettings': [
+            {
+              'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              'threshold': 'BLOCK_ONLY_HIGH'
+            }
+          ],
+          'generationConfig': {
+            'stopSequences': ['a']
+          },
+        },
+        [
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+      );
+      final responses =
+          await chat.sendMessageStream(Content.text(prompt)).toList();
+      expect(responses, [
+        matchesGenerateContentResponse(GenerateContentResponse([
+          Candidate(
+              Content('model', [TextPart(result)]), null, null, null, null),
+        ], null))
+      ]);
+    });
+
     test('forwards generation config', () async {
       final (client, model) = createModel('models/$defaultModelName');
       final chat = model.startChat(

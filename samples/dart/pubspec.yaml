@@ -1,4 +1,5 @@
 name: generative_ai_samples
+
 publish_to: none
 
 environment:
@@ -6,8 +7,15 @@ environment:
 
 dependencies:
   path: ^1.9.0
-  google_generative_ai:
-    path: ../../pkgs/google_generative_ai
+  # Note: best practice here is to use a caret version constraint. We use `any`
+  # here just for the purpose of the samples.
+  google_generative_ai: any
 
 dev_dependencies:
   lints: ^3.0.0
+
+# Note: this section is only used in order to resolve google_generative_ai to
+# the same repo as the samples.
+dependency_overrides:
+  google_generative_ai:
+    path: ../../pkgs/google_generative_ai
