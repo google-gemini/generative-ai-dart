@@ -137,7 +137,7 @@ final class ChatSession {
     final parts = <Part>[];
     void addBufferedText() {
       if (textBuffer.isEmpty) return;
-      if (previousText case var singleText?) {
+      if (previousText case final singleText?) {
         parts.add(singleText);
         previousText = null;
       } else {
