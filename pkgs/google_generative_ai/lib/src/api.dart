@@ -192,7 +192,7 @@ enum BlockReason {
 /// These categories cover various kinds of harms that developers may wish to
 /// adjust.
 enum HarmCategory {
-  unknown('HARM_CATEGORY_UNSPECIFIED'),
+  unspecified('HARM_CATEGORY_UNSPECIFIED'),
 
   /// Malicious, intimidating, bullying, or abusive comments targeting another
   /// individual.
@@ -210,7 +210,7 @@ enum HarmCategory {
 
   static HarmCategory _parseValue(Object jsonObject) {
     return switch (jsonObject) {
-      'HARM_CATEGORY_UNSPECIFIED' => HarmCategory.unknown,
+      'HARM_CATEGORY_UNSPECIFIED' => HarmCategory.unspecified,
       'HARM_CATEGORY_HARASSMENT' => HarmCategory.harassment,
       'HARM_CATEGORY_HATE_SPEECH' => HarmCategory.hateSpeech,
       'HARM_CATEGORY_SEXUALLY_EXPLICIT' => HarmCategory.sexuallyExplicit,
@@ -231,8 +231,6 @@ enum HarmCategory {
 /// The classification system gives the probability of the content being unsafe.
 /// This does not indicate the severity of harm for a piece of content.
 enum HarmProbability {
-  unknown,
-
   /// Probability is unspecified.
   unspecified,
 
@@ -250,7 +248,6 @@ enum HarmProbability {
 
   static HarmProbability _parseValue(Object jsonObject) {
     return switch (jsonObject) {
-      'UNKNOWN' => HarmProbability.unknown,
       'UNSPECIFIED' => HarmProbability.unspecified,
       'NEGLIGIBLE' => HarmProbability.negligible,
       'LOW' => HarmProbability.low,
@@ -293,8 +290,6 @@ final class CitationSource {
 
 /// Reason why a model stopped generating tokens.
 enum FinishReason {
-  unknown,
-
   /// Default value to use when a finish reason isn't set.
   ///
   /// Never used as the reason for finshing.
@@ -317,7 +312,6 @@ enum FinishReason {
 
   static FinishReason _parseValue(Object jsonObject) {
     return switch (jsonObject) {
-      'UNKNOWN' => FinishReason.unknown,
       'UNSPECIFIED' => FinishReason.unspecified,
       'STOP' => FinishReason.stop,
       'MAX_TOKENS' => FinishReason.maxTokens,

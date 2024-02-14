@@ -1,5 +1,8 @@
-## 0.1.1-wip
+## 0.2.0-wip
 
+- **Breaking** `HarmCategory.unknown` renamed to `unspecified` renamed to
+  `unspecified`. Removed unused `unknown` values in the `HarmProbability` and
+  `FinishReason` enums.
 - Add additional API documentation.
 - Update the getting started instructions in the readme.
 
