@@ -47,7 +47,7 @@ Content parseContent(Object jsonObject) {
   return switch (jsonObject) {
     {'parts': final List<Object?> parts} => Content(
         switch (jsonObject) {
-          {'role': String role} => role,
+          {'role': final String role} => role,
           _ => null,
         },
         parts.map(_parsePart).toList()),
@@ -57,7 +57,7 @@ Content parseContent(Object jsonObject) {
 
 Part _parsePart(Object? jsonObject) {
   return switch (jsonObject) {
-    {'text': String text} => TextPart(text),
+    {'text': final String text} => TextPart(text),
     {'inlineData': {'mimeType': String _, 'data': String _}} =>
       throw UnimplementedError('inlineData content part not yet supported'),
     _ => throw FormatException('Unhandled Part format', jsonObject),

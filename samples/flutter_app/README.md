@@ -19,5 +19,5 @@ If you use VSCode, you can [specify `--dart-define`
 variables](https://dartcode.org/docs/using-dart-define-in-flutter/) in your
 launch.json file.
 
-If you use Android Studio or IntelliJ you can use run/debug
-configurations (https://www.jetbrains.com/help/idea/run-debug-configuration.html)
+If you use Android Studio or IntelliJ you can use run / debug configurations
+(https://www.jetbrains.com/help/idea/run-debug-configuration.html).
