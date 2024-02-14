@@ -25,6 +25,7 @@ final class CountTokensResponse {
   CountTokensResponse(this.totalTokens);
 }
 
+/// Response from the model; supports multiple candidates.
 final class GenerateContentResponse {
   /// Candidate responses from the model.
   final List<Candidate> candidates;
@@ -159,14 +160,37 @@ final class SafetyRating {
 
 /// The reason why a prompt was blocked.
 enum BlockReason {
+  /// Default value to use when a blocking reason isn't set.
+  ///
+  /// Never used as the reason for blocking a prompt.
   unspecified,
+
+  /// Prompt was blocked due to safety reasons.
+  ///
+  /// You can inspect `safetyRatings` to see which safety category blocked the
+  /// prompt.
   safety,
+
+  /// Prompt was blocked due to other unspecified reasons.
   other;
+
+  static BlockReason _parseValue(String jsonObject) {
+    return switch (jsonObject) {
+      'BLOCK_REASON_UNSPECIFIED' => BlockReason.unspecified,
+      'SAFETY' => BlockReason.safety,
+      'OTHER' => BlockReason.other,
+      _ => throw FormatException('Unhandled BlockReason format', jsonObject),
+    };
+  }
 
   @override
   String toString() => name;
 }
 
+/// The category of a rating.
+///
+/// These categories cover various kinds of harms that developers may wish to
+/// adjust.
 enum HarmCategory {
   unknown('HARM_CATEGORY_UNSPECIFIED'),
 
@@ -202,8 +226,14 @@ enum HarmCategory {
   String toJson() => _jsonString;
 }
 
+/// The probability that a piece of content is harmful.
+///
+/// The classification system gives the probability of the content being unsafe.
+/// This does not indicate the severity of harm for a piece of content.
 enum HarmProbability {
   unknown,
+
+  /// Probability is unspecified.
   unspecified,
 
   /// Content has a negligible probability of being unsafe.
@@ -264,11 +294,25 @@ final class CitationSource {
 /// Reason why a model stopped generating tokens.
 enum FinishReason {
   unknown,
+
+  /// Default value to use when a finish reason isn't set.
+  ///
+  /// Never used as the reason for finshing.
   unspecified,
+
+  /// Natural stop point of the model or provided stop sequence.
   stop,
+
+  /// The maximum number of tokens as specified in the request was reached.
   maxTokens,
+
+  /// The candidate content was flagged for safety reasons.
   safety,
+
+  /// The candidate content was flagged for recitation reasons.
   recitation,
+
+  /// Unknown reason.
   other;
 
   static FinishReason _parseValue(Object jsonObject) {
@@ -305,6 +349,10 @@ final class SafetySetting {
       {'category': category.toJson(), 'threshold': threshold.toJson()};
 }
 
+/// Probability of harm which causes content to be blocked.
+///
+/// When provided in [SafetySetting.threshold], a predicted harm probability at
+/// or above this level will block content from being returned.
 enum HarmBlockThreshold {
   /// Threshold is unspecified, block using default threshold.
   unspecified('HARM_BLOCK_THRESHOLD_UNSPECIFIED'),
@@ -493,7 +541,7 @@ PromptFeedback _parsePromptFeedback(Object jsonObject) {
       PromptFeedback(
           switch (jsonObject) {
             {'blockReason': final String blockReason} =>
-              _parseBlockReason(blockReason),
+              BlockReason._parseValue(blockReason),
             _ => null,
           },
           switch (jsonObject) {
@@ -545,14 +593,5 @@ CitationSource _parseCitationSource(Object? jsonObject) {
     } =>
       CitationSource(startIndex, endIndex, Uri.parse(uri), license),
     _ => throw FormatException('Unhandled CitationSource format', jsonObject),
-  };
-}
-
-BlockReason _parseBlockReason(String jsonObject) {
-  return switch (jsonObject) {
-    'BLOCK_REASON_UNSPECIFIED' => BlockReason.unspecified,
-    'SAFETY' => BlockReason.safety,
-    'OTHER' => BlockReason.other,
-    _ => throw FormatException('Unhandled BlockReason format', jsonObject),
   };
 }
