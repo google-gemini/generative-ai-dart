@@ -278,7 +278,10 @@ class MessageWidget extends StatelessWidget {
               horizontal: 20,
             ),
             margin: const EdgeInsets.only(bottom: 8),
-            child: MarkdownBody(data: text),
+            child: MarkdownBody(
+              selectable: true,
+              data: text,
+            ),
           ),
         ),
       ],
