@@ -74,7 +74,7 @@ class _ChatWidgetState extends State<ChatWidget> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
   bool _loading = false;
-  static const _apiKey = const String.fromEnvironment('API_KEY');
+  static const _apiKey = String.fromEnvironment('API_KEY');
 
   @override
   void initState() {
