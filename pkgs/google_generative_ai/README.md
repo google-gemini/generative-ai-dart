@@ -59,6 +59,13 @@ void main() async {
 See additional examples at
 [samples/](https://github.com/google/generative-ai-dart/tree/main/samples).
 
+For detailed instructions, you can find a quickstart for the Google AI Dart SDK
+in the Google documentation: http://ai.google.dev/tutorials/dart_quickstart.
+This quickstart describes how to add your API key and the SDK to your app,
+initialize the model, and then call the API to access the model. It also
+describes some additional use cases and features, like streaming, embedding,
+counting tokens, and controlling responses.
+
 ## Additional documentation
 
 You can find additional documentation for the Google AI SDKs and the Gemini

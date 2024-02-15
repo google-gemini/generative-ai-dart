@@ -1,3 +1,7 @@
+## 0.2.1-wip
+
+- Add link to ai.google.dev docs.
+
 ## 0.2.0
 
 - **Breaking** `HarmCategory.unknown` renamed to `unspecified`. Removed unused
