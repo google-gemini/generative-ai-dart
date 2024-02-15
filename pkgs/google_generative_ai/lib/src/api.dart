@@ -138,8 +138,13 @@ final class Candidate {
   final String? finishMessage;
 
   // TODO: token count?
-  Candidate(this.content, this.safetyRatings, this.citationMetadata,
-      this.finishReason, this.finishMessage);
+  Candidate(
+    this.content,
+    this.safetyRatings,
+    this.citationMetadata,
+    this.finishReason,
+    this.finishMessage,
+  );
 }
 
 /// Safety rating for a piece of content.
@@ -417,13 +422,14 @@ final class GenerationConfig {
   /// Note: The default value varies by model.
   final int? topK;
 
-  GenerationConfig(
-      {this.candidateCount,
-      this.stopSequences = const [],
-      this.maxOutputTokens,
-      this.temperature,
-      this.topP,
-      this.topK});
+  GenerationConfig({
+    this.candidateCount,
+    this.stopSequences = const [],
+    this.maxOutputTokens,
+    this.temperature,
+    this.topP,
+    this.topK,
+  });
 
   Map<String, Object?> toJson() => {
         if (candidateCount case final candidateCount?)
@@ -472,11 +478,14 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
           {'promptFeedback': final promptFeedback?} =>
             _parsePromptFeedback(promptFeedback),
           _ => null
-        }),
+        },
+      ),
     {'promptFeedback': final promptFeedback?} =>
       GenerateContentResponse([], _parsePromptFeedback(promptFeedback)),
     _ => throw FormatException(
-        'Unhandled GenerateContentResponse format', jsonObject)
+        'Unhandled GenerateContentResponse format',
+        jsonObject,
+      )
   };
 }
 
@@ -503,26 +512,27 @@ Candidate _parseCandidate(Object? jsonObject) {
       'content': final Object content,
     } =>
       Candidate(
-          parseContent(content),
-          switch (jsonObject) {
-            {'safetyRatings': final List<Object?> safetyRatings} =>
-              safetyRatings.map(_parseSafetyRating).toList(),
-            _ => null
-          },
-          switch (jsonObject) {
-            {'citationMetadata': final Object citationMetadata} =>
-              _parseCitationMetadata(citationMetadata),
-            _ => null
-          },
-          switch (jsonObject) {
-            {'finishReason': final Object finishReason} =>
-              FinishReason._parseValue(finishReason),
-            _ => null
-          },
-          switch (jsonObject) {
-            {'finishMessage': final String finishMessage} => finishMessage,
-            _ => null
-          }),
+        parseContent(content),
+        switch (jsonObject) {
+          {'safetyRatings': final List<Object?> safetyRatings} =>
+            safetyRatings.map(_parseSafetyRating).toList(),
+          _ => null
+        },
+        switch (jsonObject) {
+          {'citationMetadata': final Object citationMetadata} =>
+            _parseCitationMetadata(citationMetadata),
+          _ => null
+        },
+        switch (jsonObject) {
+          {'finishReason': final Object finishReason} =>
+            FinishReason._parseValue(finishReason),
+          _ => null
+        },
+        switch (jsonObject) {
+          {'finishMessage': final String finishMessage} => finishMessage,
+          _ => null
+        },
+      ),
     _ => throw FormatException('Unhandled Candidate format', jsonObject),
   };
 }
@@ -533,17 +543,18 @@ PromptFeedback _parsePromptFeedback(Object jsonObject) {
       'safetyRatings': final List<Object?> safetyRatings,
     } =>
       PromptFeedback(
-          switch (jsonObject) {
-            {'blockReason': final String blockReason} =>
-              BlockReason._parseValue(blockReason),
-            _ => null,
-          },
-          switch (jsonObject) {
-            {'blockReasonMessage': final String blockReasonMessage} =>
-              blockReasonMessage,
-            _ => null,
-          },
-          safetyRatings.map(_parseSafetyRating).toList()),
+        switch (jsonObject) {
+          {'blockReason': final String blockReason} =>
+            BlockReason._parseValue(blockReason),
+          _ => null,
+        },
+        switch (jsonObject) {
+          {'blockReasonMessage': final String blockReasonMessage} =>
+            blockReasonMessage,
+          _ => null,
+        },
+        safetyRatings.map(_parseSafetyRating).toList(),
+      ),
     _ => throw FormatException('Unhandled PromptFeedback format', jsonObject),
   };
 }
@@ -554,8 +565,10 @@ SafetyRating _parseSafetyRating(Object? jsonObject) {
       'category': final Object category,
       'probability': final Object probability
     } =>
-      SafetyRating(HarmCategory._parseValue(category),
-          HarmProbability._parseValue(probability)),
+      SafetyRating(
+        HarmCategory._parseValue(category),
+        HarmProbability._parseValue(probability),
+      ),
     _ => throw FormatException('Unhandled SafetyRating format', jsonObject),
   };
 }

@@ -20,7 +20,9 @@ import 'package:http/http.dart' as http;
 abstract interface class ApiClient {
   Future<Map<String, Object?>> makeRequest(Uri uri, Map<String, Object?> body);
   Stream<Map<String, Object?>> streamRequest(
-      Uri uri, Map<String, Object?> body);
+    Uri uri,
+    Map<String, Object?> body,
+  );
 }
 
 const packageVersion = '0.0.1';
@@ -40,7 +42,9 @@ final class HttpApiClient implements ApiClient {
 
   @override
   Future<Map<String, Object?>> makeRequest(
-      Uri uri, Map<String, Object?> body) async {
+    Uri uri,
+    Map<String, Object?> body,
+  ) async {
     final response = await (_httpClient?.post ?? http.post)(
       uri,
       headers: {
@@ -55,7 +59,9 @@ final class HttpApiClient implements ApiClient {
 
   @override
   Stream<Map<String, Object?>> streamRequest(
-      Uri uri, Map<String, Object?> body) async* {
+    Uri uri,
+    Map<String, Object?> body,
+  ) async* {
     uri = uri.replace(queryParameters: {'alt': 'sse'});
     final request = http.Request('POST', uri)
       ..bodyBytes = _utf8Json.encode(body)

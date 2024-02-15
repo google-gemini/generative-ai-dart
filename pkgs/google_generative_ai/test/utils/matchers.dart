@@ -33,25 +33,34 @@ Matcher matchesCandidate(Candidate candidate) => isA<Candidate>()
 
 Matcher matchesGenerateContentResponse(GenerateContentResponse response) =>
     isA<GenerateContentResponse>()
-        .having((r) => r.candidates, 'candidates',
-            response.candidates.map(matchesCandidate).toList())
         .having(
-            (r) => r.promptFeedback,
-            'promptFeedback',
-            response.promptFeedback == null
-                ? isNull
-                : matchesPromptFeedback(response.promptFeedback!));
+          (r) => r.candidates,
+          'candidates',
+          response.candidates.map(matchesCandidate).toList(),
+        )
+        .having(
+          (r) => r.promptFeedback,
+          'promptFeedback',
+          response.promptFeedback == null
+              ? isNull
+              : matchesPromptFeedback(response.promptFeedback!),
+        );
 
 Matcher matchesPromptFeedback(PromptFeedback promptFeedback) =>
     isA<PromptFeedback>()
         .having((p) => p.blockReason, 'blockReason', promptFeedback.blockReason)
-        .having((p) => p.blockReasonMessage, 'blockReasonMessage',
-            promptFeedback.blockReasonMessage)
         .having(
-            (p) => p.safetyRatings,
-            'safetyRatings',
-            unorderedMatches(
-                promptFeedback.safetyRatings.map(matchesSafetyRating)));
+          (p) => p.blockReasonMessage,
+          'blockReasonMessage',
+          promptFeedback.blockReasonMessage,
+        )
+        .having(
+          (p) => p.safetyRatings,
+          'safetyRatings',
+          unorderedMatches(
+            promptFeedback.safetyRatings.map(matchesSafetyRating),
+          ),
+        );
 
 Matcher matchesSafetyRating(SafetyRating safetyRating) => isA<SafetyRating>()
     .having((s) => s.category, 'category', safetyRating.category)
@@ -62,7 +71,10 @@ Matcher matchesEmbedding(ContentEmbedding embedding) =>
 
 Matcher matchesEmbedContentResponse(EmbedContentResponse response) =>
     isA<EmbedContentResponse>().having(
-        (r) => r.embedding, 'embedding', matchesEmbedding(response.embedding));
+      (r) => r.embedding,
+      'embedding',
+      matchesEmbedding(response.embedding),
+    );
 
 Matcher matchesCountTokensResponse(CountTokensResponse response) =>
     isA<CountTokensResponse>()

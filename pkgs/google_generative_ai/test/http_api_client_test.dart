@@ -28,24 +28,31 @@ void main() {
       final body = {'some': 'body'};
       final apiKey = 'apiKey';
       final expectedResponse = {'result': 'OK'};
-      await http.runWithClient(() async {
-        final client = HttpApiClient(apiKey: apiKey);
-        final response = await client.makeRequest(url, body);
-        expect(response, expectedResponse);
-      },
-          () => MockClient((request) async {
-                expect(
-                    request,
-                    matchesRequest(http.Request('POST', url)
-                      ..headers.addAll({
-                        'x-goog-api-key': apiKey,
-                        'x-goog-api-client': clientName,
-                        'Content-Type': 'application/json'
-                      })
-                      ..bodyBytes = utf8.encode(jsonEncode(body))));
-                return http.Response.bytes(
-                    utf8.encode(jsonEncode(expectedResponse)), 200);
-              }));
+      await http.runWithClient(
+        () async {
+          final client = HttpApiClient(apiKey: apiKey);
+          final response = await client.makeRequest(url, body);
+          expect(response, expectedResponse);
+        },
+        () => MockClient((request) async {
+          expect(
+            request,
+            matchesRequest(
+              http.Request('POST', url)
+                ..headers.addAll({
+                  'x-goog-api-key': apiKey,
+                  'x-goog-api-client': clientName,
+                  'Content-Type': 'application/json',
+                })
+                ..bodyBytes = utf8.encode(jsonEncode(body)),
+            ),
+          );
+          return http.Response.bytes(
+            utf8.encode(jsonEncode(expectedResponse)),
+            200,
+          );
+        }),
+      );
     });
 
     test('can make unary request with custom client', () async {
@@ -55,16 +62,21 @@ void main() {
       final expectedResponse = {'result': 'OK'};
       final httpClient = MockClient((request) async {
         expect(
-            request,
-            matchesRequest(http.Request('POST', url)
+          request,
+          matchesRequest(
+            http.Request('POST', url)
               ..headers.addAll({
                 'x-goog-api-key': apiKey,
                 'x-goog-api-client': clientName,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
               })
-              ..bodyBytes = utf8.encode(jsonEncode(body))));
+              ..bodyBytes = utf8.encode(jsonEncode(body)),
+          ),
+        );
         return http.Response.bytes(
-            utf8.encode(jsonEncode(expectedResponse)), 200);
+          utf8.encode(jsonEncode(expectedResponse)),
+          200,
+        );
       });
       final client = HttpApiClient(apiKey: apiKey, httpClient: httpClient);
       final response = await client.makeRequest(url, body);
@@ -78,30 +90,40 @@ void main() {
       final apiKey = 'apiKey';
       final expectedResponses = [
         {'first': 'OK'},
-        {'second': 'OK'}
+        {'second': 'OK'},
       ];
-      await http.runWithClient(() async {
-        final client = HttpApiClient(apiKey: apiKey);
-        final response = client.streamRequest(url, body);
-        await expectLater(
-            response, emitsInOrder([...expectedResponses, emitsDone]));
-      },
-          () => MockClient.streaming((request, requestStream) async {
-                expect(
-                    request,
-                    matchesBaseRequest(http.Request('POST', streamingUrl)
-                      ..headers.addAll({
-                        'x-goog-api-key': apiKey,
-                        'x-goog-api-client': clientName,
-                        'Content-Type': 'application/json'
-                      })));
-                expect(requestStream,
-                    emitsInOrder([utf8.encode(jsonEncode(body)), emitsDone]));
-                return http.StreamedResponse(
-                    Stream.fromIterable(expectedResponses)
-                        .map((r) => utf8.encode('data: ${jsonEncode(r)}\n')),
-                    200);
-              }));
+      await http.runWithClient(
+        () async {
+          final client = HttpApiClient(apiKey: apiKey);
+          final response = client.streamRequest(url, body);
+          await expectLater(
+            response,
+            emitsInOrder([...expectedResponses, emitsDone]),
+          );
+        },
+        () => MockClient.streaming((request, requestStream) async {
+          expect(
+            request,
+            matchesBaseRequest(
+              http.Request('POST', streamingUrl)
+                ..headers.addAll({
+                  'x-goog-api-key': apiKey,
+                  'x-goog-api-client': clientName,
+                  'Content-Type': 'application/json',
+                }),
+            ),
+          );
+          expect(
+            requestStream,
+            emitsInOrder([utf8.encode(jsonEncode(body)), emitsDone]),
+          );
+          return http.StreamedResponse(
+            Stream.fromIterable(expectedResponses)
+                .map((r) => utf8.encode('data: ${jsonEncode(r)}\n')),
+            200,
+          );
+        }),
+      );
     });
 
     test('can make streaming request with custom client', () async {
@@ -111,28 +133,36 @@ void main() {
       final apiKey = 'apiKey';
       final expectedResponses = [
         {'first': 'OK'},
-        {'second': 'OK'}
+        {'second': 'OK'},
       ];
       final httpClient = MockClient.streaming((request, requestStream) async {
         expect(
-            request,
-            matchesBaseRequest(http.Request('POST', streamingUrl)
+          request,
+          matchesBaseRequest(
+            http.Request('POST', streamingUrl)
               ..headers.addAll({
                 'x-goog-api-key': apiKey,
                 'x-goog-api-client': clientName,
-                'Content-Type': 'application/json'
-              })));
-        expect(requestStream,
-            emitsInOrder([utf8.encode(jsonEncode(body)), emitsDone]));
+                'Content-Type': 'application/json',
+              }),
+          ),
+        );
+        expect(
+          requestStream,
+          emitsInOrder([utf8.encode(jsonEncode(body)), emitsDone]),
+        );
         return http.StreamedResponse(
-            Stream.fromIterable(expectedResponses)
-                .map((r) => utf8.encode('data: ${jsonEncode(r)}\n')),
-            200);
+          Stream.fromIterable(expectedResponses)
+              .map((r) => utf8.encode('data: ${jsonEncode(r)}\n')),
+          200,
+        );
       });
       final client = HttpApiClient(apiKey: apiKey, httpClient: httpClient);
       final response = client.streamRequest(url, body);
       await expectLater(
-          response, emitsInOrder([...expectedResponses, emitsDone]));
+        response,
+        emitsInOrder([...expectedResponses, emitsDone]),
+      );
     });
   });
 }

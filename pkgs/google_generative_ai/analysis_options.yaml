@@ -17,6 +17,7 @@ linter:
     - prefer_single_quotes
     - sort_pub_dependencies
     - unnecessary_library_directive
+    - require_trailing_commas
 
     # correctness
     - always_declare_return_types

@@ -25,8 +25,9 @@ void main() {
   group('GenerativeModel', () {
     const defaultModelName = 'some-model';
 
-    (StubClient, GenerativeModel) createModel(
-        [String modelName = defaultModelName]) {
+    (StubClient, GenerativeModel) createModel([
+      String modelName = defaultModelName,
+    ]) {
       final client = StubClient();
       final model = createModelWithClient(model: modelName, client: client);
       return (client, model);
@@ -44,10 +45,10 @@ void main() {
             {
               'role': 'user',
               'parts': [
-                {'text': prompt}
-              ]
+                {'text': prompt},
+              ],
             }
-          ]
+          ],
         },
         {
           'candidates': [
@@ -55,20 +56,31 @@ void main() {
               'content': {
                 'role': 'model',
                 'parts': [
-                  {'text': result}
-                ]
-              }
+                  {'text': result},
+                ],
+              },
             }
-          ]
+          ],
         },
       );
       final response = await model.generateContent([Content.text(prompt)]);
       expect(
-          response,
-          matchesGenerateContentResponse(GenerateContentResponse([
-            Candidate(
-                Content('model', [TextPart(result)]), null, null, null, null),
-          ], null)));
+        response,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content('model', [TextPart(result)]),
+                null,
+                null,
+                null,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
+      );
     });
 
     group('generate unary content', () {
@@ -84,10 +96,10 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
-            ]
+            ],
           },
           {
             'candidates': [
@@ -95,20 +107,31 @@ void main() {
                 'content': {
                   'role': 'model',
                   'parts': [
-                    {'text': result}
-                  ]
-                }
+                    {'text': result},
+                  ],
+                },
               }
-            ]
+            ],
           },
         );
         final response = await model.generateContent([Content.text(prompt)]);
         expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
-              Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
+          response,
+          matchesGenerateContentResponse(
+            GenerateContentResponse(
+              [
+                Candidate(
+                  Content('model', [TextPart(result)]),
+                  null,
+                  null,
+                  null,
+                  null,
+                ),
+              ],
+              null,
+            ),
+          ),
+        );
       });
 
       test('throws errors for invalid API key', () async {
@@ -145,10 +168,10 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
-            ]
+            ],
           },
           jsonDecode(response) as Map<String, Object?>,
         );
@@ -184,10 +207,10 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
-            ]
+            ],
           },
           jsonDecode(response) as Map<String, Object?>,
         );
@@ -223,10 +246,10 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
-            ]
+            ],
           },
           jsonDecode(response) as Map<String, Object?>,
         );
@@ -248,14 +271,14 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
             ],
             'safetySettings': [
               {
                 'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                'threshold': 'BLOCK_ONLY_HIGH'
+                'threshold': 'BLOCK_ONLY_HIGH',
               }
             ],
           },
@@ -265,24 +288,39 @@ void main() {
                 'content': {
                   'role': 'model',
                   'parts': [
-                    {'text': result}
-                  ]
-                }
+                    {'text': result},
+                  ],
+                },
               }
-            ]
+            ],
           },
         );
-        final response = await model.generateContent([
-          Content.text(prompt)
-        ], safetySettings: [
-          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
-        ]);
+        final response = await model.generateContent(
+          [
+            Content.text(prompt),
+          ],
+          safetySettings: [
+            SafetySetting(
+                HarmCategory.dangerousContent, HarmBlockThreshold.high),
+          ],
+        );
         expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
-              Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
+          response,
+          matchesGenerateContentResponse(
+            GenerateContentResponse(
+              [
+                Candidate(
+                  Content('model', [TextPart(result)]),
+                  null,
+                  null,
+                  null,
+                  null,
+                ),
+              ],
+              null,
+            ),
+          ),
+        );
       });
 
       test('can override generation config', () async {
@@ -297,12 +335,12 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
             ],
             'generationConfig': {
-              'stopSequences': ['a']
+              'stopSequences': ['a'],
             },
           },
           {
@@ -311,21 +349,34 @@ void main() {
                 'content': {
                   'role': 'model',
                   'parts': [
-                    {'text': result}
-                  ]
-                }
+                    {'text': result},
+                  ],
+                },
               }
-            ]
+            ],
           },
         );
-        final response = await model.generateContent([Content.text(prompt)],
-            generationConfig: GenerationConfig(stopSequences: ['a']));
+        final response = await model.generateContent(
+          [Content.text(prompt)],
+          generationConfig: GenerationConfig(stopSequences: ['a']),
+        );
         expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
-              Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
+          response,
+          matchesGenerateContentResponse(
+            GenerateContentResponse(
+              [
+                Candidate(
+                  Content('model', [TextPart(result)]),
+                  null,
+                  null,
+                  null,
+                  null,
+                ),
+              ],
+              null,
+            ),
+          ),
+        );
       });
     });
 
@@ -342,10 +393,10 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
-            ]
+            ],
           },
           [
             for (final result in results)
@@ -355,24 +406,35 @@ void main() {
                     'content': {
                       'role': 'model',
                       'parts': [
-                        {'text': result}
-                      ]
-                    }
+                        {'text': result},
+                      ],
+                    },
                   }
-                ]
-              }
+                ],
+              },
           ],
         );
         final response = model.generateContentStream([Content.text(prompt)]);
         expect(
-            response,
-            emitsInOrder([
-              for (final result in results)
-                matchesGenerateContentResponse(GenerateContentResponse([
-                  Candidate(Content('model', [TextPart(result)]), null, null,
-                      null, null),
-                ], null))
-            ]));
+          response,
+          emitsInOrder([
+            for (final result in results)
+              matchesGenerateContentResponse(
+                GenerateContentResponse(
+                  [
+                    Candidate(
+                      Content('model', [TextPart(result)]),
+                      null,
+                      null,
+                      null,
+                      null,
+                    ),
+                  ],
+                  null,
+                ),
+              ),
+          ]),
+        );
       });
 
       test('can override safety settings', () async {
@@ -387,14 +449,14 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
             ],
             'safetySettings': [
               {
                 'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                'threshold': 'BLOCK_ONLY_HIGH'
+                'threshold': 'BLOCK_ONLY_HIGH',
               }
             ],
           },
@@ -406,28 +468,43 @@ void main() {
                     'content': {
                       'role': 'model',
                       'parts': [
-                        {'text': result}
-                      ]
-                    }
+                        {'text': result},
+                      ],
+                    },
                   }
-                ]
-              }
+                ],
+              },
           ],
         );
-        final response = model.generateContentStream([
-          Content.text(prompt)
-        ], safetySettings: [
-          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
-        ]);
+        final response = model.generateContentStream(
+          [
+            Content.text(prompt),
+          ],
+          safetySettings: [
+            SafetySetting(
+                HarmCategory.dangerousContent, HarmBlockThreshold.high),
+          ],
+        );
         expect(
-            response,
-            emitsInOrder([
-              for (final result in results)
-                matchesGenerateContentResponse(GenerateContentResponse([
-                  Candidate(Content('model', [TextPart(result)]), null, null,
-                      null, null),
-                ], null))
-            ]));
+          response,
+          emitsInOrder([
+            for (final result in results)
+              matchesGenerateContentResponse(
+                GenerateContentResponse(
+                  [
+                    Candidate(
+                      Content('model', [TextPart(result)]),
+                      null,
+                      null,
+                      null,
+                      null,
+                    ),
+                  ],
+                  null,
+                ),
+              ),
+          ]),
+        );
       });
 
       test('can override generation config', () async {
@@ -442,12 +519,12 @@ void main() {
               {
                 'role': 'user',
                 'parts': [
-                  {'text': prompt}
-                ]
+                  {'text': prompt},
+                ],
               }
             ],
             'generationConfig': {
-              'stopSequences': ['a']
+              'stopSequences': ['a'],
             },
           },
           [
@@ -458,25 +535,38 @@ void main() {
                     'content': {
                       'role': 'model',
                       'parts': [
-                        {'text': result}
-                      ]
-                    }
+                        {'text': result},
+                      ],
+                    },
                   }
-                ]
-              }
+                ],
+              },
           ],
         );
-        final response = model.generateContentStream([Content.text(prompt)],
-            generationConfig: GenerationConfig(stopSequences: ['a']));
+        final response = model.generateContentStream(
+          [Content.text(prompt)],
+          generationConfig: GenerationConfig(stopSequences: ['a']),
+        );
         expect(
-            response,
-            emitsInOrder([
-              for (final result in results)
-                matchesGenerateContentResponse(GenerateContentResponse([
-                  Candidate(Content('model', [TextPart(result)]), null, null,
-                      null, null),
-                ], null))
-            ]));
+          response,
+          emitsInOrder([
+            for (final result in results)
+              matchesGenerateContentResponse(
+                GenerateContentResponse(
+                  [
+                    Candidate(
+                      Content('model', [TextPart(result)]),
+                      null,
+                      null,
+                      null,
+                      null,
+                    ),
+                  ],
+                  null,
+                ),
+              ),
+          ]),
+        );
       });
     });
 
@@ -492,13 +582,13 @@ void main() {
                 {
                   'role': 'user',
                   'parts': [
-                    {'text': prompt}
-                  ]
+                    {'text': prompt},
+                  ],
                 }
-              ]
+              ],
             },
             {
-              'totalTokens': 2
+              'totalTokens': 2,
             });
         final response = await model.countTokens([Content.text(prompt)]);
         expect(response, matchesCountTokensResponse(CountTokensResponse(2)));
@@ -516,21 +606,23 @@ void main() {
             'content': {
               'role': 'user',
               'parts': [
-                {'text': prompt}
-              ]
-            }
+                {'text': prompt},
+              ],
+            },
           },
           {
             'embedding': {
-              'values': [0.1, 0.2, 0.3]
-            }
+              'values': [0.1, 0.2, 0.3],
+            },
           },
         );
         final response = await model.embedContent(Content.text(prompt));
         expect(
-            response,
-            matchesEmbedContentResponse(
-                EmbedContentResponse(ContentEmbedding([0.1, 0.2, 0.3]))));
+          response,
+          matchesEmbedContentResponse(
+            EmbedContentResponse(ContentEmbedding([0.1, 0.2, 0.3])),
+          ),
+        );
       });
     });
   });

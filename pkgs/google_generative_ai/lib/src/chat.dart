@@ -26,12 +26,16 @@ import 'utils/mutex.dart';
 /// [GenerateContentResponse], other candidates may be available on the returned
 /// response.
 final class ChatSession {
-  final Future<GenerateContentResponse> Function(Iterable<Content> content,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) _generateContent;
-  final Stream<GenerateContentResponse> Function(Iterable<Content> content,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) _generateContentStream;
+  final Future<GenerateContentResponse> Function(
+    Iterable<Content> content, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+  }) _generateContent;
+  final Stream<GenerateContentResponse> Function(
+    Iterable<Content> content, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+  }) _generateContentStream;
 
   final _mutex = Mutex();
 
@@ -39,8 +43,13 @@ final class ChatSession {
   final List<SafetySetting>? _safetySettings;
   final GenerationConfig? _generationConfig;
 
-  ChatSession._(this._generateContent, this._generateContentStream,
-      this._history, this._safetySettings, this._generationConfig);
+  ChatSession._(
+    this._generateContent,
+    this._generateContentStream,
+    this._history,
+    this._safetySettings,
+    this._generationConfig,
+  );
 
   /// The content that has been successfully sent to, or received from, the
   /// generative model.
@@ -66,8 +75,11 @@ final class ChatSession {
   Future<GenerateContentResponse> sendMessage(Content message) async {
     final lock = await _mutex.acquire();
     try {
-      final response = await _generateContent(_history.followedBy([message]),
-          safetySettings: _safetySettings, generationConfig: _generationConfig);
+      final response = await _generateContent(
+        _history.followedBy([message]),
+        safetySettings: _safetySettings,
+        generationConfig: _generationConfig,
+      );
       if (response.candidates case [final candidate, ...]) {
         _history.add(message);
         // TODO: Append role?
@@ -100,9 +112,11 @@ final class ChatSession {
     final controller = StreamController<GenerateContentResponse>(sync: true);
     _mutex.acquire().then((lock) async {
       try {
-        final responses = _generateContentStream(_history.followedBy([message]),
-            safetySettings: _safetySettings,
-            generationConfig: _generationConfig);
+        final responses = _generateContentStream(
+          _history.followedBy([message]),
+          safetySettings: _safetySettings,
+          generationConfig: _generationConfig,
+        );
         final content = <Content>[];
         await for (final response in responses) {
           if (response.candidates case [final candidate, ...]) {
@@ -173,10 +187,16 @@ extension StartChatExtension on GenerativeModel {
   /// final response = await chat.sendMessage(Content.text('Hello there.'));
   /// print(response.text);
   /// ```
-  ChatSession startChat(
-          {List<Content>? history,
-          List<SafetySetting>? safetySettings,
-          GenerationConfig? generationConfig}) =>
-      ChatSession._(generateContent, generateContentStream, history ?? [],
-          safetySettings, generationConfig);
+  ChatSession startChat({
+    List<Content>? history,
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+  }) =>
+      ChatSession._(
+        generateContent,
+        generateContentStream,
+        history ?? [],
+        safetySettings,
+        generationConfig,
+      );
 }

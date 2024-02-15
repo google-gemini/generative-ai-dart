@@ -75,10 +75,11 @@ final class GenerativeModel {
     http.Client? httpClient,
   }) =>
       GenerativeModel._withClient(
-          client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
-          model: model,
-          safetySettings: safetySettings,
-          generationConfig: generationConfig);
+        client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
+        model: model,
+        safetySettings: safetySettings,
+        generationConfig: generationConfig,
+      );
 
   GenerativeModel._withClient({
     required ApiClient client,
@@ -97,7 +98,8 @@ final class GenerativeModel {
           : modelName;
 
   Uri _taskUri(Task task) => _baseUrl.resolveUri(
-      Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
+        Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']),
+      );
 
   /// Generates content responding to [prompt].
   ///
@@ -109,9 +111,11 @@ final class GenerativeModel {
   /// final response = await model.generateContent([Content.text(prompt)]);
   /// print(response.text);
   /// ```
-  Future<GenerateContentResponse> generateContent(Iterable<Content> prompt,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) async {
+  Future<GenerateContentResponse> generateContent(
+    Iterable<Content> prompt, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+  }) async {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
     final parameters = {
@@ -146,9 +150,10 @@ final class GenerativeModel {
   /// }
   /// ```
   Stream<GenerateContentResponse> generateContentStream(
-      Iterable<Content> prompt,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) {
+    Iterable<Content> prompt, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+  }) {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
     final parameters = <String, Object?>{
@@ -182,7 +187,7 @@ final class GenerativeModel {
   /// ```
   Future<CountTokensResponse> countTokens(Iterable<Content> contents) async {
     final parameters = <String, Object?>{
-      'contents': contents.map((c) => c.toJson()).toList()
+      'contents': contents.map((c) => c.toJson()).toList(),
     };
     final response =
         await _client.makeRequest(_taskUri(Task.countTokens), parameters);
@@ -199,12 +204,15 @@ final class GenerativeModel {
   /// final promptEmbedding =
   ///     (await model.embedContent([Content.text(prompt)])).embedding.values;
   /// ```
-  Future<EmbedContentResponse> embedContent(Content content,
-      {TaskType? taskType, String? title}) async {
+  Future<EmbedContentResponse> embedContent(
+    Content content, {
+    TaskType? taskType,
+    String? title,
+  }) async {
     final parameters = <String, Object?>{
       'content': content.toJson(),
       if (taskType != null) 'taskType': taskType.toJson(),
-      if (title != null) 'title': title
+      if (title != null) 'title': title,
     };
     final response =
         await _client.makeRequest(_taskUri(Task.embedContent), parameters);
@@ -215,13 +223,15 @@ final class GenerativeModel {
 /// Creates a model with an overridden [ApiClient] for testing.
 ///
 /// Package private test-only method.
-GenerativeModel createModelWithClient(
-        {required String model,
-        required ApiClient client,
-        List<SafetySetting> safetySettings = const [],
-        GenerationConfig? generationConfig}) =>
+GenerativeModel createModelWithClient({
+  required String model,
+  required ApiClient client,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+}) =>
     GenerativeModel._withClient(
-        client: client,
-        model: model,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig);
+      client: client,
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+    );

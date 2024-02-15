@@ -38,7 +38,7 @@ final class Content {
 
   Map<String, Object?> toJson() => {
         if (role case final role?) 'role': role,
-        'parts': parts.map((p) => p.toJson()).toList()
+        'parts': parts.map((p) => p.toJson()).toList(),
       };
 }
 
@@ -49,7 +49,8 @@ Content parseContent(Object jsonObject) {
           {'role': final String role} => role,
           _ => null,
         },
-        parts.map(_parsePart).toList()),
+        parts.map(_parsePart).toList(),
+      ),
     _ => throw FormatException('Unhandled Content format', jsonObject),
   };
 }
@@ -81,6 +82,6 @@ final class DataPart implements Part {
   DataPart(this.mimeType, this.bytes);
   @override
   Object toJson() => {
-        'inlineData': {'data': base64Encode(bytes), 'mimeType': mimeType}
+        'inlineData': {'data': base64Encode(bytes), 'mimeType': mimeType},
       };
 }

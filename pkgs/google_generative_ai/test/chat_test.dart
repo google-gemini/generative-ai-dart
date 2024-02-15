@@ -23,8 +23,9 @@ void main() {
   group('Chat', () {
     const defaultModelName = 'some-model';
 
-    (StubClient, GenerativeModel) createModel(
-        [String modelName = defaultModelName]) {
+    (StubClient, GenerativeModel) createModel([
+      String modelName = defaultModelName,
+    ]) {
       final client = StubClient();
       final model = createModelWithClient(model: modelName, client: client);
       return (client, model);
@@ -32,10 +33,12 @@ void main() {
 
     test('includes chat history in prompt', () async {
       final (client, model) = createModel('models/$defaultModelName');
-      final chat = model.startChat(history: [
-        Content.text('Hi!'),
-        Content.model([TextPart('Hello, how can I help you today?')])
-      ]);
+      final chat = model.startChat(
+        history: [
+          Content.text('Hi!'),
+          Content.model([TextPart('Hello, how can I help you today?')]),
+        ],
+      );
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
@@ -46,22 +49,22 @@ void main() {
             {
               'role': 'user',
               'parts': [
-                {'text': 'Hi!'}
-              ]
+                {'text': 'Hi!'},
+              ],
             },
             {
               'role': 'model',
               'parts': [
-                {'text': 'Hello, how can I help you today?'}
-              ]
+                {'text': 'Hello, how can I help you today?'},
+              ],
             },
             {
               'role': 'user',
               'parts': [
-                {'text': prompt}
-              ]
+                {'text': prompt},
+              ],
             },
-          ]
+          ],
         },
         {
           'candidates': [
@@ -69,29 +72,44 @@ void main() {
               'content': {
                 'role': 'model',
                 'parts': [
-                  {'text': result}
-                ]
-              }
+                  {'text': result},
+                ],
+              },
             }
-          ]
+          ],
         },
       );
       final response = await chat.sendMessage(Content.text(prompt));
       expect(
-          response,
-          matchesGenerateContentResponse(GenerateContentResponse([
-            Candidate(
-                Content('model', [TextPart(result)]), null, null, null, null),
-          ], null)));
+        response,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content('model', [TextPart(result)]),
+                null,
+                null,
+                null,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
+      );
       expect(
-          chat.history.last, matchesContent(response.candidates.first.content));
+        chat.history.last,
+        matchesContent(response.candidates.first.content),
+      );
     });
 
     test('forwards safety settings', () async {
       final (client, model) = createModel('models/$defaultModelName');
-      final chat = model.startChat(safetySettings: [
-        SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
-      ]);
+      final chat = model.startChat(
+        safetySettings: [
+          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high),
+        ],
+      );
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
@@ -102,14 +120,14 @@ void main() {
             {
               'role': 'user',
               'parts': [
-                {'text': prompt}
-              ]
+                {'text': prompt},
+              ],
             },
           ],
           'safetySettings': [
             {
               'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-              'threshold': 'BLOCK_ONLY_HIGH'
+              'threshold': 'BLOCK_ONLY_HIGH',
             }
           ],
         },
@@ -119,27 +137,41 @@ void main() {
               'content': {
                 'role': 'model',
                 'parts': [
-                  {'text': result}
-                ]
-              }
+                  {'text': result},
+                ],
+              },
             }
-          ]
+          ],
         },
       );
       final response = await chat.sendMessage(Content.text(prompt));
       expect(
-          response,
-          matchesGenerateContentResponse(GenerateContentResponse([
-            Candidate(
-                Content('model', [TextPart(result)]), null, null, null, null),
-          ], null)));
+        response,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content('model', [TextPart(result)]),
+                null,
+                null,
+                null,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
+      );
     });
 
     test('forwards safety settings and config when streaming', () async {
       final (client, model) = createModel('models/$defaultModelName');
-      final chat = model.startChat(safetySettings: [
-        SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
-      ], generationConfig: GenerationConfig(stopSequences: ['a']));
+      final chat = model.startChat(
+        safetySettings: [
+          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high),
+        ],
+        generationConfig: GenerationConfig(stopSequences: ['a']),
+      );
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stubStream(
@@ -150,18 +182,18 @@ void main() {
             {
               'role': 'user',
               'parts': [
-                {'text': prompt}
-              ]
+                {'text': prompt},
+              ],
             },
           ],
           'safetySettings': [
             {
               'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-              'threshold': 'BLOCK_ONLY_HIGH'
+              'threshold': 'BLOCK_ONLY_HIGH',
             }
           ],
           'generationConfig': {
-            'stopSequences': ['a']
+            'stopSequences': ['a'],
           },
         },
         [
@@ -171,28 +203,39 @@ void main() {
                 'content': {
                   'role': 'model',
                   'parts': [
-                    {'text': result}
-                  ]
-                }
+                    {'text': result},
+                  ],
+                },
               }
-            ]
+            ],
           }
         ],
       );
       final responses =
           await chat.sendMessageStream(Content.text(prompt)).toList();
       expect(responses, [
-        matchesGenerateContentResponse(GenerateContentResponse([
-          Candidate(
-              Content('model', [TextPart(result)]), null, null, null, null),
-        ], null))
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content('model', [TextPart(result)]),
+                null,
+                null,
+                null,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
       ]);
     });
 
     test('forwards generation config', () async {
       final (client, model) = createModel('models/$defaultModelName');
       final chat = model.startChat(
-          generationConfig: GenerationConfig(stopSequences: ['a']));
+        generationConfig: GenerationConfig(stopSequences: ['a']),
+      );
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
@@ -203,12 +246,12 @@ void main() {
             {
               'role': 'user',
               'parts': [
-                {'text': prompt}
-              ]
+                {'text': prompt},
+              ],
             },
           ],
           'generationConfig': {
-            'stopSequences': ['a']
+            'stopSequences': ['a'],
           },
         },
         {
@@ -217,20 +260,31 @@ void main() {
               'content': {
                 'role': 'model',
                 'parts': [
-                  {'text': result}
-                ]
-              }
+                  {'text': result},
+                ],
+              },
             }
-          ]
+          ],
         },
       );
       final response = await chat.sendMessage(Content.text(prompt));
       expect(
-          response,
-          matchesGenerateContentResponse(GenerateContentResponse([
-            Candidate(
-                Content('model', [TextPart(result)]), null, null, null, null),
-          ], null)));
+        response,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content('model', [TextPart(result)]),
+                null,
+                null,
+                null,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
+      );
     });
   });
 }
