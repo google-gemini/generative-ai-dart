@@ -74,13 +74,14 @@ class _ChatWidgetState extends State<ChatWidget> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
   bool _loading = false;
+  static const _apiKey = String.fromEnvironment('API_KEY');
 
   @override
   void initState() {
     super.initState();
     _model = GenerativeModel(
       model: 'gemini-pro',
-      apiKey: const String.fromEnvironment('API_KEY'),
+      apiKey: _apiKey,
     );
     _chat = _model.startChat();
   }
@@ -127,21 +128,27 @@ class _ChatWidgetState extends State<ChatWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemBuilder: (context, idx) {
-                var content = _chat.history.toList()[idx];
-                var text = content.parts
-                    .whereType<TextPart>()
-                    .map<String>((e) => e.text)
-                    .join('');
-                return MessageWidget(
-                  text: text,
-                  isFromUser: content.role == 'user',
-                );
-              },
-              itemCount: _chat.history.length,
-            ),
+            child: _apiKey.isNotEmpty
+                ? ListView.builder(
+                    controller: _scrollController,
+                    itemBuilder: (context, idx) {
+                      var content = _chat.history.toList()[idx];
+                      var text = content.parts
+                          .whereType<TextPart>()
+                          .map<String>((e) => e.text)
+                          .join('');
+                      return MessageWidget(
+                        text: text,
+                        isFromUser: content.role == 'user',
+                      );
+                    },
+                    itemCount: _chat.history.length,
+                  )
+                : ListView(
+                    children: const [
+                      Text('No API key found. Please provide an API Key.'),
+                    ],
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -225,7 +232,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         return AlertDialog(
           title: const Text('Something went wrong'),
           content: SingleChildScrollView(
-            child: Text(message),
+            child: SelectableText(message),
           ),
           actions: [
             TextButton(
@@ -271,7 +278,10 @@ class MessageWidget extends StatelessWidget {
               horizontal: 20,
             ),
             margin: const EdgeInsets.only(bottom: 8),
-            child: MarkdownBody(data: text),
+            child: MarkdownBody(
+              selectable: true,
+              data: text,
+            ),
           ),
         ),
       ],
