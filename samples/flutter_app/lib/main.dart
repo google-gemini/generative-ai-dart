@@ -79,10 +79,9 @@ class _ChatWidgetState extends State<ChatWidget> {
   @override
   void initState() {
     super.initState();
-    apiKey = const String.fromEnvironment('API_KEY');
     _model = GenerativeModel(
       model: 'gemini-pro',
-      apiKey: apiKey,
+      apiKey: _apiKey,
     );
     _chat = _model.startChat();
   }
@@ -129,7 +128,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: apiKey.isNotEmpty
+            child: _apiKey.isNotEmpty
                 ? ListView.builder(
                     controller: _scrollController,
                     itemBuilder: (context, idx) {
