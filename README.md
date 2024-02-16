@@ -43,10 +43,18 @@ final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
 ### Calling the API
 
 ```dart
-final prompt = 'Write a story about a magic backpack.';
-final content = [Content.text(prompt)];
+final prompt = 'Do these look store-bought or homemade?';
+final imageBytes = await File('cookie.png').readAsBytes();
+final content = [
+  Content.multi([
+    TextPart(prompt),
+    DataPart('image/png', imageBytes),
+  ])
+];
+
 final response = await model.generateContent(content);
 print(response.text);
+
 ```
 
 ## Documentation
