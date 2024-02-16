@@ -301,7 +301,9 @@ void main() {
           ],
           safetySettings: [
             SafetySetting(
-                HarmCategory.dangerousContent, HarmBlockThreshold.high),
+              HarmCategory.dangerousContent,
+              HarmBlockThreshold.high,
+            ),
           ],
         );
         expect(
@@ -482,7 +484,9 @@ void main() {
           ],
           safetySettings: [
             SafetySetting(
-                HarmCategory.dangerousContent, HarmBlockThreshold.high),
+              HarmCategory.dangerousContent,
+              HarmBlockThreshold.high,
+            ),
           ],
         );
         expect(
