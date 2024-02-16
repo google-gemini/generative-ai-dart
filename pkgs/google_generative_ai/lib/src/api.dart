@@ -579,14 +579,16 @@ CitationMetadata _parseCitationMetadata(Object? jsonObject) {
 }
 
 CitationSource _parseCitationSource(Object? jsonObject) {
-  return switch (jsonObject) {
-    {
-      'startIndex': final int startIndex,
-      'endIndex': final int endIndex,
-      'uri': final String uri,
-      'license': final String license,
-    } =>
-      CitationSource(startIndex, endIndex, Uri.parse(uri), license),
-    _ => throw FormatException('Unhandled CitationSource format', jsonObject),
-  };
+  if (jsonObject is! Map) {
+    throw FormatException('Unhandled CitationSource format', jsonObject);
+  }
+
+  final uriString = jsonObject['uri'] as String?;
+
+  return CitationSource(
+    jsonObject['startIndex'] as int?,
+    jsonObject['endIndex'] as int?,
+    uriString != null ? Uri.parse(uriString) : null,
+    jsonObject['license'] as String?,
+  );
 }
