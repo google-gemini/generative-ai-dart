@@ -16,6 +16,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
+/// The API key to use when accessing the Gemini API.
+///
+/// To learn how to generate and specify this key,
+/// check out the README file of this sample.
+const String _apiKey = String.fromEnvironment('API_KEY');
+
 void main() {
   runApp(const GenerativeAISample());
 }
@@ -55,13 +61,18 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: const ChatWidget(),
+      body: const ChatWidget(apiKey: _apiKey),
     );
   }
 }
 
 class ChatWidget extends StatefulWidget {
-  const ChatWidget({super.key});
+  const ChatWidget({
+    required this.apiKey,
+    super.key,
+  });
+
+  final String apiKey;
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
@@ -74,14 +85,13 @@ class _ChatWidgetState extends State<ChatWidget> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
   bool _loading = false;
-  static const _apiKey = String.fromEnvironment('API_KEY');
 
   @override
   void initState() {
     super.initState();
     _model = GenerativeModel(
       model: 'gemini-pro',
-      apiKey: _apiKey,
+      apiKey: widget.apiKey,
     );
     _chat = _model.startChat();
   }
@@ -100,7 +110,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var textFieldDecoration = InputDecoration(
+    final textFieldDecoration = InputDecoration(
       contentPadding: const EdgeInsets.all(15),
       hintText: 'Enter a prompt...',
       border: OutlineInputBorder(
@@ -121,6 +131,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       ),
     );
 
+    final chatHistory = _chat.history.toList(growable: false);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -132,8 +143,8 @@ class _ChatWidgetState extends State<ChatWidget> {
                 ? ListView.builder(
                     controller: _scrollController,
                     itemBuilder: (context, idx) {
-                      var content = _chat.history.toList()[idx];
-                      var text = content.parts
+                      final content = chatHistory[idx];
+                      final text = content.parts
                           .whereType<TextPart>()
                           .map<String>((e) => e.text)
                           .join('');
@@ -142,11 +153,14 @@ class _ChatWidgetState extends State<ChatWidget> {
                         isFromUser: content.role == 'user',
                       );
                     },
-                    itemCount: _chat.history.length,
+                    itemCount: chatHistory.length,
                   )
                 : ListView(
                     children: const [
-                      Text('No API key found. Please provide an API Key.'),
+                      Text(
+                        'No API key found. Please provide an API Key using '
+                        "'--dart-define' to set the 'API_KEY' declaration.",
+                      ),
                     ],
                   ),
           ),
@@ -163,14 +177,10 @@ class _ChatWidgetState extends State<ChatWidget> {
                     focusNode: _textFieldFocus,
                     decoration: textFieldDecoration,
                     controller: _textController,
-                    onSubmitted: (String value) {
-                      _sendChatMessage(value);
-                    },
+                    onSubmitted: _sendChatMessage,
                   ),
                 ),
-                const SizedBox.square(
-                  dimension: 15,
-                ),
+                const SizedBox.square(dimension: 15),
                 if (!_loading)
                   IconButton(
                     onPressed: () async {
@@ -197,10 +207,10 @@ class _ChatWidgetState extends State<ChatWidget> {
     });
 
     try {
-      var response = await _chat.sendMessage(
+      final response = await _chat.sendMessage(
         Content.text(message),
       );
-      var text = response.text;
+      final text = response.text;
 
       if (text == null) {
         _showError('No response from API.');
@@ -226,7 +236,7 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   void _showError(String message) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -249,14 +259,14 @@ class _ChatWidgetState extends State<ChatWidget> {
 }
 
 class MessageWidget extends StatelessWidget {
-  final String text;
-  final bool isFromUser;
-
   const MessageWidget({
     super.key,
     required this.text,
     required this.isFromUser,
   });
+
+  final String text;
+  final bool isFromUser;
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +276,7 @@ class MessageWidget extends StatelessWidget {
       children: [
         Flexible(
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 520),
             decoration: BoxDecoration(
               color: isFromUser
                   ? Theme.of(context).colorScheme.primaryContainer
