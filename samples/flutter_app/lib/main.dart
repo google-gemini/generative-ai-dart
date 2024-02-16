@@ -98,10 +98,6 @@ class _ChatWidgetState extends State<ChatWidget> {
       model: 'gemini-pro-vision',
       apiKey: _apiKey,
     );
-    _visionModel = GenerativeModel(
-      model: 'gemini-pro-vision',
-      apiKey: const String.fromEnvironment('API_KEY'),
-    );
     _chat = _model.startChat();
   }
 
