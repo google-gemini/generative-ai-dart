@@ -1,5 +1,7 @@
 ## 0.2.1-wip
 
+- Fix an issue parsing `generateContent()` responses that do not include content
+  (this can occur for some `finishReason`s).
 - Add link to ai.google.dev docs.
 
 ## 0.2.0

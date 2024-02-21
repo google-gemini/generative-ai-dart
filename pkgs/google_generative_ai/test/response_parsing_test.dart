@@ -312,5 +312,64 @@ void main() {
                     HarmCategory.dangerousContent, HarmProbability.negligible),
               ]))));
     });
+
+    test('allows missing content', () async {
+      final response = '''
+{
+  "candidates": [
+    {
+      "finishReason": "SAFETY",
+      "index": 0,
+      "safetyRatings": [
+        {
+          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          "probability": "NEGLIGIBLE"
+        },
+        {
+          "category": "HARM_CATEGORY_HATE_SPEECH",
+          "probability": "LOW"
+        },
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "probability": "MEDIUM"
+        },
+        {
+          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+          "probability": "NEGLIGIBLE"
+        }
+      ]
+    }
+  ]
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final generateContentResponse = parseGenerateContentResponse(decoded);
+      expect(
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content(null, []),
+                [
+                  SafetyRating(HarmCategory.sexuallyExplicit,
+                      HarmProbability.negligible),
+                  SafetyRating(
+                      HarmCategory.hateSpeech, HarmProbability.negligible),
+                  SafetyRating(
+                      HarmCategory.harassment, HarmProbability.negligible),
+                  SafetyRating(HarmCategory.dangerousContent,
+                      HarmProbability.negligible),
+                ],
+                CitationMetadata([]),
+                FinishReason.safety,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
+      );
+    });
   });
 }
