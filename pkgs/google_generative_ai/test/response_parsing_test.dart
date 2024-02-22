@@ -247,7 +247,16 @@ void main() {
             "endIndex": 1026,
             "uri": "https://example.com/",
             "license": ""
-          }
+          },
+          {
+            "startIndex": 899,
+            "endIndex": 1026
+          },
+          {
+            "uri": "https://example.com/",
+            "license": ""
+          },
+          {}
         ]
       }
     }
