@@ -20,6 +20,12 @@ including some getting started instructions.
 See a Flutter sample app at [samples/flutter_app](samples/flutter_app/),
 including some getting started instructions.
 
+And set your API key like below.
+
+```
+flutter run --dart-define=API_KEY=[YOUR_API_KEY]
+```
+
 ## Using the SDK in your own app
 
 Add a dependency on the `package:google_generative_ai` package via:
