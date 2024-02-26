@@ -68,14 +68,6 @@ class ChatWidget extends StatefulWidget {
   State<ChatWidget> createState() => _ChatWidgetState();
 }
 
-class ImageAndText {
-  Image? image;
-  String? text;
-  bool fromUser;
-
-  ImageAndText(this.image, this.text, this.fromUser);
-}
-
 class _ChatWidgetState extends State<ChatWidget> {
   late final GenerativeModel _model;
   late final GenerativeModel _visionModel;
@@ -83,7 +75,8 @@ class _ChatWidgetState extends State<ChatWidget> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
-  final List<ImageAndText> _generatedContent = <ImageAndText>[];
+  final List<({Image? image, String? text, bool fromUser})> _generatedContent =
+      <({Image? image, String? text, bool fromUser})>[];
   bool _loading = false;
   static const _apiKey = String.fromEnvironment('API_KEY');
 
@@ -231,14 +224,20 @@ class _ChatWidgetState extends State<ChatWidget> {
           DataPart('image/jpeg', sconeBytes.buffer.asUint8List()),
         ])
       ];
-      _generatedContent.add(
-          ImageAndText(Image.asset("assets/images/cat.jpg"), message, true));
-      _generatedContent.add(
-          ImageAndText(Image.asset("assets/images/scones.jpg"), null, true));
+      _generatedContent.add((
+        image: Image.asset("assets/images/cat.jpg"),
+        text: message,
+        fromUser: true
+      ));
+      _generatedContent.add((
+        image: Image.asset("assets/images/scones.jpg"),
+        text: null,
+        fromUser: true
+      ));
 
       var response = await _visionModel.generateContent(content);
       var text = response.text;
-      _generatedContent.add(ImageAndText(null, text, false));
+      _generatedContent.add((image: null, text: text, fromUser: false));
 
       if (text == null) {
         _showError('No response from API.');
@@ -269,12 +268,12 @@ class _ChatWidgetState extends State<ChatWidget> {
     });
 
     try {
-      _generatedContent.add(ImageAndText(null, message, true));
+      _generatedContent.add((image: null, text: message, fromUser: true));
       var response = await _chat.sendMessage(
         Content.text(message),
       );
       var text = response.text;
-      _generatedContent.add(ImageAndText(null, text, false));
+      _generatedContent.add((image: null, text: text, fromUser: false));
 
       if (text == null) {
         _showError('No response from API.');
@@ -355,12 +354,8 @@ class MessageWidget extends StatelessWidget {
                 ),
                 margin: const EdgeInsets.only(bottom: 8),
                 child: Column(children: [
-                  if (text != null) ...[
-                    MarkdownBody(data: text!),
-                  ],
-                  if (image != null) ...[
-                    image!,
-                  ],
+                  if (text case final text?) MarkdownBody(data: text),
+                  if (image case final image?) image,
                 ]))),
       ],
     );
