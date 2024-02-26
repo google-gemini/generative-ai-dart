@@ -26,7 +26,7 @@ jobs:
         working-directory: samples/flutter_app/
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-      - uses: subosito/flutter-action@14bf5302efe06bee37a57e1c54c15f8f17080ec3
+      - uses: subosito/flutter-action@62f096cacda5168a3bd7b95793373be14fa4fbaf
         with:
           channel: stable
       - run: flutter pub get

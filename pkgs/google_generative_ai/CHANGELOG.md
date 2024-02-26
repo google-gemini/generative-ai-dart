@@ -1,5 +1,9 @@
-## 0.2.1-wip
+## 0.2.1
 
+- Fix an issue parsing `generateContent()` responses that do not include content
+  (this can occur for some `finishReason`s).
+- Fix an issue parsing `generateContent()` responses that include citation
+  sources with unpopulated fields
 - Add link to ai.google.dev docs.
 
 ## 0.2.0
