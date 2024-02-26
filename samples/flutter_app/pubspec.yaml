@@ -22,6 +22,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
 
 # Note: this section is only used in order to resolve google_generative_ai to
 # the same repo as the sample.
