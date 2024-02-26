@@ -498,33 +498,34 @@ EmbedContentResponse parseEmbedContentResponse(Object jsonObject) {
 }
 
 Candidate _parseCandidate(Object? jsonObject) {
-  return switch (jsonObject) {
-    {
-      'content': final Object content,
-    } =>
-      Candidate(
-          parseContent(content),
-          switch (jsonObject) {
-            {'safetyRatings': final List<Object?> safetyRatings} =>
-              safetyRatings.map(_parseSafetyRating).toList(),
-            _ => null
-          },
-          switch (jsonObject) {
-            {'citationMetadata': final Object citationMetadata} =>
-              _parseCitationMetadata(citationMetadata),
-            _ => null
-          },
-          switch (jsonObject) {
-            {'finishReason': final Object finishReason} =>
-              FinishReason._parseValue(finishReason),
-            _ => null
-          },
-          switch (jsonObject) {
-            {'finishMessage': final String finishMessage} => finishMessage,
-            _ => null
-          }),
-    _ => throw FormatException('Unhandled Candidate format', jsonObject),
-  };
+  if (jsonObject is! Map) {
+    throw FormatException('Unhandled Candidate format', jsonObject);
+  }
+
+  return Candidate(
+    jsonObject.containsKey('content')
+        ? parseContent(jsonObject['content'] as Object)
+        : Content(null, []),
+    switch (jsonObject) {
+      {'safetyRatings': final List<Object?> safetyRatings} =>
+        safetyRatings.map(_parseSafetyRating).toList(),
+      _ => null
+    },
+    switch (jsonObject) {
+      {'citationMetadata': final Object citationMetadata} =>
+        _parseCitationMetadata(citationMetadata),
+      _ => null
+    },
+    switch (jsonObject) {
+      {'finishReason': final Object finishReason} =>
+        FinishReason._parseValue(finishReason),
+      _ => null
+    },
+    switch (jsonObject) {
+      {'finishMessage': final String finishMessage} => finishMessage,
+      _ => null
+    },
+  );
 }
 
 PromptFeedback _parsePromptFeedback(Object jsonObject) {
@@ -578,14 +579,16 @@ CitationMetadata _parseCitationMetadata(Object? jsonObject) {
 }
 
 CitationSource _parseCitationSource(Object? jsonObject) {
-  return switch (jsonObject) {
-    {
-      'startIndex': final int startIndex,
-      'endIndex': final int endIndex,
-      'uri': final String uri,
-      'license': final String license,
-    } =>
-      CitationSource(startIndex, endIndex, Uri.parse(uri), license),
-    _ => throw FormatException('Unhandled CitationSource format', jsonObject),
-  };
+  if (jsonObject is! Map) {
+    throw FormatException('Unhandled CitationSource format', jsonObject);
+  }
+
+  final uriString = jsonObject['uri'] as String?;
+
+  return CitationSource(
+    jsonObject['startIndex'] as int?,
+    jsonObject['endIndex'] as int?,
+    uriString != null ? Uri.parse(uriString) : null,
+    jsonObject['license'] as String?,
+  );
 }
