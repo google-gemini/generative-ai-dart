@@ -1,12 +1,12 @@
 name: google_generative_ai
-version: 0.2.1
+version: 0.2.2
 description: >-
   The Google AI Dart SDK enables developers to use Google's state-of-the-art
   generative AI models (like Gemini).
 repository: https://github.com/google/generative-ai-dart/tree/main/pkgs/google_generative_ai
 
 environment:
-  sdk: ^3.2.0
+  sdk: ^3.0.0
 
 dependencies:
   http: ^1.1.0

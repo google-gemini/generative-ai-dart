@@ -62,9 +62,11 @@ final class HttpApiClient implements ApiClient {
       ..headers['x-goog-api-key'] = _apiKey
       ..headers['x-goog-api-client'] = clientName
       ..headers['Content-Type'] = 'application/json';
-    final response = _httpClient == null
+    // TODO: When updating min SDK remove workaround.
+    final httpClient = _httpClient;
+    final response = httpClient == null
         ? await request.send()
-        : await _httpClient.send(request);
+        : await httpClient.send(request);
     final lines =
         response.stream.toStringStream().transform(const LineSplitter());
     await for (final line in lines) {
