@@ -139,7 +139,6 @@ final class ChatSession {
       if (textBuffer.isEmpty) return;
       // TODO: When updating min SDK remove workaround.
       // if (previousText case final singleText?) {
-      //   parts.add(singleText);
       final singleText = previousText;
       if (singleText != null) {
         parts.add(singleText);
