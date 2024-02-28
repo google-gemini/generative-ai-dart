@@ -17,6 +17,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
+/// The API key to use when accessing the Gemini API.
+///
+/// To learn how to generate and specify this key,
+/// check out the README file of this sample.
+const String _apiKey = String.fromEnvironment('API_KEY');
+
 void main() {
   runApp(const GenerativeAISample());
 }
@@ -56,13 +62,18 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: const ChatWidget(),
+      body: const ChatWidget(apiKey: _apiKey),
     );
   }
 }
 
 class ChatWidget extends StatefulWidget {
-  const ChatWidget({super.key});
+  const ChatWidget({
+    required this.apiKey,
+    super.key,
+  });
+
+  final String apiKey;
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
@@ -78,14 +89,13 @@ class _ChatWidgetState extends State<ChatWidget> {
   final List<({Image? image, String? text, bool fromUser})> _generatedContent =
       <({Image? image, String? text, bool fromUser})>[];
   bool _loading = false;
-  static const _apiKey = String.fromEnvironment('API_KEY');
 
   @override
   void initState() {
     super.initState();
     _model = GenerativeModel(
       model: 'gemini-pro',
-      apiKey: _apiKey,
+      apiKey: widget.apiKey,
     );
     _visionModel = GenerativeModel(
       model: 'gemini-pro-vision',
@@ -108,7 +118,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var textFieldDecoration = InputDecoration(
+    final textFieldDecoration = InputDecoration(
       contentPadding: const EdgeInsets.all(15),
       hintText: 'Enter a prompt...',
       border: OutlineInputBorder(
@@ -140,7 +150,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                 ? ListView.builder(
                     controller: _scrollController,
                     itemBuilder: (context, idx) {
-                      var content = _generatedContent[idx];
+                      final content = _generatedContent[idx];
                       return MessageWidget(
                         text: content.text,
                         image: content.image,
@@ -151,7 +161,10 @@ class _ChatWidgetState extends State<ChatWidget> {
                   )
                 : ListView(
                     children: const [
-                      Text('No API key found. Please provide an API Key.'),
+                      Text(
+                        'No API key found. Please provide an API Key using '
+                        "'--dart-define' to set the 'API_KEY' declaration.",
+                      ),
                     ],
                   ),
           ),
@@ -168,14 +181,10 @@ class _ChatWidgetState extends State<ChatWidget> {
                     focusNode: _textFieldFocus,
                     decoration: textFieldDecoration,
                     controller: _textController,
-                    onSubmitted: (String value) {
-                      _sendChatMessage(value);
-                    },
+                    onSubmitted: _sendChatMessage,
                   ),
                 ),
-                const SizedBox.square(
-                  dimension: 15,
-                ),
+                const SizedBox.square(dimension: 15),
                 IconButton(
                   onPressed: !_loading
                       ? () async {
@@ -269,10 +278,10 @@ class _ChatWidgetState extends State<ChatWidget> {
 
     try {
       _generatedContent.add((image: null, text: message, fromUser: true));
-      var response = await _chat.sendMessage(
+      final response = await _chat.sendMessage(
         Content.text(message),
       );
-      var text = response.text;
+      final text = response.text;
       _generatedContent.add((image: null, text: text, fromUser: false));
 
       if (text == null) {
@@ -299,7 +308,7 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   void _showError(String message) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -322,16 +331,16 @@ class _ChatWidgetState extends State<ChatWidget> {
 }
 
 class MessageWidget extends StatelessWidget {
-  final Image? image;
-  final String? text;
-  final bool isFromUser;
-
   const MessageWidget({
     super.key,
     this.image,
     this.text,
     required this.isFromUser,
   });
+
+  final Image? image;
+  final String? text;
+  final bool isFromUser;
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +350,7 @@ class MessageWidget extends StatelessWidget {
       children: [
         Flexible(
             child: Container(
-                constraints: const BoxConstraints(maxWidth: 600),
+                constraints: const BoxConstraints(maxWidth: 520),
                 decoration: BoxDecoration(
                   color: isFromUser
                       ? Theme.of(context).colorScheme.primaryContainer
