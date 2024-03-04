@@ -17,14 +17,15 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'version.dart';
+
+const clientName = 'genai-dart/$packageVersion';
+
 abstract interface class ApiClient {
   Future<Map<String, Object?>> makeRequest(Uri uri, Map<String, Object?> body);
   Stream<Map<String, Object?>> streamRequest(
       Uri uri, Map<String, Object?> body);
 }
-
-const packageVersion = '0.0.1';
-const clientName = 'genai-dart/$packageVersion';
 
 // Encodes first by `json.encode`, then `utf8.encode`.
 // Decodes first by `utf8.decode`, then `json.decode`.

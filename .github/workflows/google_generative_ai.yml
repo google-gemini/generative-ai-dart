@@ -39,6 +39,9 @@ jobs:
 
       - run: dart analyze --fatal-infos
 
+      # Make sure that the package version in lib/src/version.dart is kept up-to-date.
+      - run: dart tool/validate_version.dart
+
       - run: dart format --output=none --set-exit-if-changed .
         if: ${{matrix.run-tests}}
 
