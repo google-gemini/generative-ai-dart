@@ -1,3 +1,7 @@
+## 0.2.3-wip
+
+- Update the package version that is sent with the HTTP client name.
+
 ## 0.2.2
 
 - Remove usage of new SDK features - support older SDKs 3.0 and above.
