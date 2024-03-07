@@ -17,7 +17,7 @@ import 'dart:io';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-final r = RegExp(r"((\d+\.?)|[-*])\s+(?<content>.+)");
+final listItemExtractor = RegExp(r"((\d+\.?)|[-*])\s+(?<content>.+)");
 
 List<String> parseList(String lst, int expectedLength) {
   final lines = LineSplitter.split(lst).toList();
@@ -27,7 +27,7 @@ List<String> parseList(String lst, int expectedLength) {
 
   final lists = <String>[];
   for (var line in lines) {
-    final match = r.firstMatch(line);
+    final match = listItemExtractor.firstMatch(line);
     if (match == null) {
       throw FormatException('Unexpected list item: $line');
     }
