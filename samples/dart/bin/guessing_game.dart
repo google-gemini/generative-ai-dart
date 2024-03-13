@@ -15,6 +15,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 final listItemExtractor = RegExp(r"((\d+\.?)|[-*])\s+(?<content>.+)");
@@ -36,13 +37,11 @@ List<String> parseList(String lst, int expectedLength) {
   return lists;
 }
 
-Future<List<String>> getWords(String apiKey) async {
+Future<List<String>> getWords(String apiKey, String subject) async {
   final config = GenerationConfig(candidateCount: 1, temperature: 1.0);
   final model = GenerativeModel(
       model: 'gemini-pro', apiKey: apiKey, generationConfig: config);
-  final content = [
-    Content.text('Create a bullet list of 20 random common nouns.')
-  ];
+  final content = [Content.text('Create a bullet list of 20 random $subject.')];
 
   final response = await model.generateContent(content);
   return parseList(response.text!, 20);
@@ -92,13 +91,19 @@ bool guessWord(String word, String hint) {
   }
 }
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   final apiKey = Platform.environment['GOOGLE_API_KEY'];
   if (apiKey == null) {
     stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
-  final words = await getWords(apiKey);
+
+  final parser = ArgParser();
+  parser.addOption('subject',
+      defaultsTo: 'common nouns', help: 'the theme of the quiz');
+  final parsedArgs = parser.parse(args);
+
+  final words = await getWords(apiKey, parsedArgs['subject']);
   words.shuffle();
   final hints = await getHints(apiKey, words);
 

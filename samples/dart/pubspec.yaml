@@ -6,6 +6,7 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
+  args: ^2.4.2
   path: ^1.9.0
   # Note: best practice here is to use a caret version constraint. We use `any`
   # here just for the purpose of the samples.
