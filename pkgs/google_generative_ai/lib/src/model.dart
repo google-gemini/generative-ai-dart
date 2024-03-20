@@ -123,14 +123,7 @@ final class GenerativeModel {
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
-    try {
-      return parseGenerateContentResponse(response);
-    } on FormatException {
-      if (response case {'error': final Object error}) {
-        throw parseError(error);
-      }
-      rethrow;
-    }
+    return parseGenerateContentResponse(response);
   }
 
   /// Generates a stream of content responding to [prompt].

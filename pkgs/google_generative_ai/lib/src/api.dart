@@ -475,6 +475,7 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
         }),
     {'promptFeedback': final promptFeedback?} =>
       GenerateContentResponse([], _parsePromptFeedback(promptFeedback)),
+    {'error': final Object error} => throw parseError(error),
     _ => throw FormatException(
         'Unhandled GenerateContentResponse format', jsonObject)
   };
@@ -483,6 +484,7 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
   return switch (jsonObject) {
     {'totalTokens': final int totalTokens} => CountTokensResponse(totalTokens),
+    {'error': final Object error} => throw parseError(error),
     _ =>
       throw FormatException('Unhandled CountTokensResponse format', jsonObject)
   };
@@ -492,6 +494,7 @@ EmbedContentResponse parseEmbedContentResponse(Object jsonObject) {
   return switch (jsonObject) {
     {'embedding': final Object embedding} =>
       EmbedContentResponse(_parseContentEmbedding(embedding)),
+    {'error': final Object error} => throw parseError(error),
     _ =>
       throw FormatException('Unhandled EmbedContentResponse format', jsonObject)
   };
