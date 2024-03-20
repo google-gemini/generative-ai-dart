@@ -109,7 +109,6 @@ void main() {
             ], null)));
       });
 
-
       test('can override safety settings', () async {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
