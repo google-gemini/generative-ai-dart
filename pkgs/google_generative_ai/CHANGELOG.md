@@ -2,7 +2,7 @@
 
 - Update the package version that is sent with the HTTP client name.
 - Throw more actionable error objects than `FormatException` for errors. Errors
-  were previously only correctly parse in `generateContent` calls.
+  were previously only correctly parsed in `generateContent` calls.
 
 ## 0.2.2
 
