@@ -445,5 +445,55 @@ void main() {
                 EmbedContentResponse(ContentEmbedding([0.1, 0.2, 0.3]))));
       });
     });
+
+    group('batch embed contents', () {
+      test('can make successful request', () async {
+        final (client, model) = createModel();
+        final prompt1 = 'Some prompt';
+        final prompt2 = 'Another prompt';
+        final embedding1 = [0.1, 0.2, 0.3];
+        final embedding2 = [0.4, 0.5, 1.6];
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:batchEmbedContents'),
+          {
+            'requests': [
+              {
+                'content': {
+                  'role': 'user',
+                  'parts': [
+                    {'text': prompt1}
+                  ]
+                },
+                'model': 'models/$defaultModelName'
+              },
+              {
+                'content': {
+                  'role': 'user',
+                  'parts': [
+                    {'text': prompt2}
+                  ]
+                },
+                'model': 'models/$defaultModelName'
+              }
+            ]
+          },
+          {
+            'embeddings': [
+              {'values': embedding1},
+              {'values': embedding2}
+            ]
+          },
+        );
+        final response = await model.batchEmbedContents([
+          EmbedContentRequest(Content.text(prompt1)),
+          EmbedContentRequest(Content.text(prompt2))
+        ]);
+        expect(
+            response,
+            matchesBatchEmbedContentsResponse(BatchEmbedContentsResponse(
+                [ContentEmbedding(embedding1), ContentEmbedding(embedding2)])));
+      });
+    });
   });
 }
