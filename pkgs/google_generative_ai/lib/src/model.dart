@@ -19,7 +19,6 @@ import 'package:http/http.dart' as http;
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
-import 'error.dart';
 
 final _baseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
@@ -123,14 +122,7 @@ final class GenerativeModel {
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
-    try {
-      return parseGenerateContentResponse(response);
-    } on FormatException {
-      if (response case {'error': final Object error}) {
-        throw parseError(error);
-      }
-      rethrow;
-    }
+    return parseGenerateContentResponse(response);
   }
 
   /// Generates a stream of content responding to [prompt].
