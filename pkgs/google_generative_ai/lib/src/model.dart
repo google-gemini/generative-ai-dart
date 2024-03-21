@@ -19,6 +19,7 @@ import 'package:http/http.dart' as http;
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
+import 'function_calling.dart';
 
 const _apiVersion = 'v1';
 Uri _googleAIBaseUri(RequestOptions? options) => Uri.https(
@@ -55,6 +56,7 @@ final class GenerativeModel {
   final ({String prefix, String name}) _model;
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
+  final List<Tool>? _tools;
   final ApiClient _client;
   final Uri _baseUri;
 
@@ -80,11 +82,16 @@ final class GenerativeModel {
   /// concurrent requests.
   /// If the `httpClient` is omitted, a new [http.Client] is created for each
   /// request.
+  ///
+  /// Functions that the model may call while generating content can be passed
+  /// in [tools]. When using tools the [requestOptions] must be passed to
+  /// override the `apiVersion` to `v1beta`.
   factory GenerativeModel({
     required String model,
     required String apiKey,
     List<SafetySetting> safetySettings = const [],
     GenerationConfig? generationConfig,
+    List<Tool>? tools,
     http.Client? httpClient,
     RequestOptions? requestOptions,
   }) =>
@@ -94,6 +101,7 @@ final class GenerativeModel {
         safetySettings: safetySettings,
         generationConfig: generationConfig,
         baseUri: _googleAIBaseUri(requestOptions),
+        tools: tools,
       );
 
   GenerativeModel._withClient({
@@ -102,10 +110,12 @@ final class GenerativeModel {
     required List<SafetySetting> safetySettings,
     required GenerationConfig? generationConfig,
     required Uri baseUri,
+    required List<Tool>? tools,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
+        _tools = tools,
         _client = client;
 
   /// Returns the model code for a user friendly model name.
@@ -143,6 +153,8 @@ final class GenerativeModel {
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
+      if (_tools case final tools?)
+        'tools': tools.map((t) => t.toJson()).toList(),
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
@@ -173,6 +185,8 @@ final class GenerativeModel {
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
+      if (_tools case final tools?)
+        'tools': tools.map((t) => t.toJson()).toList(),
     };
     final response =
         _client.streamRequest(_taskUri(Task.streamGenerateContent), parameters);
@@ -263,6 +277,7 @@ GenerativeModel createModelWithClient({
   List<SafetySetting> safetySettings = const [],
   GenerationConfig? generationConfig,
   RequestOptions? requestOptions,
+  List<Tool>? tools,
 }) =>
     GenerativeModel._withClient(
       client: client,
@@ -270,6 +285,7 @@ GenerativeModel createModelWithClient({
       safetySettings: safetySettings,
       generationConfig: generationConfig,
       baseUri: _googleAIBaseUri(requestOptions),
+      tools: tools,
     );
 
 /// Creates a model with an overridden base URL to communicate with a different
@@ -278,15 +294,18 @@ GenerativeModel createModelWithClient({
 /// Used from a `src/` import in the Vertex AI SDK.
 // TODO: https://github.com/google/generative-ai-dart/issues/111 - Changes to
 // this API need to be coordinated with the vertex AI SDK.
-GenerativeModel createModelWithBaseUri(
-        {required String model,
-        required String apiKey,
-        required Uri baseUri,
-        List<SafetySetting> safetySettings = const [],
-        GenerationConfig? generationConfig}) =>
+GenerativeModel createModelWithBaseUri({
+  required String model,
+  required String apiKey,
+  required Uri baseUri,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+}) =>
     GenerativeModel._withClient(
-        client: HttpApiClient(apiKey: apiKey),
-        model: model,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig,
-        baseUri: baseUri);
+      client: HttpApiClient(apiKey: apiKey),
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+      baseUri: baseUri,
+      tools: null,
+    );

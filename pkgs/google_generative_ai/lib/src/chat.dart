@@ -151,15 +151,12 @@ final class ChatSession {
 
     for (final content in contents) {
       for (final part in content.parts) {
-        switch (part) {
-          case TextPart(:final text):
-            if (text.isNotEmpty) {
-              previousText = textBuffer.isEmpty ? part : null;
-              textBuffer.write(text);
-            }
-          case DataPart():
-            addBufferedText();
-            parts.add(part);
+        if (part case TextPart(:final text)) {
+          previousText = textBuffer.isEmpty ? part : null;
+          textBuffer.write(text);
+        } else {
+          addBufferedText();
+          parts.add(part);
         }
       }
     }

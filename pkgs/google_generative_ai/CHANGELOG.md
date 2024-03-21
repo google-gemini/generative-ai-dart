@@ -1,3 +1,8 @@
+## 0.3.0-wip
+
+- **Breaking** Add `FunctionCall` and `FunctionResponse` subclasses of the
+  sealed class `Part`.
+
 ## 0.2.4-wip
 
 - Allow specifying an API version in a `requestOptions` argument when
