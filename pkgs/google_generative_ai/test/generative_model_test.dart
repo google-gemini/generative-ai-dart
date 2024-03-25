@@ -406,5 +406,55 @@ void main() {
                 EmbedContentResponse(ContentEmbedding([0.1, 0.2, 0.3]))));
       });
     });
+
+    test('listModels', () async {
+      final apiKey = 'apiKey';
+      final client = StubClient();
+      client.stubGet(
+        Uri.parse('https://generativelanguage.googleapis.com/v1/models'),
+        null,
+        {
+          'models': [
+            {
+              'name': 'models/gemini-1.0-pro',
+              'version': '001',
+              'displayName': 'Gemini 1.0 Pro',
+              'description':
+                  'The best model for scaling across a wide range of tasks',
+              'inputTokenLimit': 30720,
+              'outputTokenLimit': 2048,
+              'supportedGenerationMethods': ['generateContent', 'countTokens'],
+              'temperature': 0.9,
+              'topP': 1,
+              'topK': 1
+            },
+            {
+              'name': 'models/embedding-001',
+              'version': '001',
+              'displayName': 'Embedding 001',
+              'description': 'Obtain a distributed representation of a text.',
+              'inputTokenLimit': 2048,
+              'outputTokenLimit': 1,
+              'supportedGenerationMethods': ['embedContent']
+            }
+          ]
+        },
+      );
+      final response =
+          await GenerativeModel.listModels(apiKey: apiKey, apiClient: client);
+      expect(response.models, hasLength(2));
+
+      var model = response.models[0];
+      expect(model.name, 'models/gemini-1.0-pro');
+      expect(model.version, isNotEmpty);
+      expect(model.displayName, isNotEmpty);
+      expect(model.description, isNotEmpty);
+
+      model = response.models[1];
+      expect(model.name, 'models/embedding-001');
+      expect(model.version, isNotEmpty);
+      expect(model.displayName, isNotEmpty);
+      expect(model.description, isNotEmpty);
+    });
   });
 }

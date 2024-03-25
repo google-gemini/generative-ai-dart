@@ -23,6 +23,8 @@ const clientName = 'genai-dart/$packageVersion';
 
 abstract interface class ApiClient {
   Future<Map<String, Object?>> makeRequest(Uri uri, Map<String, Object?> body);
+  Future<Map<String, Object?>> makeGetRequest(Uri uri,
+      {Map<String, dynamic>? queryParameters});
   Stream<Map<String, Object?>> streamRequest(
       Uri uri, Map<String, Object?> body);
 }
@@ -55,6 +57,23 @@ final class HttpApiClient implements ApiClient {
   }
 
   @override
+  Future<Map<String, Object?>> makeGetRequest(Uri uri,
+      {Map<String, dynamic>? queryParameters}) async {
+    if (queryParameters != null) {
+      uri = uri.resolveUri(Uri(queryParameters: queryParameters));
+    }
+    final response = await (_httpClient?.get ?? http.get)(
+      uri,
+      headers: {
+        'x-goog-api-key': _apiKey,
+        'x-goog-api-client': clientName,
+        'Content-Type': 'application/json',
+      },
+    );
+    return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
+  }
+
+  @override
   Stream<Map<String, Object?>> streamRequest(
       Uri uri, Map<String, Object?> body) async* {
     uri = uri.replace(queryParameters: {'alt': 'sse'});
@@ -70,7 +89,7 @@ final class HttpApiClient implements ApiClient {
         : await httpClient.send(request);
     if (response.statusCode != 200) {
       final body = await response.stream.bytesToString();
-      // Yeild a potential error object like a normal result for consistency
+      // Yield a potential error object like a normal result for consistency
       // with `makeRequest`.
       yield jsonDecode(body) as Map<String, Object?>;
       return;

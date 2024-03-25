@@ -88,6 +88,34 @@ final class EmbedContentResponse {
   EmbedContentResponse(this.embedding);
 }
 
+/// Response from [GenerativeModel.listModels] containing a paginated list of
+/// Models.
+final class ListModelsResponse {
+  /// The returned Models.
+  final List<Model> models;
+
+  /// A token, which can be sent as pageToken to retrieve the next page.
+  ///
+  /// If this field is omitted, there are no more pages.
+  final String? nextPageToken;
+
+  ListModelsResponse({
+    required this.models,
+    this.nextPageToken,
+  });
+
+  static ListModelsResponse parseJson(Map<String, Object?> json) {
+    if (json.containsKey('error')) throw parseError(json['error']!);
+
+    return ListModelsResponse(
+      models: (json['models'] as List).map((item) {
+        return Model.parseJson(item as Map<String, Object?>);
+      }).toList(),
+      nextPageToken: json['nextPageToken'] as String?,
+    );
+  }
+}
+
 /// An embedding, as defined by a list of values.
 final class ContentEmbedding {
   /// The embedding values.
@@ -435,6 +463,98 @@ final class GenerationConfig {
         if (topP case final topP?) 'topP': topP,
         if (topK case final topK?) 'topK': topK,
       };
+}
+
+/// Information about a Generative Language Model.
+class Model {
+  /// The resource name of the Model.
+  ///
+  /// Format: `models/{model}` with a `{model}` naming convention of:
+  ///
+  ///   "{baseModelId}-{version}"
+  ///
+  /// Examples:
+  ///
+  /// - `models/chat-bison-001`
+  final String name;
+
+  /// The version number of the model.
+  ///
+  /// This represents the major version.
+  final String version;
+
+  /// The human-readable name of the model. E.g. "Chat Bison".
+  ///
+  /// The name can be up to 128 characters long and can consist of any UTF-8
+  /// characters.
+  final String displayName;
+
+  /// A short description of the model.
+  final String description;
+
+  /// Maximum number of input tokens allowed for this model.
+  final int inputTokenLimit;
+
+  /// Maximum number of output tokens available for this model.
+  final int outputTokenLimit;
+
+  /// The model's supported generation methods.
+  ///
+  /// The method names are defined as Pascal case strings, such as
+  /// `generateMessage` which correspond to API methods.
+  final List<String> supportedGenerationMethods;
+
+  /// Controls the randomness of the output.
+  ///
+  /// Values can range over `[0.0,1.0]`, inclusive. A value closer to 1.0 will
+  /// produce responses that are more varied, while a value closer to 0.0 will
+  /// typically result in less surprising responses from the model. This value
+  /// specifies default to be used by the backend while making the call to the
+  /// model.
+  final double? temperature;
+
+  /// For Nucleus sampling.
+  ///
+  /// Nucleus sampling considers the smallest set of tokens whose probability
+  /// sum is at least topP. This value specifies default to be used by the
+  /// backend while making the call to the model.
+  final int? topP;
+
+  /// For Top-k sampling.
+  ///
+  /// Top-k sampling considers the set of topK most probable tokens. This value
+  /// specifies default to be used by the backend while making the call to the
+  /// model.
+  final int? topK;
+
+  Model({
+    required this.name,
+    required this.version,
+    required this.displayName,
+    required this.description,
+    required this.inputTokenLimit,
+    required this.outputTokenLimit,
+    required this.supportedGenerationMethods,
+    this.temperature,
+    this.topP,
+    this.topK,
+  });
+
+  static Model parseJson(Map<String, Object?> json) {
+    return Model(
+      name: json['name'] as String,
+      version: json['version'] as String,
+      displayName: json['displayName'] as String,
+      description: json['description'] as String,
+      inputTokenLimit: json['inputTokenLimit'] as int,
+      outputTokenLimit: json['outputTokenLimit'] as int,
+      supportedGenerationMethods:
+          (json['supportedGenerationMethods'] as List).cast(),
+      temperature: json['temperature'] as double?,
+      topP: json['topP'] as int?,
+      topK: json['topK'] as int?,
+    );
+  }
 }
 
 /// Type of task for which the embedding will be used.

@@ -1,8 +1,9 @@
-## 0.2.3-wip
+## 0.3.0-wip
 
 - Update the package version that is sent with the HTTP client name.
 - Throw more actionable error objects than `FormatException` for errors. Errors
   were previously only correctly parsed in `generateContent` calls.
+- Expose a way to list available models - `GenerativeModel.listModels`.
 
 ## 0.2.2
 

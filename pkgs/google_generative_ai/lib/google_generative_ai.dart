@@ -52,6 +52,8 @@ export 'src/api.dart'
         HarmBlockThreshold,
         HarmCategory,
         HarmProbability,
+        ListModelsResponse,
+        Model,
         PromptFeedback,
         SafetyRating,
         SafetySetting,

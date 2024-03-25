@@ -27,6 +27,11 @@ final class StubClient implements ApiClient {
 
   void stub(Uri uri, Map<String, Object?> body, Map<String, Object?> result) =>
       _requests[{'_hack_uri': uri, ...body}] = result;
+
+  void stubGet(Uri uri, Map<String, Object?>? queryParameters,
+          Map<String, Object?> result) =>
+      _requests[{'_hack_uri': uri, ...(queryParameters ?? {})}] = result;
+
   void stubStream(Uri uri, Map<String, Object?> body,
           Iterable<Map<String, Object?>> result) =>
       _streamRequests[{'_hack_uri': uri, ...body}] = result;
@@ -37,6 +42,14 @@ final class StubClient implements ApiClient {
       Future.value(_requests.remove({'_hack_uri': uri, ...body}) ??
           (throw StateError(
               'Missing stub for request to $uri with body $body')));
+
+  @override
+  Future<Map<String, Object?>> makeGetRequest(Uri uri,
+          {Map<String, dynamic>? queryParameters}) =>
+      Future.value(_requests
+              .remove({'_hack_uri': uri, ...(queryParameters ?? {})}) ??
+          (throw StateError(
+              'Missing stub for request to $uri with params $queryParameters')));
 
   @override
   Stream<Map<String, Object?>> streamRequest(

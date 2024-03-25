@@ -71,6 +71,34 @@ void main() {
       expect(response, expectedResponse);
     });
 
+    test('can make unary GET request', () async {
+      final url = Uri.parse('https://someurl.com?some=param');
+      final params = {'some': 'param'};
+      final apiKey = 'apiKey';
+      final expectedResponse = {'result': 'OK'};
+      await http.runWithClient(
+        () async {
+          final client = HttpApiClient(apiKey: apiKey);
+          final response =
+              await client.makeGetRequest(url, queryParameters: params);
+          expect(response, expectedResponse);
+        },
+        () => MockClient((request) async {
+          expect(
+            request,
+            matchesRequest(http.Request('GET', url)
+              ..headers.addAll({
+                'x-goog-api-key': apiKey,
+                'x-goog-api-client': clientName,
+                'Content-Type': 'application/json'
+              })),
+          );
+          return http.Response.bytes(
+              utf8.encode(jsonEncode(expectedResponse)), 200);
+        }),
+      );
+    });
+
     test('can make streaming request with default client', () async {
       final url = Uri.parse('https://someurl.com');
       final streamingUrl = Uri.parse('https://someurl.com?alt=sse');

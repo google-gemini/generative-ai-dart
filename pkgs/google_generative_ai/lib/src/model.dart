@@ -20,8 +20,8 @@ import 'api.dart';
 import 'client.dart';
 import 'content.dart';
 
-final _baseUrl = Uri.https('generativelanguage.googleapis.com');
-const _apiVersion = 'v1';
+final baseUrl = Uri.https('generativelanguage.googleapis.com');
+const apiVersion = 'v1';
 
 enum Task {
   generateContent('generateContent'),
@@ -63,9 +63,8 @@ final class GenerativeModel {
   ///
   /// Content creation requests are sent to a server through the [httpClient],
   /// which can be used to control, for example, the number of allowed
-  /// concurrent requests.
-  /// If the `httpClient` is omitted, a new [http.Client] is created for each
-  /// request.
+  /// concurrent requests. If the `httpClient` is omitted, a new [http.Client]
+  /// is created for each request.
   factory GenerativeModel({
     required String model,
     required String apiKey,
@@ -95,8 +94,49 @@ final class GenerativeModel {
           ? modelName.substring(_modelsPrefix.length)
           : modelName;
 
-  Uri _taskUri(Task task) => _baseUrl.resolveUri(
-      Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
+  /// Lists models available through the API.
+  ///
+  /// A Google Cloud [apiKey] is required for all requests. See documentation
+  /// about [API keys][] for more information.
+  ///
+  /// [API keys]: https://cloud.google.com/docs/authentication/api-keys "Google Cloud API keys"
+  ///
+  /// [pageSize] is the maximum number of Models to return (per page).
+  /// The service may return fewer models. If unspecified, at most 50 models
+  /// will be returned per page. This method returns at most 1000 models per
+  /// page, even if you pass a larger pageSize.
+  ///
+  /// [pageToken] is a page token, received from a previous [listModels] call.
+  /// Provide the pageToken returned by one request as an argument to the next
+  /// request to retrieve the next page.
+  /// When paginating, all other parameters provided to [listModels] must match
+  /// the call that provided the page token.
+  ///
+  /// Requests are sent to a server through the [httpClient], which can be used
+  /// to control, for example, the number of allowed concurrent requests. If the
+  /// `httpClient` is omitted, a new [http.Client] is created for each request.
+  ///
+  /// The [apiClient] is only exposed to enable testing of this method.
+  static Future<ListModelsResponse> listModels({
+    required String apiKey,
+    int? pageSize,
+    String? pageToken,
+    http.Client? httpClient,
+    ApiClient? apiClient,
+  }) async {
+    apiClient ??= HttpApiClient(apiKey: apiKey, httpClient: httpClient);
+    final response = await apiClient.makeGetRequest(
+      baseUrl.resolveUri(Uri(pathSegments: [apiVersion, 'models'])),
+      queryParameters: {
+        if (pageSize != null) 'pageSize': pageSize,
+        if (pageToken != null) 'pageToken': pageToken,
+      },
+    );
+    return ListModelsResponse.parseJson(response);
+  }
+
+  Uri _taskUri(Task task) => baseUrl.resolveUri(
+      Uri(pathSegments: [apiVersion, 'models', '$_model:${task._name}']));
 
   /// Generates content responding to [prompt].
   ///
