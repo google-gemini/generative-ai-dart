@@ -417,13 +417,19 @@ final class GenerationConfig {
   /// Note: The default value varies by model.
   final int? topK;
 
+  /// The config to point to Vertex AI backend.
+  /// If this value is set, the SDK will be using Vertex AI instead of the
+  /// default model.
+  final VertexConfig? vertexConfig;
+
   GenerationConfig(
       {this.candidateCount,
       this.stopSequences = const [],
       this.maxOutputTokens,
       this.temperature,
       this.topP,
-      this.topK});
+      this.topK,
+      this.vertexConfig});
 
   Map<String, Object?> toJson() => {
         if (candidateCount case final candidateCount?)
@@ -435,6 +441,15 @@ final class GenerationConfig {
         if (topP case final topP?) 'topP': topP,
         if (topK case final topK?) 'topK': topK,
       };
+}
+
+/// Configuration options for Vertex AI backend.
+final class VertexConfig {
+  /// The backend url, contains all the path including api version and
+  /// project id, server location.
+  final Uri? modelUri;
+
+  VertexConfig({this.modelUri});
 }
 
 /// Type of task for which the embedding will be used.
