@@ -39,7 +39,9 @@ enum Task {
 /// Allows generating content, creating embeddings, and counting the number of
 /// tokens in a piece of content.
 final class GenerativeModel {
-  final String _model;
+  /// The full model identifier split into a prefix ("models" or "tunedModels")
+  /// and the model name.
+  final ({String prefix, String name}) _model;
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
@@ -47,7 +49,7 @@ final class GenerativeModel {
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
   /// The [model] argument can be a model name (such as `'gemini-pro'`) or a
-  /// model code (such as `'models/gemini-pro'`).
+  /// model code (such as `'models/gemini-pro'` or `'tunedModels/my-model'`).
   /// There is no creation time check for whether the `model` string identifies
   /// a known and supported model. If not, attempts to generate content
   /// will fail.
@@ -89,14 +91,17 @@ final class GenerativeModel {
         _generationConfig = generationConfig,
         _client = client;
 
-  static const _modelsPrefix = 'models/';
-  static String _normalizeModelName(String modelName) =>
-      modelName.startsWith(_modelsPrefix)
-          ? modelName.substring(_modelsPrefix.length)
-          : modelName;
+  static ({String prefix, String name}) _normalizeModelName(String modelName) {
+    if (!modelName.contains('/')) return (prefix: 'models', name: modelName);
+    final parts = modelName.split('/');
+    return (prefix: parts.first, name: parts.skip(1).join('/'));
+  }
 
-  Uri _taskUri(Task task) => _baseUrl.resolveUri(
-      Uri(pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
+  Uri _taskUri(Task task) => _baseUrl.resolveUri(Uri(pathSegments: [
+        _apiVersion,
+        _model.prefix,
+        '${_model.name}:${task._name}'
+      ]));
 
   /// Generates content responding to [prompt].
   ///

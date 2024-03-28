@@ -69,6 +69,45 @@ void main() {
           ], null)));
     });
 
+    test('allows specifying a tuned model', () async {
+      final (client, model) = createModel('tunedModels/$defaultModelName');
+      final prompt = 'Some prompt';
+      final result = 'Some response';
+      client.stub(
+        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+            'tunedModels/some-model:generateContent'),
+        {
+          'contents': [
+            {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          ]
+        },
+        {
+          'candidates': [
+            {
+              'content': {
+                'role': 'model',
+                'parts': [
+                  {'text': result}
+                ]
+              }
+            }
+          ]
+        },
+      );
+      final response = await model.generateContent([Content.text(prompt)]);
+      expect(
+          response,
+          matchesGenerateContentResponse(GenerateContentResponse([
+            Candidate(
+                Content('model', [TextPart(result)]), null, null, null, null),
+          ], null)));
+    });
+
     group('generate unary content', () {
       test('can make successful request', () async {
         final (client, model) = createModel();
