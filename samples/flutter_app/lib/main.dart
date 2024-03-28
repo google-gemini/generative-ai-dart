@@ -13,8 +13,15 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+/// The API key to use when accessing the Gemini API.
+///
+/// To learn how to generate and specify this key,
+/// check out the README file of this sample.
+const String _apiKey = String.fromEnvironment('API_KEY');
 
 void main() {
   runApp(const GenerativeAISample());
@@ -55,13 +62,18 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: const ChatWidget(),
+      body: const ChatWidget(apiKey: _apiKey),
     );
   }
 }
 
 class ChatWidget extends StatefulWidget {
-  const ChatWidget({super.key});
+  const ChatWidget({
+    required this.apiKey,
+    super.key,
+  });
+
+  final String apiKey;
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
@@ -69,18 +81,24 @@ class ChatWidget extends StatefulWidget {
 
 class _ChatWidgetState extends State<ChatWidget> {
   late final GenerativeModel _model;
+  late final GenerativeModel _visionModel;
   late final ChatSession _chat;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
+  final List<({Image? image, String? text, bool fromUser})> _generatedContent =
+      <({Image? image, String? text, bool fromUser})>[];
   bool _loading = false;
-  static const _apiKey = String.fromEnvironment('API_KEY');
 
   @override
   void initState() {
     super.initState();
     _model = GenerativeModel(
       model: 'gemini-pro',
+      apiKey: widget.apiKey,
+    );
+    _visionModel = GenerativeModel(
+      model: 'gemini-pro-vision',
       apiKey: _apiKey,
     );
     _chat = _model.startChat();
@@ -100,7 +118,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var textFieldDecoration = InputDecoration(
+    final textFieldDecoration = InputDecoration(
       contentPadding: const EdgeInsets.all(15),
       hintText: 'Enter a prompt...',
       border: OutlineInputBorder(
@@ -132,21 +150,21 @@ class _ChatWidgetState extends State<ChatWidget> {
                 ? ListView.builder(
                     controller: _scrollController,
                     itemBuilder: (context, idx) {
-                      var content = _chat.history.toList()[idx];
-                      var text = content.parts
-                          .whereType<TextPart>()
-                          .map<String>((e) => e.text)
-                          .join('');
+                      final content = _generatedContent[idx];
                       return MessageWidget(
-                        text: text,
-                        isFromUser: content.role == 'user',
+                        text: content.text,
+                        image: content.image,
+                        isFromUser: content.fromUser,
                       );
                     },
-                    itemCount: _chat.history.length,
+                    itemCount: _generatedContent.length,
                   )
                 : ListView(
                     children: const [
-                      Text('No API key found. Please provide an API Key.'),
+                      Text(
+                        'No API key found. Please provide an API Key using '
+                        "'--dart-define' to set the 'API_KEY' declaration.",
+                      ),
                     ],
                   ),
           ),
@@ -163,13 +181,22 @@ class _ChatWidgetState extends State<ChatWidget> {
                     focusNode: _textFieldFocus,
                     decoration: textFieldDecoration,
                     controller: _textController,
-                    onSubmitted: (String value) {
-                      _sendChatMessage(value);
-                    },
+                    onSubmitted: _sendChatMessage,
                   ),
                 ),
-                const SizedBox.square(
-                  dimension: 15,
+                const SizedBox.square(dimension: 15),
+                IconButton(
+                  onPressed: !_loading
+                      ? () async {
+                          _sendImagePrompt(_textController.text);
+                        }
+                      : null,
+                  icon: Icon(
+                    Icons.image,
+                    color: _loading
+                        ? Theme.of(context).colorScheme.secondary
+                        : Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 if (!_loading)
                   IconButton(
@@ -191,16 +218,71 @@ class _ChatWidgetState extends State<ChatWidget> {
     );
   }
 
+  Future<void> _sendImagePrompt(String message) async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      ByteData catBytes = await rootBundle.load('assets/images/cat.jpg');
+      ByteData sconeBytes = await rootBundle.load('assets/images/scones.jpg');
+      final content = [
+        Content.multi([
+          TextPart(message),
+          // The only accepted mime types are image/*.
+          DataPart('image/jpeg', catBytes.buffer.asUint8List()),
+          DataPart('image/jpeg', sconeBytes.buffer.asUint8List()),
+        ])
+      ];
+      _generatedContent.add((
+        image: Image.asset("assets/images/cat.jpg"),
+        text: message,
+        fromUser: true
+      ));
+      _generatedContent.add((
+        image: Image.asset("assets/images/scones.jpg"),
+        text: null,
+        fromUser: true
+      ));
+
+      var response = await _visionModel.generateContent(content);
+      var text = response.text;
+      _generatedContent.add((image: null, text: text, fromUser: false));
+
+      if (text == null) {
+        _showError('No response from API.');
+        return;
+      } else {
+        setState(() {
+          _loading = false;
+          _scrollDown();
+        });
+      }
+    } catch (e) {
+      _showError(e.toString());
+      setState(() {
+        _loading = false;
+      });
+    } finally {
+      _textController.clear();
+      setState(() {
+        _loading = false;
+      });
+      _textFieldFocus.requestFocus();
+    }
+  }
+
   Future<void> _sendChatMessage(String message) async {
     setState(() {
       _loading = true;
     });
 
     try {
-      var response = await _chat.sendMessage(
+      _generatedContent.add((image: null, text: message, fromUser: true));
+      final response = await _chat.sendMessage(
         Content.text(message),
       );
-      var text = response.text;
+      final text = response.text;
+      _generatedContent.add((image: null, text: text, fromUser: false));
 
       if (text == null) {
         _showError('No response from API.');
@@ -226,7 +308,7 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   void _showError(String message) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -249,14 +331,16 @@ class _ChatWidgetState extends State<ChatWidget> {
 }
 
 class MessageWidget extends StatelessWidget {
-  final String text;
-  final bool isFromUser;
-
   const MessageWidget({
     super.key,
-    required this.text,
+    this.image,
+    this.text,
     required this.isFromUser,
   });
+
+  final Image? image;
+  final String? text;
+  final bool isFromUser;
 
   @override
   Widget build(BuildContext context) {
@@ -265,25 +349,23 @@ class MessageWidget extends StatelessWidget {
           isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         Flexible(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 600),
-            decoration: BoxDecoration(
-              color: isFromUser
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            padding: const EdgeInsets.symmetric(
-              vertical: 15,
-              horizontal: 20,
-            ),
-            margin: const EdgeInsets.only(bottom: 8),
-            child: MarkdownBody(
-              selectable: true,
-              data: text,
-            ),
-          ),
-        ),
+            child: Container(
+                constraints: const BoxConstraints(maxWidth: 520),
+                decoration: BoxDecoration(
+                  color: isFromUser
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ),
+                margin: const EdgeInsets.only(bottom: 8),
+                child: Column(children: [
+                  if (text case final text?) MarkdownBody(data: text),
+                  if (image case final image?) image,
+                ]))),
       ],
     );
   }

@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: ['3.2', stable, dev]
+        sdk: ['3.0', stable, dev]
         include:
           - sdk: stable
             run-tests: true
@@ -38,6 +38,9 @@ jobs:
       - run: dart pub get
 
       - run: dart analyze --fatal-infos
+
+      # Make sure that the package version in lib/src/version.dart is kept up-to-date.
+      - run: dart tool/validate_version.dart
 
       - run: dart format --output=none --set-exit-if-changed .
         if: ${{matrix.run-tests}}
