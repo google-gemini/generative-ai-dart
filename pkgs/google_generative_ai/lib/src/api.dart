@@ -447,6 +447,7 @@ final class GenerationConfig {
 final class VertexConfig {
   /// The backend url, contains all the path including api version and
   /// project id, server location.
+  /// reference: https://cloud.google.com/vertex-ai/docs
   final Uri? modelUri;
 
   VertexConfig({this.modelUri});
