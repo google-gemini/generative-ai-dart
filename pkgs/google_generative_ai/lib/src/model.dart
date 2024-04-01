@@ -39,8 +39,8 @@ enum Task {
 /// Allows generating content, creating embeddings, and counting the number of
 /// tokens in a piece of content.
 final class GenerativeModel {
-  /// The full model identifier split into a prefix ("models" or "tunedModels")
-  /// and the model name.
+  /// The full model code split into a prefix ("models" or "tunedModels") and
+  /// the model name.
   final ({String prefix, String name}) _model;
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
@@ -91,6 +91,10 @@ final class GenerativeModel {
         _generationConfig = generationConfig,
         _client = client;
 
+  /// Returns the model code for a user friendly model name.
+  ///
+  /// If the model name is already a model code (contains a `/`), use the parts
+  /// directly. Otherwise, return a `models/` model code.
   static ({String prefix, String name}) _normalizeModelName(String modelName) {
     if (!modelName.contains('/')) return (prefix: 'models', name: modelName);
     final parts = modelName.split('/');
