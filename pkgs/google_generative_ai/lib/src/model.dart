@@ -215,8 +215,7 @@ final class GenerativeModel {
   /// Creates embeddings (list of float values) representing each content in
   /// [requests].
   ///
-  /// Sends a "batchEmbedContent" API request for the configured model,
-  /// and waits for the response.
+  /// Sends a "batchEmbedContents" API request for the configured model.
   ///
   /// Example:
   /// ```dart
