@@ -211,6 +211,32 @@ final class GenerativeModel {
         await _client.makeRequest(_taskUri(Task.embedContent), parameters);
     return parseEmbedContentResponse(response);
   }
+
+  /// Creates embeddings (list of float values) representing each content in
+  /// [requests].
+  ///
+  /// Sends a "batchEmbedContents" API request for the configured model.
+  ///
+  /// Example:
+  /// ```dart
+  /// final requests = [
+  ///   EmbedContentRequest(Content.text(first)),
+  ///   EmbedContentRequest(Content.text(second))
+  /// ];
+  /// final promptEmbeddings =
+  ///     (await model.embedContent(requests)).embedding.values;
+  /// ```
+  Future<BatchEmbedContentsResponse> batchEmbedContents(
+      Iterable<EmbedContentRequest> requests) async {
+    final parameters = {
+      'requests': requests
+          .map((r) => r.toJson(defaultModel: '${_model.prefix}/${_model.name}'))
+          .toList()
+    };
+    final response = await _client.makeRequest(
+        _taskUri(Task.batchEmbedContents), parameters);
+    return parseBatchEmbedContentsResponse(response);
+  }
 }
 
 /// Creates a model with an overridden [ApiClient] for testing.
