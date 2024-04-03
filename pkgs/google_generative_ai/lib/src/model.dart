@@ -259,6 +259,8 @@ GenerativeModel createModelWithClient(
 /// backend.
 ///
 /// Used from a `src/` import in the Vertex AI SDK.
+// TODO: https://github.com/google/generative-ai-dart/issues/111 - Changes to
+// this API need to be coordinated with the vertex AI SDK.
 GenerativeModel createModelWithBaseUri(
         {required String model,
         required String apiKey,
