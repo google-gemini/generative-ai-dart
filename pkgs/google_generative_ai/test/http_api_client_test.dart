@@ -134,5 +134,34 @@ void main() {
       await expectLater(
           response, emitsInOrder([...expectedResponses, emitsDone]));
     });
+
+    test('parses non-SSE JSON error object at the top level', () async {
+      final url = Uri.parse('https://someurl.com');
+      final streamingUrl = Uri.parse('https://someurl.com?alt=sse');
+      final body = {'some': 'body'};
+      final apiKey = 'apiKey';
+      final expectedError = {
+        'error': {'message': 'User location is not supported for the API use.'}
+      };
+      await http.runWithClient(() async {
+        final client = HttpApiClient(apiKey: apiKey);
+        final response = client.streamRequest(url, body);
+        await expectLater(response, emitsInOrder([expectedError, emitsDone]));
+      },
+          () => MockClient.streaming((request, requestStream) async {
+                expect(
+                    request,
+                    matchesBaseRequest(http.Request('POST', streamingUrl)
+                      ..headers.addAll({
+                        'x-goog-api-key': apiKey,
+                        'x-goog-api-client': clientName,
+                        'Content-Type': 'application/json'
+                      })));
+                return http.StreamedResponse(
+                    // No "data: " prefix
+                    Stream.value(utf8.encode(jsonEncode(expectedError))),
+                    400);
+              }));
+    });
   });
 }

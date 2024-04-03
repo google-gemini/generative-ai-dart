@@ -1,3 +1,15 @@
+## 0.2.3-wip
+
+- Update the package version that is sent with the HTTP client name.
+- Throw more actionable error objects than `FormatException` for errors. Errors
+  were previously only correctly parsed in `generateContent` calls.
+- Add support for tuned models.
+- Add support for `batchEmbedContents` calls.
+
+## 0.2.2
+
+- Remove usage of new SDK features - support older SDKs 3.0 and above.
+
 ## 0.2.1
 
 - Fix an issue parsing `generateContent()` responses that do not include content

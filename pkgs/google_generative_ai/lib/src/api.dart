@@ -88,6 +88,29 @@ final class EmbedContentResponse {
   EmbedContentResponse(this.embedding);
 }
 
+final class BatchEmbedContentsResponse {
+  /// The embeddings generated from the input content for each request, in the
+  /// same order as provided in the batch request.
+  final List<ContentEmbedding> embeddings;
+
+  BatchEmbedContentsResponse(this.embeddings);
+}
+
+final class EmbedContentRequest {
+  final Content content;
+  final TaskType? taskType;
+  final String? title;
+  final String? model;
+  EmbedContentRequest(this.content, {this.taskType, this.title, this.model});
+
+  Object toJson({String? defaultModel}) => {
+        'content': content.toJson(),
+        if (taskType case final taskType?) 'taskType': taskType.toJson(),
+        if (title != null) 'title': title,
+        if (model ?? defaultModel case final model?) 'model': model,
+      };
+}
+
 /// An embedding, as defined by a list of values.
 final class ContentEmbedding {
   /// The embedding values.
@@ -491,6 +514,7 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
         }),
     {'promptFeedback': final promptFeedback?} =>
       GenerateContentResponse([], _parsePromptFeedback(promptFeedback)),
+    {'error': final Object error} => throw parseError(error),
     _ => throw FormatException(
         'Unhandled GenerateContentResponse format', jsonObject)
   };
@@ -499,6 +523,7 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
   return switch (jsonObject) {
     {'totalTokens': final int totalTokens} => CountTokensResponse(totalTokens),
+    {'error': final Object error} => throw parseError(error),
     _ =>
       throw FormatException('Unhandled CountTokensResponse format', jsonObject)
   };
@@ -508,6 +533,18 @@ EmbedContentResponse parseEmbedContentResponse(Object jsonObject) {
   return switch (jsonObject) {
     {'embedding': final Object embedding} =>
       EmbedContentResponse(_parseContentEmbedding(embedding)),
+    {'error': final Object error} => throw parseError(error),
+    _ =>
+      throw FormatException('Unhandled EmbedContentResponse format', jsonObject)
+  };
+}
+
+BatchEmbedContentsResponse parseBatchEmbedContentsResponse(Object jsonObject) {
+  return switch (jsonObject) {
+    {'embeddings': final List<Object?> embeddings} =>
+      BatchEmbedContentsResponse(
+          embeddings.map(_parseContentEmbedding).toList()),
+    {'error': final Object error} => throw parseError(error),
     _ =>
       throw FormatException('Unhandled EmbedContentResponse format', jsonObject)
   };

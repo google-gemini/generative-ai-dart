@@ -17,14 +17,15 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'version.dart';
+
+const clientName = 'genai-dart/$packageVersion';
+
 abstract interface class ApiClient {
   Future<Map<String, Object?>> makeRequest(Uri uri, Map<String, Object?> body);
   Stream<Map<String, Object?>> streamRequest(
       Uri uri, Map<String, Object?> body);
 }
-
-const packageVersion = '0.0.1';
-const clientName = 'genai-dart/$packageVersion';
 
 // Encodes first by `json.encode`, then `utf8.encode`.
 // Decodes first by `utf8.decode`, then `json.decode`.
@@ -62,9 +63,18 @@ final class HttpApiClient implements ApiClient {
       ..headers['x-goog-api-key'] = _apiKey
       ..headers['x-goog-api-client'] = clientName
       ..headers['Content-Type'] = 'application/json';
-    final response = _httpClient == null
+    // TODO: When updating min SDK remove workaround.
+    final httpClient = _httpClient;
+    final response = httpClient == null
         ? await request.send()
-        : await _httpClient.send(request);
+        : await httpClient.send(request);
+    if (response.statusCode != 200) {
+      final body = await response.stream.bytesToString();
+      // Yeild a potential error object like a normal result for consistency
+      // with `makeRequest`.
+      yield jsonDecode(body) as Map<String, Object?>;
+      return;
+    }
     final lines =
         response.stream.toStringStream().transform(const LineSplitter());
     await for (final line in lines) {

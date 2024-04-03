@@ -19,7 +19,6 @@ import 'package:http/http.dart' as http;
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
-import 'error.dart';
 
 final _baseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
@@ -40,7 +39,9 @@ enum Task {
 /// Allows generating content, creating embeddings, and counting the number of
 /// tokens in a piece of content.
 final class GenerativeModel {
-  final String _model;
+  /// The full model code split into a prefix ("models" or "tunedModels") and
+  /// the model name.
+  final ({String prefix, String name}) _model;
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
@@ -50,7 +51,7 @@ final class GenerativeModel {
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
   /// The [model] argument can be a model name (such as `'gemini-pro'`) or a
-  /// model code (such as `'models/gemini-pro'`).
+  /// model code (such as `'models/gemini-pro'` or `'tunedModels/my-model'`).
   /// There is no creation time check for whether the `model` string identifies
   /// a known and supported model. If not, attempts to generate content
   /// will fail.
@@ -97,18 +98,25 @@ final class GenerativeModel {
         _useVertex =
             generationConfig != null && generationConfig.vertexConfig != null;
 
-  static const _modelsPrefix = 'models/';
-  static String _normalizeModelName(String modelName) =>
-      modelName.startsWith(_modelsPrefix)
-          ? modelName.substring(_modelsPrefix.length)
-          : modelName;
+  /// Returns the model code for a user friendly model name.
+  ///
+  /// If the model name is already a model code (contains a `/`), use the parts
+  /// directly. Otherwise, return a `models/` model code.
+  static ({String prefix, String name}) _normalizeModelName(String modelName) {
+    if (!modelName.contains('/')) return (prefix: 'models', name: modelName);
+    final parts = modelName.split('/');
+    return (prefix: parts.first, name: parts.skip(1).join('/'));
+  }
 
   Uri _taskUri(Task task) =>
       _useVertex // Vertex Uri already has the version info
           ? Uri.https(
               _modelUri.host, '${_modelUri.path}models/$_model:${task._name}')
-          : _modelUri.resolveUri(Uri(
-              pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
+          : _modelUri.resolveUri(Uri(pathSegments: [
+              _apiVersion,
+              _model.prefix,
+              '${_model.name}:${task._name}'
+            ]));
 
   /// Generates content responding to [prompt].
   ///
@@ -134,14 +142,7 @@ final class GenerativeModel {
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
-    try {
-      return parseGenerateContentResponse(response);
-    } on FormatException {
-      if (response case {'error': final Object error}) {
-        throw parseError(error);
-      }
-      rethrow;
-    }
+    return parseGenerateContentResponse(response);
   }
 
   /// Generates a stream of content responding to [prompt].
@@ -220,6 +221,32 @@ final class GenerativeModel {
     final response =
         await _client.makeRequest(_taskUri(Task.embedContent), parameters);
     return parseEmbedContentResponse(response);
+  }
+
+  /// Creates embeddings (list of float values) representing each content in
+  /// [requests].
+  ///
+  /// Sends a "batchEmbedContents" API request for the configured model.
+  ///
+  /// Example:
+  /// ```dart
+  /// final requests = [
+  ///   EmbedContentRequest(Content.text(first)),
+  ///   EmbedContentRequest(Content.text(second))
+  /// ];
+  /// final promptEmbeddings =
+  ///     (await model.embedContent(requests)).embedding.values;
+  /// ```
+  Future<BatchEmbedContentsResponse> batchEmbedContents(
+      Iterable<EmbedContentRequest> requests) async {
+    final parameters = {
+      'requests': requests
+          .map((r) => r.toJson(defaultModel: '${_model.prefix}/${_model.name}'))
+          .toList()
+    };
+    final response = await _client.makeRequest(
+        _taskUri(Task.batchEmbedContents), parameters);
+    return parseBatchEmbedContentsResponse(response);
   }
 }
 

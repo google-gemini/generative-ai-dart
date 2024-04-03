@@ -18,9 +18,13 @@ import 'package:matcher/matcher.dart';
 
 Matcher matchesPart(Part part) => switch (part) {
       TextPart(text: final text) =>
+        // TODO: When updating min SDK remove ignore.
+        // ignore: unused_result, implementation bug
         isA<TextPart>().having((p) => p.text, 'text', text),
       DataPart(mimeType: final mimeType, bytes: final bytes) => isA<DataPart>()
           .having((p) => p.mimeType, 'mimeType', mimeType)
+          // TODO: When updating min SDK remove ignore.
+          // ignore: unused_result, implementation bug
           .having((p) => p.bytes, 'bytes', bytes),
     };
 
@@ -63,6 +67,11 @@ Matcher matchesEmbedding(ContentEmbedding embedding) =>
 Matcher matchesEmbedContentResponse(EmbedContentResponse response) =>
     isA<EmbedContentResponse>().having(
         (r) => r.embedding, 'embedding', matchesEmbedding(response.embedding));
+
+Matcher matchesBatchEmbedContentsResponse(
+        BatchEmbedContentsResponse response) =>
+    isA<BatchEmbedContentsResponse>().having((r) => r.embeddings, 'embeddings',
+        response.embeddings.map(matchesEmbedding));
 
 Matcher matchesCountTokensResponse(CountTokensResponse response) =>
     isA<CountTokensResponse>()
