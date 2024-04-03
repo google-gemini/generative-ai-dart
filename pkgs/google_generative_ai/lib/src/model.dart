@@ -21,7 +21,7 @@ import 'client.dart';
 import 'content.dart';
 
 const _apiVersion = 'v1';
-final _googleAIBaseUrl =
+final _googleAIBaseUri =
     Uri.https('generativelanguage.googleapis.com', _apiVersion);
 
 enum Task {
@@ -79,7 +79,7 @@ final class GenerativeModel {
         model: model,
         safetySettings: safetySettings,
         generationConfig: generationConfig,
-        baseUri: _googleAIBaseUrl,
+        baseUri: _googleAIBaseUri,
       );
 
   GenerativeModel._withClient({
@@ -253,7 +253,7 @@ GenerativeModel createModelWithClient(
         model: model,
         safetySettings: safetySettings,
         generationConfig: generationConfig,
-        baseUri: _googleAIBaseUrl);
+        baseUri: _googleAIBaseUri);
 
 /// Creates a model with an overridden base URL to communicate with a different
 /// backend.
