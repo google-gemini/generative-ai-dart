@@ -20,8 +20,9 @@ import 'api.dart';
 import 'client.dart';
 import 'content.dart';
 
-final _googleAIBaseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
+final _googleAIBaseUrl =
+    Uri.https('generativelanguage.googleapis.com', _apiVersion);
 
 enum Task {
   generateContent,
@@ -103,11 +104,9 @@ final class GenerativeModel {
     return (prefix: parts.first, name: parts.skip(1).join('/'));
   }
 
-  Uri _taskUri(Task task) => _baseUri.resolveUri(Uri(pathSegments: [
-        _apiVersion,
-        _model.prefix,
-        '${_model.name}:${task.name}'
-      ]));
+  Uri _taskUri(Task task) => _baseUri.replace(
+      pathSegments: _baseUri.pathSegments
+          .followedBy([_model.prefix, '${_model.name}:${task.name}']));
 
   /// Generates content responding to [prompt].
   ///
