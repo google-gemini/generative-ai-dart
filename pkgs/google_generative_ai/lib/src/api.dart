@@ -197,14 +197,12 @@ enum BlockReason {
   /// Prompt was blocked due to other unspecified reasons.
   other;
 
-  static BlockReason _parseValue(String jsonObject) {
-    return switch (jsonObject) {
-      'BLOCK_REASON_UNSPECIFIED' => BlockReason.unspecified,
-      'SAFETY' => BlockReason.safety,
-      'OTHER' => BlockReason.other,
-      _ => throw FormatException('Unhandled BlockReason format', jsonObject),
-    };
-  }
+  static BlockReason _parseValue(String jsonObject) => switch (jsonObject) {
+        'BLOCK_REASON_UNSPECIFIED' => BlockReason.unspecified,
+        'SAFETY' => BlockReason.safety,
+        'OTHER' => BlockReason.other,
+        _ => throw FormatException('Unhandled BlockReason format', jsonObject),
+      };
 
   @override
   String toString() => name;
@@ -215,38 +213,38 @@ enum BlockReason {
 /// These categories cover various kinds of harms that developers may wish to
 /// adjust.
 enum HarmCategory {
-  unspecified('HARM_CATEGORY_UNSPECIFIED'),
+  unspecified,
 
   /// Malicious, intimidating, bullying, or abusive comments targeting another
   /// individual.
-  harassment('HARM_CATEGORY_HARASSMENT'),
+  harassment,
 
   /// Negative or harmful comments targeting identity and/or protected
   /// attributes.
-  hateSpeech('HARM_CATEGORY_HATE_SPEECH'),
+  hateSpeech,
 
   /// Contains references to sexual acts or other lewd content.
-  sexuallyExplicit('HARM_CATEGORY_SEXUALLY_EXPLICIT'),
+  sexuallyExplicit,
 
   /// Promotes or enables access to harmful goods, services, and activities.
-  dangerousContent('HARM_CATEGORY_DANGEROUS_CONTENT');
+  dangerousContent;
 
-  static HarmCategory _parseValue(Object jsonObject) {
-    return switch (jsonObject) {
-      'HARM_CATEGORY_UNSPECIFIED' => HarmCategory.unspecified,
-      'HARM_CATEGORY_HARASSMENT' => HarmCategory.harassment,
-      'HARM_CATEGORY_HATE_SPEECH' => HarmCategory.hateSpeech,
-      'HARM_CATEGORY_SEXUALLY_EXPLICIT' => HarmCategory.sexuallyExplicit,
-      'HARM_CATEGORY_DANGEROUS_CONTENT' => HarmCategory.dangerousContent,
-      _ => throw FormatException('Unhandled HarmCategory format', jsonObject),
-    };
-  }
+  static HarmCategory _parseValue(Object jsonObject) => switch (jsonObject) {
+        'HARM_CATEGORY_UNSPECIFIED' => unspecified,
+        'HARM_CATEGORY_HARASSMENT' => harassment,
+        'HARM_CATEGORY_HATE_SPEECH' => hateSpeech,
+        'HARM_CATEGORY_SEXUALLY_EXPLICIT' => sexuallyExplicit,
+        'HARM_CATEGORY_DANGEROUS_CONTENT' => dangerousContent,
+        _ => throw FormatException('Unhandled HarmCategory format', jsonObject),
+      };
 
-  const HarmCategory(this._jsonString);
-
-  final String _jsonString;
-
-  String toJson() => _jsonString;
+  String toJson() => switch (this) {
+        unspecified => 'HARM_CATEGORY_UNSPECIFIED',
+        harassment => 'HARM_CATEGORY_HARASSMENT',
+        hateSpeech => 'HARM_CATEGORY_HATE_SPEECH',
+        sexuallyExplicit => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        dangerousContent => 'HARM_CATEGORY_DANGEROUS_CONTENT'
+      };
 }
 
 /// The probability that a piece of content is harmful.
@@ -269,17 +267,15 @@ enum HarmProbability {
   /// Content has a high probability of being unsafe.
   high;
 
-  static HarmProbability _parseValue(Object jsonObject) {
-    return switch (jsonObject) {
-      'UNSPECIFIED' => HarmProbability.unspecified,
-      'NEGLIGIBLE' => HarmProbability.negligible,
-      'LOW' => HarmProbability.low,
-      'MEDIUM' => HarmProbability.medium,
-      'HIGH' => HarmProbability.high,
-      _ =>
-        throw FormatException('Unhandled HarmProbability format', jsonObject),
-    };
-  }
+  static HarmProbability _parseValue(Object jsonObject) => switch (jsonObject) {
+        'UNSPECIFIED' => HarmProbability.unspecified,
+        'NEGLIGIBLE' => HarmProbability.negligible,
+        'LOW' => HarmProbability.low,
+        'MEDIUM' => HarmProbability.medium,
+        'HIGH' => HarmProbability.high,
+        _ =>
+          throw FormatException('Unhandled HarmProbability format', jsonObject),
+      };
 }
 
 /// Source attributions for a piece of content.
@@ -333,17 +329,15 @@ enum FinishReason {
   /// Unknown reason.
   other;
 
-  static FinishReason _parseValue(Object jsonObject) {
-    return switch (jsonObject) {
-      'UNSPECIFIED' => FinishReason.unspecified,
-      'STOP' => FinishReason.stop,
-      'MAX_TOKENS' => FinishReason.maxTokens,
-      'SAFETY' => FinishReason.safety,
-      'RECITATION' => FinishReason.recitation,
-      'OTHER' => FinishReason.other,
-      _ => throw FormatException('Unhandled FinishReason format', jsonObject),
-    };
-  }
+  static FinishReason _parseValue(Object jsonObject) => switch (jsonObject) {
+        'UNSPECIFIED' => FinishReason.unspecified,
+        'STOP' => FinishReason.stop,
+        'MAX_TOKENS' => FinishReason.maxTokens,
+        'SAFETY' => FinishReason.safety,
+        'RECITATION' => FinishReason.recitation,
+        'OTHER' => FinishReason.other,
+        _ => throw FormatException('Unhandled FinishReason format', jsonObject),
+      };
 
   @override
   String toString() => name;
@@ -372,25 +366,27 @@ final class SafetySetting {
 /// or above this level will block content from being returned.
 enum HarmBlockThreshold {
   /// Threshold is unspecified, block using default threshold.
-  unspecified('HARM_BLOCK_THRESHOLD_UNSPECIFIED'),
+  unspecified,
 
   /// Block when medium or high probability of unsafe content.
-  low('BLOCK_LOW_AND_ABOVE'),
+  low,
 
   /// Block when medium or high probability of unsafe content.
-  medium('BLOCK_MEDIUM_AND_ABOVE'),
+  medium,
 
   /// Block when high probability of unsafe content.
-  high('BLOCK_ONLY_HIGH'),
+  high,
 
   /// Always show regardless of probability of unsafe content.
-  none('BLOCK_NONE');
+  none;
 
-  final String _jsonString;
-
-  const HarmBlockThreshold(this._jsonString);
-
-  Object toJson() => _jsonString;
+  String toJson() => switch (this) {
+        unspecified => 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
+        low => 'BLOCK_LOW_AND_ABOVE',
+        medium => 'BLOCK_MEDIUM_AND_ABOVE',
+        high => 'BLOCK_ONLY_HIGH',
+        none => 'BLOCK_NONE'
+      };
 }
 
 /// Configuration options for model generation and outputs.
@@ -463,28 +459,31 @@ final class GenerationConfig {
 /// Type of task for which the embedding will be used.
 enum TaskType {
   /// Unset value, which will default to one of the other enum values.
-  unspecified('TASK_TYPE_UNSPECIFIED'),
+  unspecified,
 
   /// Specifies the given text is a query in a search/retrieval setting.
-  retrievalQuery('RETRIEVAL_QUERY'),
+  retrievalQuery,
 
   /// Specifies the given text is a document from the corpus being searched.
-  retrievalDocument('RETRIEVAL_DOCUMENT'),
+  retrievalDocument,
 
   /// Specifies the given text will be used for STS.
-  semanticSimilarity('SEMANTIC_SIMILARITY'),
+  semanticSimilarity,
 
   /// Specifies that the given text will be classified.
-  classification('CLASSIFICATION'),
+  classification,
 
   /// Specifies that the embeddings will be used for clustering.
-  clustering('CLUSTERING');
+  clustering;
 
-  final String _jsonString;
-
-  const TaskType(this._jsonString);
-
-  Object toJson() => _jsonString;
+  String toJson() => switch (this) {
+        unspecified => 'TASK_TYPE_UNSPECIFIED',
+        retrievalQuery => 'RETRIEVAL_QUERY',
+        retrievalDocument => 'RETRIEVAL_DOCUMENT',
+        semanticSimilarity => 'SEMANTIC_SIMILARITY',
+        classification => 'CLASSIFICATION',
+        clustering => 'CLUSTERING'
+      };
 }
 
 GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
