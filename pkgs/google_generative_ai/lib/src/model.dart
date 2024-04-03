@@ -24,14 +24,11 @@ final _baseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
 
 enum Task {
-  generateContent('generateContent'),
-  streamGenerateContent('streamGenerateContent'),
-  countTokens('countTokens'),
-  embedContent('embedContent'),
-  batchEmbedContents('batchEmbedContents');
-
-  final String _name;
-  const Task(this._name);
+  generateContent,
+  streamGenerateContent,
+  countTokens,
+  embedContent,
+  batchEmbedContents;
 }
 
 /// A multimodel generative model (like Gemini).
@@ -104,7 +101,7 @@ final class GenerativeModel {
   Uri _taskUri(Task task) => _baseUrl.resolveUri(Uri(pathSegments: [
         _apiVersion,
         _model.prefix,
-        '${_model.name}:${task._name}'
+        '${_model.name}:${task.name}'
       ]));
 
   /// Generates content responding to [prompt].
