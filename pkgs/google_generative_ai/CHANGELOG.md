@@ -1,4 +1,4 @@
-## 0.2.3-wip
+## 0.2.3
 
 - Update the package version that is sent with the HTTP client name.
 - Throw more actionable error objects than `FormatException` for errors. Errors
