@@ -68,6 +68,11 @@ Matcher matchesEmbedContentResponse(EmbedContentResponse response) =>
     isA<EmbedContentResponse>().having(
         (r) => r.embedding, 'embedding', matchesEmbedding(response.embedding));
 
+Matcher matchesBatchEmbedContentsResponse(
+        BatchEmbedContentsResponse response) =>
+    isA<BatchEmbedContentsResponse>().having((r) => r.embeddings, 'embeddings',
+        response.embeddings.map(matchesEmbedding));
+
 Matcher matchesCountTokensResponse(CountTokensResponse response) =>
     isA<CountTokensResponse>()
         .having((r) => r.totalTokens, 'totalTokens', response.totalTokens);

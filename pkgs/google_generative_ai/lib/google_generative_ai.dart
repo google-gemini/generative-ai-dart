@@ -39,12 +39,14 @@ import 'src/model.dart';
 
 export 'src/api.dart'
     show
+        BatchEmbedContentsResponse,
         BlockReason,
         Candidate,
         CitationMetadata,
         CitationSource,
         ContentEmbedding,
         CountTokensResponse,
+        EmbedContentRequest,
         EmbedContentResponse,
         FinishReason,
         GenerateContentResponse,

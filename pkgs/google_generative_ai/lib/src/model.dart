@@ -24,14 +24,11 @@ final _baseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
 
 enum Task {
-  generateContent('generateContent'),
-  streamGenerateContent('streamGenerateContent'),
-  countTokens('countTokens'),
-  embedContent('embedContent'),
-  batchEmbedContents('batchEmbedContents');
-
-  final String _name;
-  const Task(this._name);
+  generateContent,
+  streamGenerateContent,
+  countTokens,
+  embedContent,
+  batchEmbedContents;
 }
 
 /// A multimodel generative model (like Gemini).
@@ -39,7 +36,9 @@ enum Task {
 /// Allows generating content, creating embeddings, and counting the number of
 /// tokens in a piece of content.
 final class GenerativeModel {
-  final String _model;
+  /// The full model code split into a prefix ("models" or "tunedModels") and
+  /// the model name.
+  final ({String prefix, String name}) _model;
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
@@ -49,7 +48,7 @@ final class GenerativeModel {
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
   /// The [model] argument can be a model name (such as `'gemini-pro'`) or a
-  /// model code (such as `'models/gemini-pro'`).
+  /// model code (such as `'models/gemini-pro'` or `'tunedModels/my-model'`).
   /// There is no creation time check for whether the `model` string identifies
   /// a known and supported model. If not, attempts to generate content
   /// will fail.
@@ -94,7 +93,7 @@ final class GenerativeModel {
             ? generationConfig.vertexConfig?.modelUri ?? _baseUrl
             : _baseUrl,
         _useVertex =
-            generationConfig != null && generationConfig.vertexConfig != null;
+            generationConfig != null && generationConfig.vertexConfig != null;;
 
   static const _modelsPrefix = 'models/';
   static String _normalizeModelName(String modelName) =>
@@ -212,6 +211,32 @@ final class GenerativeModel {
     final response =
         await _client.makeRequest(_taskUri(Task.embedContent), parameters);
     return parseEmbedContentResponse(response);
+  }
+
+  /// Creates embeddings (list of float values) representing each content in
+  /// [requests].
+  ///
+  /// Sends a "batchEmbedContents" API request for the configured model.
+  ///
+  /// Example:
+  /// ```dart
+  /// final requests = [
+  ///   EmbedContentRequest(Content.text(first)),
+  ///   EmbedContentRequest(Content.text(second))
+  /// ];
+  /// final promptEmbeddings =
+  ///     (await model.embedContent(requests)).embedding.values;
+  /// ```
+  Future<BatchEmbedContentsResponse> batchEmbedContents(
+      Iterable<EmbedContentRequest> requests) async {
+    final parameters = {
+      'requests': requests
+          .map((r) => r.toJson(defaultModel: '${_model.prefix}/${_model.name}'))
+          .toList()
+    };
+    final response = await _client.makeRequest(
+        _taskUri(Task.batchEmbedContents), parameters);
+    return parseBatchEmbedContentsResponse(response);
   }
 }
 
