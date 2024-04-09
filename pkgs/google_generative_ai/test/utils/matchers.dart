@@ -26,6 +26,10 @@ Matcher matchesPart(Part part) => switch (part) {
           // TODO: When updating min SDK remove ignore.
           // ignore: unused_result, implementation bug
           .having((p) => p.bytes, 'bytes', bytes),
+      FilePart(uri: final uri) => isA<FilePart>()
+          // TODO: When updating min SDK remove ignore.
+          // ignore: unused_result, implementation bug
+          .having((p) => p.uri, 'uri', uri),
     };
 
 Matcher matchesContent(Content content) => isA<Content>()
