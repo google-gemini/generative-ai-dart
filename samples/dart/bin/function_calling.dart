@@ -56,9 +56,39 @@ void main() async {
   } else {
     content
       ..add(response.candidates.first.content)
-      ..add(Content.functionResponse(
-          'fetchCurrentWeather', {'weather': 'rainy'}));
+      ..add(_dispatchFunctionCall(functionCalls.single));
     final nextResponse = await model.generateContent(content);
     print('Response: ${nextResponse.text}');
   }
+}
+
+Content _dispatchFunctionCall(FunctionCall call) {
+  final result = switch (call.name) {
+    'fetchCurrentWeather' => {
+        'weather': _fetchWeather(WeatherRequest._parse(call.args))
+      },
+    _ => throw UnimplementedError('Function not implemented: ${call.name}')
+  };
+  return Content.functionResponse(call.name, result);
+}
+
+class WeatherRequest {
+  static WeatherRequest _parse(Map<String, Object?> jsonObject) =>
+      switch (jsonObject) {
+        {'location': final String location} => WeatherRequest(location),
+        _ =>
+          throw FormatException('Unhandled WeatherRequest format', jsonObject),
+      };
+  final String location;
+  WeatherRequest(this.location);
+}
+
+String _fetchWeather(WeatherRequest request) {
+  const weather = {
+    'Seattle': 'rainy',
+    'Chicago': 'windy',
+    'Sunnyvale': 'sunny'
+  };
+  final location = request.location;
+  return weather[location] ?? 'who knows?';
 }
