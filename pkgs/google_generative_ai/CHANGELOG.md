@@ -1,3 +1,8 @@
+## 0.2.4-wip
+
+- Allow specifying an API version in a `requestOptions` argument when
+  constructing a model.
+
 ## 0.2.3
 
 - Update the package version that is sent with the HTTP client name.

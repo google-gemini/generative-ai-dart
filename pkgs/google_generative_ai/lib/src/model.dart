@@ -21,8 +21,8 @@ import 'client.dart';
 import 'content.dart';
 
 const _apiVersion = 'v1';
-final _googleAIBaseUri =
-    Uri.https('generativelanguage.googleapis.com', _apiVersion);
+Uri _googleAIBaseUri(RequestOptions? options) => Uri.https(
+    'generativelanguage.googleapis.com', options?.apiVersion ?? _apiVersion);
 
 enum Task {
   generateContent,
@@ -30,6 +30,19 @@ enum Task {
   countTokens,
   embedContent,
   batchEmbedContents;
+}
+
+/// Configuration for how a [GenerativeModel] makes requests.
+///
+/// This allows overriding the API version in use which may be required to use
+/// some beta features.
+final class RequestOptions {
+  /// The API version used to make requests.
+  ///
+  /// By default the version is `v1`. This may be specified as `v1beta` to use
+  /// beta features.
+  final String? apiVersion;
+  const RequestOptions({this.apiVersion});
 }
 
 /// A multimodel generative model (like Gemini).
@@ -73,13 +86,14 @@ final class GenerativeModel {
     List<SafetySetting> safetySettings = const [],
     GenerationConfig? generationConfig,
     http.Client? httpClient,
+    RequestOptions? requestOptions,
   }) =>
       GenerativeModel._withClient(
         client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
         model: model,
         safetySettings: safetySettings,
         generationConfig: generationConfig,
-        baseUri: _googleAIBaseUri,
+        baseUri: _googleAIBaseUri(requestOptions),
       );
 
   GenerativeModel._withClient({
@@ -243,17 +257,20 @@ final class GenerativeModel {
 /// Creates a model with an overridden [ApiClient] for testing.
 ///
 /// Package private test-only method.
-GenerativeModel createModelWithClient(
-        {required String model,
-        required ApiClient client,
-        List<SafetySetting> safetySettings = const [],
-        GenerationConfig? generationConfig}) =>
+GenerativeModel createModelWithClient({
+  required String model,
+  required ApiClient client,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+  RequestOptions? requestOptions,
+}) =>
     GenerativeModel._withClient(
-        client: client,
-        model: model,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig,
-        baseUri: _googleAIBaseUri);
+      client: client,
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+      baseUri: _googleAIBaseUri(requestOptions),
+    );
 
 /// Creates a model with an overridden base URL to communicate with a different
 /// backend.

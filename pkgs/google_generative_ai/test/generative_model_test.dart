@@ -24,9 +24,10 @@ void main() {
     const defaultModelName = 'some-model';
 
     (StubClient, GenerativeModel) createModel(
-        [String modelName = defaultModelName]) {
+        [String modelName = defaultModelName, RequestOptions? requestOptions]) {
       final client = StubClient();
-      final model = createModelWithClient(model: modelName, client: client);
+      final model = createModelWithClient(
+          model: modelName, client: client, requestOptions: requestOptions);
       return (client, model);
     }
 
@@ -76,6 +77,46 @@ void main() {
       client.stub(
         Uri.parse('https://generativelanguage.googleapis.com/v1/'
             'tunedModels/some-model:generateContent'),
+        {
+          'contents': [
+            {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          ]
+        },
+        {
+          'candidates': [
+            {
+              'content': {
+                'role': 'model',
+                'parts': [
+                  {'text': result}
+                ]
+              }
+            }
+          ]
+        },
+      );
+      final response = await model.generateContent([Content.text(prompt)]);
+      expect(
+          response,
+          matchesGenerateContentResponse(GenerateContentResponse([
+            Candidate(
+                Content('model', [TextPart(result)]), null, null, null, null),
+          ], null)));
+    });
+
+    test('allows specifying an API version', () async {
+      final (client, model) = createModel(
+          defaultModelName, RequestOptions(apiVersion: 'override_version'));
+      final prompt = 'Some prompt';
+      final result = 'Some response';
+      client.stub(
+        Uri.parse('https://generativelanguage.googleapis.com/override_version/'
+            'models/some-model:generateContent'),
         {
           'contents': [
             {
