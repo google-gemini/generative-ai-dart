@@ -32,7 +32,15 @@ enum Task {
   batchEmbedContents;
 }
 
+/// Configuration for how a [GenerativeModel] makes requests.
+///
+/// This allows overriding the API version in use which may be required to use
+/// some beta features.
 final class RequestOptions {
+  /// The API version used to make requests.
+  ///
+  /// By default the version is `v1`. This may be specified as `v1beta` to use
+  /// beta features.
   final String? apiVersion;
   const RequestOptions({this.apiVersion});
 }
