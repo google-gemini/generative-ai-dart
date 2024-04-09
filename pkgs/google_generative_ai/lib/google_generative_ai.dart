@@ -66,4 +66,4 @@ export 'src/error.dart'
         InvalidApiKey,
         ServerException,
         UnsupportedUserLocation;
-export 'src/model.dart' show GenerativeModel;
+export 'src/model.dart' show GenerativeModel, RequestOptions;

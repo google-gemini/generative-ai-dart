@@ -21,8 +21,8 @@ import 'client.dart';
 import 'content.dart';
 
 const _apiVersion = 'v1';
-final _googleAIBaseUri =
-    Uri.https('generativelanguage.googleapis.com', _apiVersion);
+Uri _googleAIBaseUri(RequestOptions? options) => Uri.https(
+    'generativelanguage.googleapis.com', options?.apiVersion ?? _apiVersion);
 
 enum Task {
   generateContent,
@@ -30,6 +30,11 @@ enum Task {
   countTokens,
   embedContent,
   batchEmbedContents;
+}
+
+class RequestOptions {
+  final String? apiVersion;
+  const RequestOptions({this.apiVersion});
 }
 
 /// A multimodel generative model (like Gemini).
@@ -43,7 +48,8 @@ final class GenerativeModel {
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
-  final Uri _baseUri;
+  final RequestOptions? _requestOptions;
+  final Uri Function(RequestOptions?) _baseUri;
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -73,6 +79,7 @@ final class GenerativeModel {
     List<SafetySetting> safetySettings = const [],
     GenerationConfig? generationConfig,
     http.Client? httpClient,
+    RequestOptions? requestOptions,
   }) =>
       GenerativeModel._withClient(
         client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
@@ -80,6 +87,7 @@ final class GenerativeModel {
         safetySettings: safetySettings,
         generationConfig: generationConfig,
         baseUri: _googleAIBaseUri,
+        requestOptions: requestOptions,
       );
 
   GenerativeModel._withClient({
@@ -87,12 +95,14 @@ final class GenerativeModel {
     required String model,
     required List<SafetySetting> safetySettings,
     required GenerationConfig? generationConfig,
-    required Uri baseUri,
+    required Uri Function(RequestOptions?) baseUri,
+    required RequestOptions? requestOptions,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
-        _client = client;
+        _client = client,
+        _requestOptions = requestOptions;
 
   /// Returns the model code for a user friendly model name.
   ///
@@ -104,9 +114,12 @@ final class GenerativeModel {
     return (prefix: parts.first, name: parts.skip(1).join('/'));
   }
 
-  Uri _taskUri(Task task) => _baseUri.replace(
-      pathSegments: _baseUri.pathSegments
-          .followedBy([_model.prefix, '${_model.name}:${task.name}']));
+  Uri _taskUri(Task task) {
+    final baseUri = _baseUri(_requestOptions);
+    return baseUri.replace(
+        pathSegments: baseUri.pathSegments
+            .followedBy([_model.prefix, '${_model.name}:${task.name}']));
+  }
 
   /// Generates content responding to [prompt].
   ///
@@ -243,17 +256,21 @@ final class GenerativeModel {
 /// Creates a model with an overridden [ApiClient] for testing.
 ///
 /// Package private test-only method.
-GenerativeModel createModelWithClient(
-        {required String model,
-        required ApiClient client,
-        List<SafetySetting> safetySettings = const [],
-        GenerationConfig? generationConfig}) =>
+GenerativeModel createModelWithClient({
+  required String model,
+  required ApiClient client,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+  RequestOptions? requestOptions,
+}) =>
     GenerativeModel._withClient(
-        client: client,
-        model: model,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig,
-        baseUri: _googleAIBaseUri);
+      client: client,
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+      baseUri: _googleAIBaseUri,
+      requestOptions: requestOptions,
+    );
 
 /// Creates a model with an overridden base URL to communicate with a different
 /// backend.
@@ -261,15 +278,42 @@ GenerativeModel createModelWithClient(
 /// Used from a `src/` import in the Vertex AI SDK.
 // TODO: https://github.com/google/generative-ai-dart/issues/111 - Changes to
 // this API need to be coordinated with the vertex AI SDK.
-GenerativeModel createModelWithBaseUri(
-        {required String model,
-        required String apiKey,
-        required Uri baseUri,
-        List<SafetySetting> safetySettings = const [],
-        GenerationConfig? generationConfig}) =>
+GenerativeModel createModelWithBaseUri({
+  required String model,
+  required String apiKey,
+  required Uri baseUri,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+  RequestOptions? requestOptions,
+}) =>
     GenerativeModel._withClient(
-        client: HttpApiClient(apiKey: apiKey),
-        model: model,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig,
-        baseUri: baseUri);
+      client: HttpApiClient(apiKey: apiKey),
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+      baseUri: (_) => baseUri,
+      requestOptions: requestOptions,
+    );
+
+/// Creates a model with an overridden base URL callback to communicate with a
+/// different backend.
+///
+/// Used from a `src/` import in the Vertex AI SDK.
+// TODO: https://github.com/google/generative-ai-dart/issues/111 - Changes to
+// this API need to be coordinated with the vertex AI SDK.
+GenerativeModel createModelWithVersionedBaseUri({
+  required String model,
+  required String apiKey,
+  required Uri Function(RequestOptions?) baseUri,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+  RequestOptions? requestOptions,
+}) =>
+    GenerativeModel._withClient(
+      client: HttpApiClient(apiKey: apiKey),
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+      baseUri: baseUri,
+      requestOptions: requestOptions,
+    );
