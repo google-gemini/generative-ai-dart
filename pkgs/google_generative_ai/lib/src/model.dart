@@ -32,7 +32,7 @@ enum Task {
   batchEmbedContents;
 }
 
-class RequestOptions {
+final class RequestOptions {
   final String? apiVersion;
   const RequestOptions({this.apiVersion});
 }
