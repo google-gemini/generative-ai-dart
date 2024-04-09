@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const packageVersion = '0.2.4-wip';
+const packageVersion = '0.3.0-wip';
