@@ -79,6 +79,15 @@ final class GenerateContentResponse {
       [Candidate(), ...] => null,
     };
   }
+
+  /// The function call parts of the first [candidates], if any.
+  ///
+  /// Returns an empty list if there are no candidates, or if the first
+  /// candidate has no [FunctionCall] parts. There is no error thrown if the
+  /// prompt or response were blocked.
+  Iterable<FunctionCall> get functionCalls =>
+      candidates.firstOrNull?.content.parts.whereType<FunctionCall>() ??
+      const [];
 }
 
 final class EmbedContentResponse {
