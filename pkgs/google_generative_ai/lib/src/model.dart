@@ -57,6 +57,7 @@ final class GenerativeModel {
   final GenerationConfig? _generationConfig;
   final ApiClient _client;
   final Uri _baseUri;
+  final String? _systemInstruction;
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -71,8 +72,8 @@ final class GenerativeModel {
   ///
   /// [API keys]: https://cloud.google.com/docs/authentication/api-keys "Google Cloud API keys"
   ///
-  /// The optional [safetySettings] and [generationConfig] can be used to
-  /// control and guide the generation. See [SafetySetting] and
+  /// The optional [safetySettings], [generationConfig] and [systemInstruction]
+  /// can be used to control and guide the generation. See [SafetySetting] and
   /// [GenerationConfig] for details.
   ///
   /// Content creation requests are sent to a server through the [httpClient],
@@ -87,14 +88,15 @@ final class GenerativeModel {
     GenerationConfig? generationConfig,
     http.Client? httpClient,
     RequestOptions? requestOptions,
+    String? systemInstruction,
   }) =>
       GenerativeModel._withClient(
-        client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
-        model: model,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig,
-        baseUri: _googleAIBaseUri(requestOptions),
-      );
+          client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
+          model: model,
+          safetySettings: safetySettings,
+          generationConfig: generationConfig,
+          baseUri: _googleAIBaseUri(requestOptions),
+          systemInstruction: systemInstruction);
 
   GenerativeModel._withClient({
     required ApiClient client,
@@ -102,11 +104,13 @@ final class GenerativeModel {
     required List<SafetySetting> safetySettings,
     required GenerationConfig? generationConfig,
     required Uri baseUri,
+    String? systemInstruction,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
-        _client = client;
+        _client = client,
+        _systemInstruction = systemInstruction;
 
   /// Returns the model code for a user friendly model name.
   ///
@@ -134,15 +138,19 @@ final class GenerativeModel {
   /// ```
   Future<GenerateContentResponse> generateContent(Iterable<Content> prompt,
       {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) async {
+      GenerationConfig? generationConfig,
+      String? systemInstruction}) async {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
+    systemInstruction ??= _systemInstruction;
     final parameters = {
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
+      if (systemInstruction case final systemInstructionFinal)
+        'systemInstruction': systemInstructionFinal,
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
@@ -164,15 +172,20 @@ final class GenerativeModel {
   Stream<GenerateContentResponse> generateContentStream(
       Iterable<Content> prompt,
       {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) {
+      GenerationConfig? generationConfig,
+      String? systemInstruction}) {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
+    systemInstruction ??= _systemInstruction;
+
     final parameters = <String, Object?>{
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
+      if (systemInstruction case final systemInstructionFinal)
+        'systemInstruction': Content(null, [TextPart(systemInstructionFinal!)]),
     };
     final response =
         _client.streamRequest(_taskUri(Task.streamGenerateContent), parameters);
