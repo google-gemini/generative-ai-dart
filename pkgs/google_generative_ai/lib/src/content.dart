@@ -73,8 +73,7 @@ Part _parsePart(Object? jsonObject) {
       throw UnimplementedError('FunctionResponse part not yet supported'),
     {'inlineData': {'mimeType': String _, 'data': String _}} =>
       throw UnimplementedError('inlineData content part not yet supported'),
-    _ =>
-      throw FormatException('Unhandled Part format', jsonObject),
+    _ => throw FormatException('Unhandled Part format', jsonObject),
   };
 }
 
