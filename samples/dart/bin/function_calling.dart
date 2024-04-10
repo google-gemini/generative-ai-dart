@@ -45,8 +45,7 @@ void main() async {
   final content = [Content.text(prompt)];
   final response = await model.generateContent(content);
 
-  final functionCalls =
-      response.candidates.first.content.parts.whereType<FunctionCall>();
+  final functionCalls = response.functionCalls.toList();
   if (functionCalls.isEmpty) {
     print('No function calls.');
     print(response.text);
