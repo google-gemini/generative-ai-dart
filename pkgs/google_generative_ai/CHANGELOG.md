@@ -3,6 +3,8 @@
 - Allow specifying an API version in a `requestOptions` argument when
   constructing a model.
 - Add support for referring to uploaded files in request contents.
+- Add support for passing tools with functions the model may call while
+  generating responses.
 - **Breaking** Added new subclasses `FilePart`, `FunctionCall`, and
   `FunctionResponse` of the sealed class `Part`.
 
