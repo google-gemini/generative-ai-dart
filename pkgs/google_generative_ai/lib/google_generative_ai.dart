@@ -60,7 +60,14 @@ export 'src/api.dart'
         TaskType;
 export 'src/chat.dart' show ChatSession, StartChatExtension;
 export 'src/content.dart'
-    show Content, DataPart, FunctionCall, FunctionResponse, Part, TextPart;
+    show
+        Content,
+        DataPart,
+        FilePart,
+        FunctionCall,
+        FunctionResponse,
+        Part,
+        TextPart;
 export 'src/error.dart'
     show
         GenerativeAIException,

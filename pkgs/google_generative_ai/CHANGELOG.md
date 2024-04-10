@@ -1,12 +1,10 @@
 ## 0.3.0-wip
 
-- **Breaking** Add `FunctionCall` and `FunctionResponse` subclasses of the
-  sealed class `Part`.
-
-## 0.2.4-wip
-
 - Allow specifying an API version in a `requestOptions` argument when
   constructing a model.
+- Add support for referring to uploaded files in request contents.
+- **Breaking** Added new subclasses `FilePart`, `FunctionCall`, and
+  `FunctionResponse` of the sealed class `Part`.
 
 ## 0.2.3
 
