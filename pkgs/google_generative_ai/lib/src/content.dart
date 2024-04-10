@@ -35,6 +35,9 @@ final class Content {
       Content('user', [DataPart(mimeType, bytes)]);
   static Content multi(Iterable<Part> parts) => Content('user', [...parts]);
   static Content model(Iterable<Part> parts) => Content('model', [...parts]);
+  static Content functionResponse(
+          String name, Map<String, Object?>? response) =>
+      Content('function', [FunctionResponse(name, response)]);
 
   Map<String, Object?> toJson() => {
         if (role case final role?) 'role': role,
@@ -57,6 +60,17 @@ Content parseContent(Object jsonObject) {
 Part _parsePart(Object? jsonObject) {
   return switch (jsonObject) {
     {'text': final String text} => TextPart(text),
+    {
+      'functionCall': {
+        'name': final String name,
+        'args': final Map<String, Object?> args
+      }
+    } =>
+      FunctionCall(name, args),
+    {
+      'functionResponse': {'name': String _, 'response': Map<String, Object?> _}
+    } =>
+      throw UnimplementedError('FunctionResponse part not yet supported'),
     {'inlineData': {'mimeType': String _, 'data': String _}} =>
       throw UnimplementedError('inlineData content part not yet supported'),
     _ => throw FormatException('Unhandled Part format', jsonObject),
@@ -95,5 +109,42 @@ final class FilePart implements Part {
   @override
   Object toJson() => {
         'file_data': {'file_uri': '$uri'}
+      };
+}
+
+/// A predicted `FunctionCall` returned from the model that contains
+/// a string representing the `FunctionDeclaration.name` with the
+/// arguments and their values.
+final class FunctionCall implements Part {
+  /// The name of the function to call.
+  final String name;
+
+  /// The function parameters and values.
+  final Map<String, Object?> args;
+
+  FunctionCall(this.name, this.args);
+
+  @override
+  // TODO: Do we need the wrapper object?
+  Object toJson() => {
+        'functionCall': {'name': name, 'args': args}
+      };
+}
+
+final class FunctionResponse implements Part {
+  /// The name of the function that was called.
+  final String name;
+
+  /// The function response.
+  ///
+  /// The values must be JSON compatible types; `String`, `num`, `bool`, `List`
+  /// of JSON compatibles types, or `Map` from String to JSON compatible types.
+  final Map<String, Object?>? response;
+
+  FunctionResponse(this.name, this.response);
+
+  @override
+  Object toJson() => {
+        'functionResponse': {'name': name, 'response': response}
       };
 }
