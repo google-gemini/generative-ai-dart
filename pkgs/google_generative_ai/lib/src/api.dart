@@ -80,7 +80,7 @@ final class GenerateContentResponse {
     };
   }
 
-  /// The function call parts of the first [candidates], if any.
+  /// The function call parts of the first candidate in [candidates], if any.
   ///
   /// Returns an empty list if there are no candidates, or if the first
   /// candidate has no [FunctionCall] parts. There is no error thrown if the
