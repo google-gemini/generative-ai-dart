@@ -14,7 +14,7 @@
 
 import 'content.dart';
 
-/// Tool details that the model may use to generate response.
+/// Tool details that the model may use to generate a response.
 ///
 /// A `Tool` is a piece of code that enables the system to interact with
 /// external systems to perform an action, or set of actions, outside of

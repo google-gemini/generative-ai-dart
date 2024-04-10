@@ -152,8 +152,10 @@ final class ChatSession {
     for (final content in contents) {
       for (final part in content.parts) {
         if (part case TextPart(:final text)) {
-          previousText = textBuffer.isEmpty ? part : null;
-          textBuffer.write(text);
+          if (text.isNotEmpty) {
+            previousText = textBuffer.isEmpty ? part : null;
+            textBuffer.write(text);
+          }
         } else {
           addBufferedText();
           parts.add(part);

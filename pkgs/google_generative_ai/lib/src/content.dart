@@ -89,6 +89,7 @@ final class TextPart implements Part {
   Object toJson() => {'text': text};
 }
 
+/// A [Part] with the byte content of a file.
 final class DataPart implements Part {
   final String mimeType;
   final Uint8List bytes;
@@ -96,6 +97,18 @@ final class DataPart implements Part {
   @override
   Object toJson() => {
         'inlineData': {'data': base64Encode(bytes), 'mimeType': mimeType}
+      };
+}
+
+/// A [Part] referring to an uploaded file.
+///
+/// The [uri] should refer to a file uploaded to the Google AI File Service API.
+final class FilePart implements Part {
+  final Uri uri;
+  FilePart(this.uri);
+  @override
+  Object toJson() => {
+        'file_data': {'file_uri': '$uri'}
       };
 }
 
