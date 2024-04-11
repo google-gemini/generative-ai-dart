@@ -5,6 +5,7 @@
 - Add support for referring to uploaded files in request contents.
 - Add support for passing tools with functions the model may call while
   generating responses.
+- Add support for passing a system instruction when creating the model.
 - **Breaking** Added new subclasses `FilePart`, `FunctionCall`, and
   `FunctionResponse` of the sealed class `Part`.
 
