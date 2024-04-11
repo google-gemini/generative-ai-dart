@@ -1,4 +1,5 @@
 name: google_generative_ai
+# Update `lib/version.dart` when changing version.
 version: 0.3.0
 description: >-
   The Google AI Dart SDK enables developers to use Google's state-of-the-art
