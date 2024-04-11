@@ -1,4 +1,4 @@
-## 0.3.0-wip
+## 0.3.0
 
 - Allow specifying an API version in a `requestOptions` argument when
   constructing a model.
