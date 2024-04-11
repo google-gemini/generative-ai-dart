@@ -59,6 +59,7 @@ final class GenerativeModel {
   final List<Tool>? _tools;
   final ApiClient _client;
   final Uri _baseUri;
+  final Content? _systemInstruction;
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -84,8 +85,12 @@ final class GenerativeModel {
   /// request.
   ///
   /// Functions that the model may call while generating content can be passed
-  /// in [tools]. When using tools the [requestOptions] must be passed to
+  /// in [tools]. When using tools [requestOptions] must be passed to
   /// override the `apiVersion` to `v1beta`.
+  ///
+  /// A [Content.system] can be passed to [systemInstruction] to give
+  /// high priority instructions to the model. When using system instructions
+  /// [requestOptions] must be passed to override the `apiVersion` to `v1beta`.
   factory GenerativeModel({
     required String model,
     required String apiKey,
@@ -94,6 +99,7 @@ final class GenerativeModel {
     List<Tool>? tools,
     http.Client? httpClient,
     RequestOptions? requestOptions,
+    Content? systemInstruction,
   }) =>
       GenerativeModel._withClient(
         client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
@@ -102,6 +108,7 @@ final class GenerativeModel {
         generationConfig: generationConfig,
         baseUri: _googleAIBaseUri(requestOptions),
         tools: tools,
+        systemInstruction: systemInstruction,
       );
 
   GenerativeModel._withClient({
@@ -111,11 +118,13 @@ final class GenerativeModel {
     required GenerationConfig? generationConfig,
     required Uri baseUri,
     required List<Tool>? tools,
+    required Content? systemInstruction,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
         _tools = tools,
+        _systemInstruction = systemInstruction,
         _client = client;
 
   /// Returns the model code for a user friendly model name.
@@ -155,6 +164,8 @@ final class GenerativeModel {
         'generationConfig': config.toJson(),
       if (_tools case final tools?)
         'tools': tools.map((t) => t.toJson()).toList(),
+      if (_systemInstruction case final systemInstruction?)
+        'systemInstruction': systemInstruction.toJson(),
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
@@ -187,6 +198,8 @@ final class GenerativeModel {
         'generationConfig': config.toJson(),
       if (_tools case final tools?)
         'tools': tools.map((t) => t.toJson()).toList(),
+      if (_systemInstruction case final systemInstruction?)
+        'systemInstruction': systemInstruction.toJson(),
     };
     final response =
         _client.streamRequest(_taskUri(Task.streamGenerateContent), parameters);
@@ -278,6 +291,7 @@ GenerativeModel createModelWithClient({
   GenerationConfig? generationConfig,
   RequestOptions? requestOptions,
   List<Tool>? tools,
+  Content? systemInstruction,
 }) =>
     GenerativeModel._withClient(
       client: client,
@@ -286,6 +300,7 @@ GenerativeModel createModelWithClient({
       generationConfig: generationConfig,
       baseUri: _googleAIBaseUri(requestOptions),
       tools: tools,
+      systemInstruction: systemInstruction,
     );
 
 /// Creates a model with an overridden base URL to communicate with a different
@@ -300,6 +315,7 @@ GenerativeModel createModelWithBaseUri({
   required Uri baseUri,
   List<SafetySetting> safetySettings = const [],
   GenerationConfig? generationConfig,
+  Content? systemInstruction,
 }) =>
     GenerativeModel._withClient(
       client: HttpApiClient(apiKey: apiKey),
@@ -308,4 +324,5 @@ GenerativeModel createModelWithBaseUri({
       generationConfig: generationConfig,
       baseUri: baseUri,
       tools: null,
+      systemInstruction: systemInstruction,
     );

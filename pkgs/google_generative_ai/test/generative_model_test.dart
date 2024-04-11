@@ -23,16 +23,24 @@ void main() {
   group('GenerativeModel', () {
     const defaultModelName = 'some-model';
 
-    (StubClient, GenerativeModel) createModel(
-        [String modelName = defaultModelName, RequestOptions? requestOptions]) {
+    (StubClient, GenerativeModel) createModel({
+      String modelName = defaultModelName,
+      RequestOptions? requestOptions,
+      Content? systemInstruction,
+    }) {
       final client = StubClient();
       final model = createModelWithClient(
-          model: modelName, client: client, requestOptions: requestOptions);
+        model: modelName,
+        client: client,
+        requestOptions: requestOptions,
+        systemInstruction: systemInstruction,
+      );
       return (client, model);
     }
 
     test('strips leading "models/" from model name', () async {
-      final (client, model) = createModel('models/$defaultModelName');
+      final (client, model) =
+          createModel(modelName: 'models/$defaultModelName');
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
@@ -71,7 +79,8 @@ void main() {
     });
 
     test('allows specifying a tuned model', () async {
-      final (client, model) = createModel('tunedModels/$defaultModelName');
+      final (client, model) =
+          createModel(modelName: 'tunedModels/$defaultModelName');
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
@@ -111,7 +120,7 @@ void main() {
 
     test('allows specifying an API version', () async {
       final (client, model) = createModel(
-          defaultModelName, RequestOptions(apiVersion: 'override_version'));
+          requestOptions: RequestOptions(apiVersion: 'override_version'));
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
@@ -273,6 +282,55 @@ void main() {
         );
         final response = await model.generateContent([Content.text(prompt)],
             generationConfig: GenerationConfig(stopSequences: ['a']));
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can pass system instructions', () async {
+        final instructions = 'Do a good job';
+        final (client, model) =
+            createModel(systemInstruction: Content.system(instructions));
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'systemInstruction': {
+              'role': 'system',
+              'parts': [
+                {'text': instructions}
+              ],
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent(
+          [Content.text(prompt)],
+        );
         expect(
             response,
             matchesGenerateContentResponse(GenerateContentResponse([
