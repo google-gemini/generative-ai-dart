@@ -28,7 +28,7 @@ void main() {
       RequestOptions? requestOptions,
       Content? systemInstruction,
       List<Tool>? tools,
-      FunctionCallingConfig? functionCallingConfig,
+      ToolConfig? toolConfig,
     }) {
       final client = StubClient();
       final model = createModelWithClient(
@@ -37,7 +37,7 @@ void main() {
         requestOptions: requestOptions,
         systemInstruction: systemInstruction,
         tools: tools,
-        functionCallingConfig: functionCallingConfig,
+        toolConfig: toolConfig,
       );
       return (client, model);
     }
@@ -351,9 +351,10 @@ void main() {
                     Schema(SchemaType.string, description: 'Some parameter.'))
               ])
             ],
-            functionCallingConfig: FunctionCallingConfig(
-                mode: FunctionCallingMode.any,
-                allowedFunctionNames: {'someFunction'}));
+            toolConfig: ToolConfig(
+                functionCallingConfig: FunctionCallingConfig(
+                    mode: FunctionCallingMode.any,
+                    allowedFunctionNames: {'someFunction'})));
         final prompt = 'Some prompt';
         final result = 'Some response';
         client.stub(
@@ -382,9 +383,11 @@ void main() {
                 ]
               }
             ],
-            'functionCallingConfig': {
-              'mode': 'ANY',
-              'allowedFunctionNames': ['someFunction'],
+            'toolConfig': {
+              'functionCallingConfig': {
+                'mode': 'ANY',
+                'allowedFunctionNames': ['someFunction'],
+              }
             },
           },
           {
@@ -439,9 +442,11 @@ void main() {
                 ]
               }
             ],
-            'functionCallingConfig': {
-              'mode': 'ANY',
-              'allowedFunctionNames': ['someFunction'],
+            'toolConfig': {
+              'functionCallingConfig': {
+                'mode': 'ANY',
+                'allowedFunctionNames': ['someFunction'],
+              }
             },
           },
           {
@@ -466,9 +471,10 @@ void main() {
                     Schema(SchemaType.string, description: 'Some parameter.'))
               ])
             ],
-            functionCallingConfig: FunctionCallingConfig(
-                mode: FunctionCallingMode.any,
-                allowedFunctionNames: {'someFunction'}));
+            toolConfig: ToolConfig(
+                functionCallingConfig: FunctionCallingConfig(
+                    mode: FunctionCallingMode.any,
+                    allowedFunctionNames: {'someFunction'})));
         expect(
             response,
             matchesGenerateContentResponse(GenerateContentResponse([

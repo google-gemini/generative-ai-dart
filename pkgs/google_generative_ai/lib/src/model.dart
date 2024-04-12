@@ -60,7 +60,7 @@ final class GenerativeModel {
   final ApiClient _client;
   final Uri _baseUri;
   final Content? _systemInstruction;
-  final FunctionCallingConfig? _functionCallingConfig;
+  final ToolConfig? _toolConfig;
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -101,7 +101,7 @@ final class GenerativeModel {
     http.Client? httpClient,
     RequestOptions? requestOptions,
     Content? systemInstruction,
-    FunctionCallingConfig? functionCallingConfig,
+    ToolConfig? toolConfig,
   }) =>
       GenerativeModel._withClient(
         client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
@@ -111,7 +111,7 @@ final class GenerativeModel {
         baseUri: _googleAIBaseUri(requestOptions),
         tools: tools,
         systemInstruction: systemInstruction,
-        functionCallingConfig: functionCallingConfig,
+        toolConfig: toolConfig,
       );
 
   GenerativeModel._withClient({
@@ -122,14 +122,14 @@ final class GenerativeModel {
     required Uri baseUri,
     required List<Tool>? tools,
     required Content? systemInstruction,
-    required FunctionCallingConfig? functionCallingConfig,
+    required ToolConfig? toolConfig,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
         _tools = tools,
         _systemInstruction = systemInstruction,
-        _functionCallingConfig = functionCallingConfig,
+        _toolConfig = toolConfig,
         _client = client;
 
   /// Returns the model code for a user friendly model name.
@@ -161,12 +161,12 @@ final class GenerativeModel {
     List<SafetySetting>? safetySettings,
     GenerationConfig? generationConfig,
     List<Tool>? tools,
-    FunctionCallingConfig? functionCallingConfig,
+    ToolConfig? toolConfig,
   }) async {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
     tools ??= _tools;
-    functionCallingConfig ??= _functionCallingConfig;
+    toolConfig ??= _toolConfig;
     final parameters = {
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
@@ -174,8 +174,7 @@ final class GenerativeModel {
       if (generationConfig != null)
         'generationConfig': generationConfig.toJson(),
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      if (functionCallingConfig != null)
-        'functionCallingConfig': functionCallingConfig.toJson(),
+      if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
       if (_systemInstruction case final systemInstruction?)
         'systemInstruction': systemInstruction.toJson(),
     };
@@ -201,12 +200,12 @@ final class GenerativeModel {
     List<SafetySetting>? safetySettings,
     GenerationConfig? generationConfig,
     List<Tool>? tools,
-    FunctionCallingConfig? functionCallingConfig,
+    ToolConfig? toolConfig,
   }) {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
     tools ??= _tools;
-    functionCallingConfig ??= _functionCallingConfig;
+    toolConfig ??= _toolConfig;
     final parameters = <String, Object?>{
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
@@ -214,8 +213,7 @@ final class GenerativeModel {
       if (generationConfig != null)
         'generationConfig': generationConfig.toJson(),
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      if (functionCallingConfig != null)
-        'functionCallingConfig': functionCallingConfig.toJson(),
+      if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
       if (_systemInstruction case final systemInstruction?)
         'systemInstruction': systemInstruction.toJson(),
     };
@@ -310,7 +308,7 @@ GenerativeModel createModelWithClient({
   RequestOptions? requestOptions,
   Content? systemInstruction,
   List<Tool>? tools,
-  FunctionCallingConfig? functionCallingConfig,
+  ToolConfig? toolConfig,
 }) =>
     GenerativeModel._withClient(
       client: client,
@@ -320,7 +318,7 @@ GenerativeModel createModelWithClient({
       baseUri: _googleAIBaseUri(requestOptions),
       systemInstruction: systemInstruction,
       tools: tools,
-      functionCallingConfig: functionCallingConfig,
+      toolConfig: toolConfig,
     );
 
 /// Creates a model with an overridden base URL to communicate with a different
@@ -345,5 +343,5 @@ GenerativeModel createModelWithBaseUri({
       baseUri: baseUri,
       systemInstruction: systemInstruction,
       tools: null,
-      functionCallingConfig: null,
+      toolConfig: null,
     );
