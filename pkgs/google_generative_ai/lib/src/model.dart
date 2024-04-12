@@ -60,6 +60,7 @@ final class GenerativeModel {
   final ApiClient _client;
   final Uri _baseUri;
   final Content? _systemInstruction;
+  final FunctionCallingConfig? _functionCallingConfig;
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -100,6 +101,7 @@ final class GenerativeModel {
     http.Client? httpClient,
     RequestOptions? requestOptions,
     Content? systemInstruction,
+    FunctionCallingConfig? functionCallingConfig,
   }) =>
       GenerativeModel._withClient(
         client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
@@ -109,6 +111,7 @@ final class GenerativeModel {
         baseUri: _googleAIBaseUri(requestOptions),
         tools: tools,
         systemInstruction: systemInstruction,
+        functionCallingConfig: functionCallingConfig,
       );
 
   GenerativeModel._withClient({
@@ -119,12 +122,14 @@ final class GenerativeModel {
     required Uri baseUri,
     required List<Tool>? tools,
     required Content? systemInstruction,
+    required FunctionCallingConfig? functionCallingConfig,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
         _tools = tools,
         _systemInstruction = systemInstruction,
+        _functionCallingConfig = functionCallingConfig,
         _client = client;
 
   /// Returns the model code for a user friendly model name.
@@ -151,19 +156,26 @@ final class GenerativeModel {
   /// final response = await model.generateContent([Content.text(prompt)]);
   /// print(response.text);
   /// ```
-  Future<GenerateContentResponse> generateContent(Iterable<Content> prompt,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) async {
+  Future<GenerateContentResponse> generateContent(
+    Iterable<Content> prompt, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+    List<Tool>? tools,
+    FunctionCallingConfig? functionCallingConfig,
+  }) async {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
+    tools ??= _tools;
+    functionCallingConfig ??= _functionCallingConfig;
     final parameters = {
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
-      if (generationConfig case final config?)
-        'generationConfig': config.toJson(),
-      if (_tools case final tools?)
-        'tools': tools.map((t) => t.toJson()).toList(),
+      if (generationConfig != null)
+        'generationConfig': generationConfig.toJson(),
+      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
+      if (functionCallingConfig != null)
+        'functionCallingConfig': functionCallingConfig.toJson(),
       if (_systemInstruction case final systemInstruction?)
         'systemInstruction': systemInstruction.toJson(),
     };
@@ -185,19 +197,25 @@ final class GenerativeModel {
   /// }
   /// ```
   Stream<GenerateContentResponse> generateContentStream(
-      Iterable<Content> prompt,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) {
+    Iterable<Content> prompt, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+    List<Tool>? tools,
+    FunctionCallingConfig? functionCallingConfig,
+  }) {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
+    tools ??= _tools;
+    functionCallingConfig ??= _functionCallingConfig;
     final parameters = <String, Object?>{
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
-      if (generationConfig case final config?)
-        'generationConfig': config.toJson(),
-      if (_tools case final tools?)
-        'tools': tools.map((t) => t.toJson()).toList(),
+      if (generationConfig != null)
+        'generationConfig': generationConfig.toJson(),
+      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
+      if (functionCallingConfig != null)
+        'functionCallingConfig': functionCallingConfig.toJson(),
       if (_systemInstruction case final systemInstruction?)
         'systemInstruction': systemInstruction.toJson(),
     };
@@ -290,8 +308,9 @@ GenerativeModel createModelWithClient({
   List<SafetySetting> safetySettings = const [],
   GenerationConfig? generationConfig,
   RequestOptions? requestOptions,
-  List<Tool>? tools,
   Content? systemInstruction,
+  List<Tool>? tools,
+  FunctionCallingConfig? functionCallingConfig,
 }) =>
     GenerativeModel._withClient(
       client: client,
@@ -299,8 +318,9 @@ GenerativeModel createModelWithClient({
       safetySettings: safetySettings,
       generationConfig: generationConfig,
       baseUri: _googleAIBaseUri(requestOptions),
-      tools: tools,
       systemInstruction: systemInstruction,
+      tools: tools,
+      functionCallingConfig: functionCallingConfig,
     );
 
 /// Creates a model with an overridden base URL to communicate with a different
@@ -323,6 +343,7 @@ GenerativeModel createModelWithBaseUri({
       safetySettings: safetySettings,
       generationConfig: generationConfig,
       baseUri: baseUri,
-      tools: null,
       systemInstruction: systemInstruction,
+      tools: null,
+      functionCallingConfig: null,
     );

@@ -66,6 +66,54 @@ final class FunctionDeclaration {
       };
 }
 
+/// Configuration specifying how the model should use the functions provided as
+/// tools.
+final class FunctionCallingConfig {
+  /// The mode in which function calling should execute.
+  ///
+  /// If null, the default behavior will match [FunctionCallingMode.auto].
+  final FunctionCallingMode? mode;
+
+  /// A set of function names that, when provided, limits the functions the
+  /// model will call.
+  ///
+  /// This should only be set when the Mode is [FunctionCallingMode.any].
+  /// Function names should match [FunctionDeclaration.name]. With mode set to
+  /// `any`, model will predict a function call from the set of function names
+  /// provided.
+  final Set<String>? allowedFunctionNames;
+  FunctionCallingConfig({this.mode, this.allowedFunctionNames});
+
+  Object toJson() => {
+        if (mode case final mode?) 'mode': mode.toJson(),
+        if (allowedFunctionNames case final allowedFunctionNames?)
+          'allowedFunctionNames': allowedFunctionNames.toList(),
+      };
+}
+
+enum FunctionCallingMode {
+  /// The mode with default model behavior.
+  ///
+  /// Model decides to predict either a function call or a natural language
+  /// repspose.
+  auto,
+
+  /// A mode where the Model is constrained to always predicting a function
+  /// call only.
+  any,
+
+  /// A mode where the model will not predict any function call.
+  ///
+  /// Model behavior is same as when not passing any function declarations.
+  none;
+
+  String toJson() => switch (this) {
+        auto => 'AUTO',
+        any => 'ANY',
+        none => 'NONE',
+      };
+}
+
 /// The definition of an input or output data types.
 ///
 /// These types can be objects, but also primitives and arrays.
