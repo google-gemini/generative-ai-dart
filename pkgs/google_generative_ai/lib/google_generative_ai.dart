@@ -39,12 +39,14 @@ import 'src/model.dart';
 
 export 'src/api.dart'
     show
+        BatchEmbedContentsResponse,
         BlockReason,
         Candidate,
         CitationMetadata,
         CitationSource,
         ContentEmbedding,
         CountTokensResponse,
+        EmbedContentRequest,
         EmbedContentResponse,
         FinishReason,
         GenerateContentResponse,
@@ -57,11 +59,27 @@ export 'src/api.dart'
         SafetySetting,
         TaskType;
 export 'src/chat.dart' show ChatSession, StartChatExtension;
-export 'src/content.dart' show Content, DataPart, Part, TextPart;
+export 'src/content.dart'
+    show
+        Content,
+        DataPart,
+        FilePart,
+        FunctionCall,
+        FunctionResponse,
+        Part,
+        TextPart;
 export 'src/error.dart'
     show
         GenerativeAIException,
         InvalidApiKey,
         ServerException,
         UnsupportedUserLocation;
-export 'src/model.dart' show GenerativeModel;
+export 'src/function_calling.dart'
+    show
+        FunctionCallingConfig,
+        FunctionCallingMode,
+        FunctionDeclaration,
+        Schema,
+        SchemaType,
+        Tool;
+export 'src/model.dart' show GenerativeModel, RequestOptions;

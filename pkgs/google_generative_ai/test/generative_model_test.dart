@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:convert';
-
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_generative_ai/src/model.dart';
 import 'package:test/test.dart';
@@ -25,19 +23,112 @@ void main() {
   group('GenerativeModel', () {
     const defaultModelName = 'some-model';
 
-    (StubClient, GenerativeModel) createModel(
-        [String modelName = defaultModelName]) {
+    (StubClient, GenerativeModel) createModel({
+      String modelName = defaultModelName,
+      RequestOptions? requestOptions,
+      Content? systemInstruction,
+      List<Tool>? tools,
+      FunctionCallingConfig? functionCallingConfig,
+    }) {
       final client = StubClient();
-      final model = createModelWithClient(model: modelName, client: client);
+      final model = createModelWithClient(
+        model: modelName,
+        client: client,
+        requestOptions: requestOptions,
+        systemInstruction: systemInstruction,
+        tools: tools,
+        functionCallingConfig: functionCallingConfig,
+      );
       return (client, model);
     }
 
     test('strips leading "models/" from model name', () async {
-      final (client, model) = createModel('models/$defaultModelName');
+      final (client, model) =
+          createModel(modelName: 'models/$defaultModelName');
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
         Uri.parse('https://generativelanguage.googleapis.com/v1/'
+            'models/some-model:generateContent'),
+        {
+          'contents': [
+            {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          ]
+        },
+        {
+          'candidates': [
+            {
+              'content': {
+                'role': 'model',
+                'parts': [
+                  {'text': result}
+                ]
+              }
+            }
+          ]
+        },
+      );
+      final response = await model.generateContent([Content.text(prompt)]);
+      expect(
+          response,
+          matchesGenerateContentResponse(GenerateContentResponse([
+            Candidate(
+                Content('model', [TextPart(result)]), null, null, null, null),
+          ], null)));
+    });
+
+    test('allows specifying a tuned model', () async {
+      final (client, model) =
+          createModel(modelName: 'tunedModels/$defaultModelName');
+      final prompt = 'Some prompt';
+      final result = 'Some response';
+      client.stub(
+        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+            'tunedModels/some-model:generateContent'),
+        {
+          'contents': [
+            {
+              'role': 'user',
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          ]
+        },
+        {
+          'candidates': [
+            {
+              'content': {
+                'role': 'model',
+                'parts': [
+                  {'text': result}
+                ]
+              }
+            }
+          ]
+        },
+      );
+      final response = await model.generateContent([Content.text(prompt)]);
+      expect(
+          response,
+          matchesGenerateContentResponse(GenerateContentResponse([
+            Candidate(
+                Content('model', [TextPart(result)]), null, null, null, null),
+          ], null)));
+    });
+
+    test('allows specifying an API version', () async {
+      final (client, model) = createModel(
+          requestOptions: RequestOptions(apiVersion: 'override_version'));
+      final prompt = 'Some prompt';
+      final result = 'Some response';
+      client.stub(
+        Uri.parse('https://generativelanguage.googleapis.com/override_version/'
             'models/some-model:generateContent'),
         {
           'contents': [
@@ -109,131 +200,6 @@ void main() {
               Candidate(
                   Content('model', [TextPart(result)]), null, null, null, null),
             ], null)));
-      });
-
-      test('throws errors for invalid API key', () async {
-        final (client, model) = createModel();
-        final prompt = 'Some prompt';
-        final response = '''
-{
-  "error": {
-    "code": 400,
-    "message": "API key not valid. Please pass a valid API key.",
-    "status": "INVALID_ARGUMENT",
-    "details": [
-      {
-        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
-        "reason": "API_KEY_INVALID",
-        "domain": "googleapis.com",
-        "metadata": {
-          "service": "generativelanguage.googleapis.com"
-        }
-      },
-      {
-        "@type": "type.googleapis.com/google.rpc.DebugInfo",
-        "detail": "Invalid API key: AIzv00G7VmUCUeC-5OglO3hcXM"
-      }
-    ]
-  }
-}
-''';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
-              'models/some-model:generateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ]
-          },
-          jsonDecode(response) as Map<String, Object?>,
-        );
-        expect(
-          model.generateContent([Content.text(prompt)]),
-          throwsA(isA<InvalidApiKey>()),
-        );
-      });
-
-      test('throws errors for unsupported user location', () async {
-        final (client, model) = createModel();
-        final prompt = 'Some prompt';
-        final response = r'''
-{
-  "error": {
-    "code": 400,
-    "message": "User location is not supported for the API use.",
-    "status": "FAILED_PRECONDITION",
-    "details": [
-      {
-        "@type": "type.googleapis.com/google.rpc.DebugInfo",
-        "detail": "[ORIGINAL ERROR] generic::failed_precondition: User location is not supported for the API use. [google.rpc.error_details_ext] { message: \"User location is not supported for the API use.\" }"
-      }
-    ]
-  }
-}
-''';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
-              'models/some-model:generateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ]
-          },
-          jsonDecode(response) as Map<String, Object?>,
-        );
-        expect(
-          model.generateContent([Content.text(prompt)]),
-          throwsA(isA<UnsupportedUserLocation>()),
-        );
-      });
-
-      test('throws general server errors', () async {
-        final (client, model) = createModel();
-        final prompt = 'Some prompt';
-        final response = r'''
-{
-  "error": {
-    "code": 404,
-    "message": "models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods.",
-    "status": "NOT_FOUND",
-    "details": [
-      {
-        "@type": "type.googleapis.com/google.rpc.DebugInfo",
-        "detail": "[ORIGINAL ERROR] generic::not_found: models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods. [google.rpc.error_details_ext] { message: \"models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods.\" }"
-      }
-    ]
-  }
-}
-''';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
-              'models/some-model:generateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ]
-          },
-          jsonDecode(response) as Map<String, Object?>,
-        );
-        expect(
-          model.generateContent([Content.text(prompt)]),
-          throwsA(isA<ServerException>()),
-        );
       });
 
       test('can override safety settings', () async {
@@ -320,6 +286,189 @@ void main() {
         );
         final response = await model.generateContent([Content.text(prompt)],
             generationConfig: GenerationConfig(stopSequences: ['a']));
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can pass system instructions', () async {
+        final instructions = 'Do a good job';
+        final (client, model) =
+            createModel(systemInstruction: Content.system(instructions));
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'systemInstruction': {
+              'role': 'system',
+              'parts': [
+                {'text': instructions}
+              ],
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent(
+          [Content.text(prompt)],
+        );
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can pass tools and function calling config', () async {
+        final (client, model) = createModel(
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration('someFunction', 'Some cool function.',
+                    Schema(SchemaType.string, description: 'Some parameter.'))
+              ])
+            ],
+            functionCallingConfig: FunctionCallingConfig(
+                mode: FunctionCallingMode.any,
+                allowedFunctionNames: {'someFunction'}));
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'tools': [
+              {
+                'functionDeclarations': [
+                  {
+                    'name': 'someFunction',
+                    'description': 'Some cool function.',
+                    'parameters': {
+                      'type': 'STRING',
+                      'description': 'Some parameter.'
+                    }
+                  }
+                ]
+              }
+            ],
+            'functionCallingConfig': {
+              'mode': 'ANY',
+              'allowedFunctionNames': ['someFunction'],
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([Content.text(prompt)]);
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can override tools and function calling config', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'tools': [
+              {
+                'functionDeclarations': [
+                  {
+                    'name': 'someFunction',
+                    'description': 'Some cool function.',
+                    'parameters': {
+                      'type': 'STRING',
+                      'description': 'Some parameter.'
+                    }
+                  }
+                ]
+              }
+            ],
+            'functionCallingConfig': {
+              'mode': 'ANY',
+              'allowedFunctionNames': ['someFunction'],
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([
+          Content.text(prompt)
+        ],
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration('someFunction', 'Some cool function.',
+                    Schema(SchemaType.string, description: 'Some parameter.'))
+              ])
+            ],
+            functionCallingConfig: FunctionCallingConfig(
+                mode: FunctionCallingMode.any,
+                allowedFunctionNames: {'someFunction'}));
         expect(
             response,
             matchesGenerateContentResponse(GenerateContentResponse([
@@ -531,6 +680,56 @@ void main() {
             response,
             matchesEmbedContentResponse(
                 EmbedContentResponse(ContentEmbedding([0.1, 0.2, 0.3]))));
+      });
+    });
+
+    group('batch embed contents', () {
+      test('can make successful request', () async {
+        final (client, model) = createModel();
+        final prompt1 = 'Some prompt';
+        final prompt2 = 'Another prompt';
+        final embedding1 = [0.1, 0.2, 0.3];
+        final embedding2 = [0.4, 0.5, 1.6];
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:batchEmbedContents'),
+          {
+            'requests': [
+              {
+                'content': {
+                  'role': 'user',
+                  'parts': [
+                    {'text': prompt1}
+                  ]
+                },
+                'model': 'models/$defaultModelName'
+              },
+              {
+                'content': {
+                  'role': 'user',
+                  'parts': [
+                    {'text': prompt2}
+                  ]
+                },
+                'model': 'models/$defaultModelName'
+              }
+            ]
+          },
+          {
+            'embeddings': [
+              {'values': embedding1},
+              {'values': embedding2}
+            ]
+          },
+        );
+        final response = await model.batchEmbedContents([
+          EmbedContentRequest(Content.text(prompt1)),
+          EmbedContentRequest(Content.text(prompt2))
+        ]);
+        expect(
+            response,
+            matchesBatchEmbedContentsResponse(BatchEmbedContentsResponse(
+                [ContentEmbedding(embedding1), ContentEmbedding(embedding2)])));
       });
     });
   });

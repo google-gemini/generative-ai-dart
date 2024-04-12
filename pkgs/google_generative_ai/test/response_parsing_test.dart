@@ -381,4 +381,93 @@ void main() {
       );
     });
   });
+
+  group('parses and throws error responses', () {
+    test('for invalid API key', () async {
+      final response = '''
+{
+  "error": {
+    "code": 400,
+    "message": "API key not valid. Please pass a valid API key.",
+    "status": "INVALID_ARGUMENT",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+        "reason": "API_KEY_INVALID",
+        "domain": "googleapis.com",
+        "metadata": {
+          "service": "generativelanguage.googleapis.com"
+        }
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.DebugInfo",
+        "detail": "Invalid API key: AIzv00G7VmUCUeC-5OglO3hcXM"
+      }
+    ]
+  }
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final expectedThrow = throwsA(isA<InvalidApiKey>().having(
+          (e) => e.message,
+          'message',
+          'API key not valid. Please pass a valid API key.'));
+      expect(() => parseGenerateContentResponse(decoded), expectedThrow);
+      expect(() => parseCountTokensResponse(decoded), expectedThrow);
+      expect(() => parseEmbedContentResponse(decoded), expectedThrow);
+    });
+
+    test('for unsupported user location', () async {
+      final response = r'''
+{
+  "error": {
+    "code": 400,
+    "message": "User location is not supported for the API use.",
+    "status": "FAILED_PRECONDITION",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.DebugInfo",
+        "detail": "[ORIGINAL ERROR] generic::failed_precondition: User location is not supported for the API use. [google.rpc.error_details_ext] { message: \"User location is not supported for the API use.\" }"
+      }
+    ]
+  }
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final expectedThrow = throwsA(isA<UnsupportedUserLocation>().having(
+          (e) => e.message,
+          'message',
+          'User location is not supported for the API use.'));
+      expect(() => parseGenerateContentResponse(decoded), expectedThrow);
+      expect(() => parseCountTokensResponse(decoded), expectedThrow);
+      expect(() => parseEmbedContentResponse(decoded), expectedThrow);
+    });
+
+    test('for general server errors', () async {
+      final response = r'''
+{
+  "error": {
+    "code": 404,
+    "message": "models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.DebugInfo",
+        "detail": "[ORIGINAL ERROR] generic::not_found: models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods. [google.rpc.error_details_ext] { message: \"models/unknown is not found for API version v1, or is not supported for GenerateContent. Call ListModels to see the list of available models and their supported methods.\" }"
+      }
+    ]
+  }
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final expectedThrow = throwsA(isA<ServerException>().having(
+          (e) => e.message,
+          'message',
+          startsWith('models/unknown is not found for API version v1, '
+              'or is not supported for GenerateContent.')));
+      expect(() => parseGenerateContentResponse(decoded), expectedThrow);
+      expect(() => parseCountTokensResponse(decoded), expectedThrow);
+      expect(() => parseEmbedContentResponse(decoded), expectedThrow);
+    });
+  });
 }

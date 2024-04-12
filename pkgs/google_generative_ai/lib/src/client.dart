@@ -68,6 +68,13 @@ final class HttpApiClient implements ApiClient {
     final response = httpClient == null
         ? await request.send()
         : await httpClient.send(request);
+    if (response.statusCode != 200) {
+      final body = await response.stream.bytesToString();
+      // Yeild a potential error object like a normal result for consistency
+      // with `makeRequest`.
+      yield jsonDecode(body) as Map<String, Object?>;
+      return;
+    }
     final lines =
         response.stream.toStringStream().transform(const LineSplitter());
     await for (final line in lines) {

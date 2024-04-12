@@ -1,6 +1,28 @@
-## 0.2.3-wip
+## 0.3.1-wip
+
+- Add support on content generating methods for overriding "tools" passed when
+  the generative model was instantiated.
+- Add support for forcing the model to use or not use function calls to generate
+  content.
+
+## 0.3.0
+
+- Allow specifying an API version in a `requestOptions` argument when
+  constructing a model.
+- Add support for referring to uploaded files in request contents.
+- Add support for passing tools with functions the model may call while
+  generating responses.
+- Add support for passing a system instruction when creating the model.
+- **Breaking** Added new subclasses `FilePart`, `FunctionCall`, and
+  `FunctionResponse` of the sealed class `Part`.
+
+## 0.2.3
 
 - Update the package version that is sent with the HTTP client name.
+- Throw more actionable error objects than `FormatException` for errors. Errors
+  were previously only correctly parsed in `generateContent` calls.
+- Add support for tuned models.
+- Add support for `batchEmbedContents` calls.
 
 ## 0.2.2
 

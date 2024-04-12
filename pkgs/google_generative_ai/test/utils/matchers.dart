@@ -26,6 +26,21 @@ Matcher matchesPart(Part part) => switch (part) {
           // TODO: When updating min SDK remove ignore.
           // ignore: unused_result, implementation bug
           .having((p) => p.bytes, 'bytes', bytes),
+      FilePart(uri: final uri) => isA<FilePart>()
+          // TODO: When updating min SDK remove ignore.
+          // ignore: unused_result, implementation bug
+          .having((p) => p.uri, 'uri', uri),
+      FunctionCall(name: final name, args: final args) => isA<FunctionCall>()
+          .having((p) => p.name, 'name', name)
+          // TODO: When updating min SDK remove ignore.
+          // ignore: unused_result, implementation bug
+          .having((p) => p.args, 'args', args),
+      FunctionResponse(name: final name, response: final response) =>
+        isA<FunctionResponse>()
+            .having((p) => p.name, 'name', name)
+            // TODO: When updating min SDK remove ignore.
+            // ignore: unused_result, implementation bug
+            .having((p) => p.response, 'args', response),
     };
 
 Matcher matchesContent(Content content) => isA<Content>()
@@ -67,6 +82,11 @@ Matcher matchesEmbedding(ContentEmbedding embedding) =>
 Matcher matchesEmbedContentResponse(EmbedContentResponse response) =>
     isA<EmbedContentResponse>().having(
         (r) => r.embedding, 'embedding', matchesEmbedding(response.embedding));
+
+Matcher matchesBatchEmbedContentsResponse(
+        BatchEmbedContentsResponse response) =>
+    isA<BatchEmbedContentsResponse>().having((r) => r.embeddings, 'embeddings',
+        response.embeddings.map(matchesEmbedding));
 
 Matcher matchesCountTokensResponse(CountTokensResponse response) =>
     isA<CountTokensResponse>()
