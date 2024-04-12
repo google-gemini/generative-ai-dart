@@ -66,6 +66,16 @@ final class FunctionDeclaration {
       };
 }
 
+final class ToolConfig {
+  final FunctionCallingConfig? functionCallingConfig;
+  ToolConfig({this.functionCallingConfig});
+
+  Map<String, Object?> toJson() => {
+        if (functionCallingConfig case final config?)
+          'functionCallingConfig': config.toJson(),
+      };
+}
+
 /// Configuration specifying how the model should use the functions provided as
 /// tools.
 final class FunctionCallingConfig {

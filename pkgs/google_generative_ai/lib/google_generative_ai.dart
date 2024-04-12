@@ -81,5 +81,6 @@ export 'src/function_calling.dart'
         FunctionDeclaration,
         Schema,
         SchemaType,
-        Tool;
+        Tool,
+        ToolConfig;
 export 'src/model.dart' show GenerativeModel, RequestOptions;
