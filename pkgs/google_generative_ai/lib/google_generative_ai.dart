@@ -57,8 +57,7 @@ export 'src/api.dart'
         PromptFeedback,
         SafetyRating,
         SafetySetting,
-        TaskType,
-        VertexConfig;
+        TaskType;
 
 export 'src/chat.dart' show ChatSession, StartChatExtension;
 export 'src/content.dart'
