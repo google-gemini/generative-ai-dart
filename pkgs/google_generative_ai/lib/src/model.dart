@@ -313,13 +313,13 @@ GenerativeModel createModelWithBaseUri({
   required String model,
   required String apiKey,
   required Uri baseUri,
-  http.Client? httpClient,
+  FutureOr<Map<String, String>> Function()? requestHeaders,
   List<SafetySetting> safetySettings = const [],
   GenerationConfig? generationConfig,
   Content? systemInstruction,
 }) =>
     GenerativeModel._withClient(
-      client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
+      client: HttpApiClient(apiKey: apiKey, requestHeaders: requestHeaders),
       model: model,
       safetySettings: safetySettings,
       generationConfig: generationConfig,
