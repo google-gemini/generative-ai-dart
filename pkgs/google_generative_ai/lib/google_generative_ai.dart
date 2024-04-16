@@ -61,11 +61,21 @@ export 'src/api.dart'
         VertexConfig;
 
 export 'src/chat.dart' show ChatSession, StartChatExtension;
-export 'src/content.dart' show Content, DataPart, Part, TextPart;
+export 'src/content.dart'
+    show
+        Content,
+        DataPart,
+        FilePart,
+        FunctionCall,
+        FunctionResponse,
+        Part,
+        TextPart;
 export 'src/error.dart'
     show
         GenerativeAIException,
         InvalidApiKey,
         ServerException,
         UnsupportedUserLocation;
-export 'src/model.dart' show GenerativeModel;
+export 'src/function_calling.dart'
+    show FunctionDeclaration, Schema, SchemaType, Tool;
+export 'src/model.dart' show GenerativeModel, RequestOptions;

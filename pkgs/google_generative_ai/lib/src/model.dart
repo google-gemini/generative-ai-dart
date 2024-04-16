@@ -19,9 +19,11 @@ import 'package:http/http.dart' as http;
 import 'api.dart';
 import 'client.dart';
 import 'content.dart';
+import 'function_calling.dart';
 
-final _baseUrl = Uri.https('generativelanguage.googleapis.com');
 const _apiVersion = 'v1';
+Uri _googleAIBaseUri(RequestOptions? options) => Uri.https(
+    'generativelanguage.googleapis.com', options?.apiVersion ?? _apiVersion);
 
 enum Task {
   generateContent,
@@ -29,6 +31,19 @@ enum Task {
   countTokens,
   embedContent,
   batchEmbedContents;
+}
+
+/// Configuration for how a [GenerativeModel] makes requests.
+///
+/// This allows overriding the API version in use which may be required to use
+/// some beta features.
+final class RequestOptions {
+  /// The API version used to make requests.
+  ///
+  /// By default the version is `v1`. This may be specified as `v1beta` to use
+  /// beta features.
+  final String? apiVersion;
+  const RequestOptions({this.apiVersion});
 }
 
 /// A multimodel generative model (like Gemini).
@@ -41,9 +56,10 @@ final class GenerativeModel {
   final ({String prefix, String name}) _model;
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
+  final List<Tool>? _tools;
   final ApiClient _client;
-  final Uri _modelUri;
-  final bool _useVertex;
+  final Uri _baseUri;
+  final Content? _systemInstruction;
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -67,46 +83,63 @@ final class GenerativeModel {
   /// concurrent requests.
   /// If the `httpClient` is omitted, a new [http.Client] is created for each
   /// request.
+  ///
+  /// Functions that the model may call while generating content can be passed
+  /// in [tools]. When using tools [requestOptions] must be passed to
+  /// override the `apiVersion` to `v1beta`.
+  ///
+  /// A [Content.system] can be passed to [systemInstruction] to give
+  /// high priority instructions to the model. When using system instructions
+  /// [requestOptions] must be passed to override the `apiVersion` to `v1beta`.
   factory GenerativeModel({
     required String model,
     required String apiKey,
     List<SafetySetting> safetySettings = const [],
     GenerationConfig? generationConfig,
+    List<Tool>? tools,
     http.Client? httpClient,
+    RequestOptions? requestOptions,
+    Content? systemInstruction,
   }) =>
       GenerativeModel._withClient(
-          client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
-          model: model,
-          safetySettings: safetySettings,
-          generationConfig: generationConfig);
+        client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
+        model: model,
+        safetySettings: safetySettings,
+        generationConfig: generationConfig,
+        baseUri: _googleAIBaseUri(requestOptions),
+        tools: tools,
+        systemInstruction: systemInstruction,
+      );
 
   GenerativeModel._withClient({
     required ApiClient client,
     required String model,
     required List<SafetySetting> safetySettings,
     required GenerationConfig? generationConfig,
+    required Uri baseUri,
+    required List<Tool>? tools,
+    required Content? systemInstruction,
   })  : _model = _normalizeModelName(model),
+        _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
-        _client = client,
-        _modelUri = generationConfig != null
-            ? generationConfig.vertexConfig?.modelUri ?? _baseUrl
-            : _baseUrl,
-        _useVertex =
-            generationConfig != null && generationConfig.vertexConfig != null;;
+        _tools = tools,
+        _systemInstruction = systemInstruction,
+        _client = client;
 
-  static const _modelsPrefix = 'models/';
-  static String _normalizeModelName(String modelName) =>
-      modelName.startsWith(_modelsPrefix)
-          ? modelName.substring(_modelsPrefix.length)
-          : modelName;
+  /// Returns the model code for a user friendly model name.
+  ///
+  /// If the model name is already a model code (contains a `/`), use the parts
+  /// directly. Otherwise, return a `models/` model code.
+  static ({String prefix, String name}) _normalizeModelName(String modelName) {
+    if (!modelName.contains('/')) return (prefix: 'models', name: modelName);
+    final parts = modelName.split('/');
+    return (prefix: parts.first, name: parts.skip(1).join('/'));
+  }
 
-  Uri _taskUri(Task task) =>
-      _useVertex // Vertex Uri already has the version info
-          ? Uri.https(
-              _modelUri.host, '${_modelUri.path}models/$_model:${task._name}')
-          : _modelUri.resolveUri(Uri(
-              pathSegments: [_apiVersion, 'models', '$_model:${task._name}']));
+  Uri _taskUri(Task task) => _baseUri.replace(
+      pathSegments: _baseUri.pathSegments
+          .followedBy([_model.prefix, '${_model.name}:${task.name}']));
 
   /// Generates content responding to [prompt].
   ///
@@ -129,6 +162,10 @@ final class GenerativeModel {
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
+      if (_tools case final tools?)
+        'tools': tools.map((t) => t.toJson()).toList(),
+      if (_systemInstruction case final systemInstruction?)
+        'systemInstruction': systemInstruction.toJson(),
     };
     final response =
         await _client.makeRequest(_taskUri(Task.generateContent), parameters);
@@ -159,6 +196,10 @@ final class GenerativeModel {
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
       if (generationConfig case final config?)
         'generationConfig': config.toJson(),
+      if (_tools case final tools?)
+        'tools': tools.map((t) => t.toJson()).toList(),
+      if (_systemInstruction case final systemInstruction?)
+        'systemInstruction': systemInstruction.toJson(),
     };
     final response =
         _client.streamRequest(_taskUri(Task.streamGenerateContent), parameters);
@@ -243,13 +284,45 @@ final class GenerativeModel {
 /// Creates a model with an overridden [ApiClient] for testing.
 ///
 /// Package private test-only method.
-GenerativeModel createModelWithClient(
-        {required String model,
-        required ApiClient client,
-        List<SafetySetting> safetySettings = const [],
-        GenerationConfig? generationConfig}) =>
+GenerativeModel createModelWithClient({
+  required String model,
+  required ApiClient client,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+  RequestOptions? requestOptions,
+  List<Tool>? tools,
+  Content? systemInstruction,
+}) =>
     GenerativeModel._withClient(
-        client: client,
-        model: model,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig);
+      client: client,
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+      baseUri: _googleAIBaseUri(requestOptions),
+      tools: tools,
+      systemInstruction: systemInstruction,
+    );
+
+/// Creates a model with an overridden base URL to communicate with a different
+/// backend.
+///
+/// Used from a `src/` import in the Vertex AI SDK.
+// TODO: https://github.com/google/generative-ai-dart/issues/111 - Changes to
+// this API need to be coordinated with the vertex AI SDK.
+GenerativeModel createModelWithBaseUri({
+  required String model,
+  required String apiKey,
+  required Uri baseUri,
+  List<SafetySetting> safetySettings = const [],
+  GenerationConfig? generationConfig,
+  Content? systemInstruction,
+}) =>
+    GenerativeModel._withClient(
+      client: HttpApiClient(apiKey: apiKey),
+      model: model,
+      safetySettings: safetySettings,
+      generationConfig: generationConfig,
+      baseUri: baseUri,
+      tools: null,
+      systemInstruction: systemInstruction,
+    );
