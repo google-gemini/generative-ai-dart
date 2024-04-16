@@ -63,6 +63,7 @@ final class HttpApiClient implements ApiClient {
     );
     return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
   }
+
   @override
   Stream<Map<String, Object?>> streamRequest(
       Uri uri, Map<String, Object?> body) async* {
