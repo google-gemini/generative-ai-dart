@@ -35,20 +35,30 @@ final class HttpApiClient implements ApiClient {
   final String _apiKey;
   final http.Client? _httpClient;
 
-  HttpApiClient({required String apiKey, http.Client? httpClient})
+  final FutureOr<Map<String, String>> Function()? _requestHeaders;
+
+  HttpApiClient(
+      {required String apiKey,
+      http.Client? httpClient,
+      FutureOr<Map<String, String>> Function()? requestHeaders})
       : _apiKey = apiKey,
-        _httpClient = httpClient;
+        _httpClient = httpClient,
+        _requestHeaders = requestHeaders;
+
+  Future<Map<String, String>> _headers() async => {
+        'x-goog-api-key': _apiKey,
+        'x-goog-api-client': clientName,
+        'Content-Type': 'application/json',
+        if (_requestHeaders case final requestHeaders?)
+          ...(await requestHeaders()),
+      };
 
   @override
   Future<Map<String, Object?>> makeRequest(
       Uri uri, Map<String, Object?> body) async {
     final response = await (_httpClient?.post ?? http.post)(
       uri,
-      headers: {
-        'x-goog-api-key': _apiKey,
-        'x-goog-api-client': clientName,
-        'Content-Type': 'application/json',
-      },
+      headers: await _headers(),
       body: _utf8Json.encode(body),
     );
     return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
@@ -60,9 +70,7 @@ final class HttpApiClient implements ApiClient {
     uri = uri.replace(queryParameters: {'alt': 'sse'});
     final request = http.Request('POST', uri)
       ..bodyBytes = _utf8Json.encode(body)
-      ..headers['x-goog-api-key'] = _apiKey
-      ..headers['x-goog-api-client'] = clientName
-      ..headers['Content-Type'] = 'application/json';
+      ..headers.addAll(await _headers());
     // TODO: When updating min SDK remove workaround.
     final httpClient = _httpClient;
     final response = httpClient == null
