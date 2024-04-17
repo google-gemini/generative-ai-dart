@@ -60,6 +60,7 @@ final class GenerativeModel {
   final ApiClient _client;
   final Uri _baseUri;
   final Content? _systemInstruction;
+  final ToolConfig? _toolConfig;
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
@@ -86,7 +87,10 @@ final class GenerativeModel {
   ///
   /// Functions that the model may call while generating content can be passed
   /// in [tools]. When using tools [requestOptions] must be passed to
-  /// override the `apiVersion` to `v1beta`.
+  /// override the `apiVersion` to `v1beta`. Tool usage by the model can be
+  /// configured with [toolConfig]. Tools and tool configuration can be
+  /// overridden for individual requests with arguments to [generateContent] or
+  /// [generateContentStream].
   ///
   /// A [Content.system] can be passed to [systemInstruction] to give
   /// high priority instructions to the model. When using system instructions
@@ -100,6 +104,7 @@ final class GenerativeModel {
     http.Client? httpClient,
     RequestOptions? requestOptions,
     Content? systemInstruction,
+    ToolConfig? toolConfig,
   }) =>
       GenerativeModel._withClient(
         client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
@@ -109,6 +114,7 @@ final class GenerativeModel {
         baseUri: _googleAIBaseUri(requestOptions),
         tools: tools,
         systemInstruction: systemInstruction,
+        toolConfig: toolConfig,
       );
 
   GenerativeModel._withClient({
@@ -119,12 +125,14 @@ final class GenerativeModel {
     required Uri baseUri,
     required List<Tool>? tools,
     required Content? systemInstruction,
+    required ToolConfig? toolConfig,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
         _generationConfig = generationConfig,
         _tools = tools,
         _systemInstruction = systemInstruction,
+        _toolConfig = toolConfig,
         _client = client;
 
   /// Returns the model code for a user friendly model name.
@@ -146,24 +154,35 @@ final class GenerativeModel {
   /// Sends a "generateContent" API request for the configured model,
   /// and waits for the response.
   ///
+  /// The [safetySettings], [generationConfig], [tools], and [toolConfig],
+  /// override the arguments of the same name passed to the
+  /// [GenerativeModel.new] constructor. Each argument, when non-null,
+  /// overrides the model level configuration in its entirety.
+  ///
   /// Example:
   /// ```dart
   /// final response = await model.generateContent([Content.text(prompt)]);
   /// print(response.text);
   /// ```
-  Future<GenerateContentResponse> generateContent(Iterable<Content> prompt,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) async {
+  Future<GenerateContentResponse> generateContent(
+    Iterable<Content> prompt, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+    List<Tool>? tools,
+    ToolConfig? toolConfig,
+  }) async {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
+    tools ??= _tools;
+    toolConfig ??= _toolConfig;
     final parameters = {
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
-      if (generationConfig case final config?)
-        'generationConfig': config.toJson(),
-      if (_tools case final tools?)
-        'tools': tools.map((t) => t.toJson()).toList(),
+      if (generationConfig != null)
+        'generationConfig': generationConfig.toJson(),
+      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
+      if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
       if (_systemInstruction case final systemInstruction?)
         'systemInstruction': systemInstruction.toJson(),
     };
@@ -177,6 +196,11 @@ final class GenerativeModel {
   /// Sends a "streamGenerateContent" API request for the configured model,
   /// and waits for the response.
   ///
+  /// The [safetySettings], [generationConfig], [tools], and [toolConfig],
+  /// override the arguments of the same name passed to the
+  /// [GenerativeModel.new] constructor. Each argument, when non-null,
+  /// overrides the model level configuration in its entirety.
+  ///
   /// Example:
   /// ```dart
   /// final responses = await model.generateContent([Content.text(prompt)]);
@@ -185,19 +209,24 @@ final class GenerativeModel {
   /// }
   /// ```
   Stream<GenerateContentResponse> generateContentStream(
-      Iterable<Content> prompt,
-      {List<SafetySetting>? safetySettings,
-      GenerationConfig? generationConfig}) {
+    Iterable<Content> prompt, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+    List<Tool>? tools,
+    ToolConfig? toolConfig,
+  }) {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
+    tools ??= _tools;
+    toolConfig ??= _toolConfig;
     final parameters = <String, Object?>{
       'contents': prompt.map((p) => p.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
-      if (generationConfig case final config?)
-        'generationConfig': config.toJson(),
-      if (_tools case final tools?)
-        'tools': tools.map((t) => t.toJson()).toList(),
+      if (generationConfig != null)
+        'generationConfig': generationConfig.toJson(),
+      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
+      if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
       if (_systemInstruction case final systemInstruction?)
         'systemInstruction': systemInstruction.toJson(),
     };
@@ -290,8 +319,9 @@ GenerativeModel createModelWithClient({
   List<SafetySetting> safetySettings = const [],
   GenerationConfig? generationConfig,
   RequestOptions? requestOptions,
-  List<Tool>? tools,
   Content? systemInstruction,
+  List<Tool>? tools,
+  ToolConfig? toolConfig,
 }) =>
     GenerativeModel._withClient(
       client: client,
@@ -299,8 +329,9 @@ GenerativeModel createModelWithClient({
       safetySettings: safetySettings,
       generationConfig: generationConfig,
       baseUri: _googleAIBaseUri(requestOptions),
-      tools: tools,
       systemInstruction: systemInstruction,
+      tools: tools,
+      toolConfig: toolConfig,
     );
 
 /// Creates a model with an overridden base URL to communicate with a different
@@ -324,6 +355,7 @@ GenerativeModel createModelWithBaseUri({
       safetySettings: safetySettings,
       generationConfig: generationConfig,
       baseUri: baseUri,
-      tools: null,
       systemInstruction: systemInstruction,
+      tools: null,
+      toolConfig: null,
     );
