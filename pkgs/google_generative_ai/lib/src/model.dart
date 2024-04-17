@@ -87,7 +87,10 @@ final class GenerativeModel {
   ///
   /// Functions that the model may call while generating content can be passed
   /// in [tools]. When using tools [requestOptions] must be passed to
-  /// override the `apiVersion` to `v1beta`.
+  /// override the `apiVersion` to `v1beta`. Tool usage by the model can be
+  /// configured with [toolConfig]. Tools and tool configuration can be
+  /// overridden for individual requests with arguments to [generateContent] or
+  /// [generateContentStream].
   ///
   /// A [Content.system] can be passed to [systemInstruction] to give
   /// high priority instructions to the model. When using system instructions
@@ -151,6 +154,11 @@ final class GenerativeModel {
   /// Sends a "generateContent" API request for the configured model,
   /// and waits for the response.
   ///
+  /// The [safetySettings], [generationConfig], [tools], and [toolConfig],
+  /// override the arguments of the same name passed to the
+  /// [GenerativeModel.new] constructor. Each argument, when non-null,
+  /// overrides the model level configuration in its entirety.
+  ///
   /// Example:
   /// ```dart
   /// final response = await model.generateContent([Content.text(prompt)]);
@@ -187,6 +195,11 @@ final class GenerativeModel {
   ///
   /// Sends a "streamGenerateContent" API request for the configured model,
   /// and waits for the response.
+  ///
+  /// The [safetySettings], [generationConfig], [tools], and [toolConfig],
+  /// override the arguments of the same name passed to the
+  /// [GenerativeModel.new] constructor. Each argument, when non-null,
+  /// overrides the model level configuration in its entirety.
   ///
   /// Example:
   /// ```dart
