@@ -27,6 +27,8 @@ void main() {
       String modelName = defaultModelName,
       RequestOptions? requestOptions,
       Content? systemInstruction,
+      List<Tool>? tools,
+      ToolConfig? toolConfig,
     }) {
       final client = StubClient();
       final model = createModelWithClient(
@@ -34,6 +36,8 @@ void main() {
         client: client,
         requestOptions: requestOptions,
         systemInstruction: systemInstruction,
+        tools: tools,
+        toolConfig: toolConfig,
       );
       return (client, model);
     }
@@ -331,6 +335,146 @@ void main() {
         final response = await model.generateContent(
           [Content.text(prompt)],
         );
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can pass tools and function calling config', () async {
+        final (client, model) = createModel(
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration('someFunction', 'Some cool function.',
+                    Schema(SchemaType.string, description: 'Some parameter.'))
+              ])
+            ],
+            toolConfig: ToolConfig(
+                functionCallingConfig: FunctionCallingConfig(
+                    mode: FunctionCallingMode.any,
+                    allowedFunctionNames: {'someFunction'})));
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'tools': [
+              {
+                'functionDeclarations': [
+                  {
+                    'name': 'someFunction',
+                    'description': 'Some cool function.',
+                    'parameters': {
+                      'type': 'STRING',
+                      'description': 'Some parameter.'
+                    }
+                  }
+                ]
+              }
+            ],
+            'toolConfig': {
+              'functionCallingConfig': {
+                'mode': 'ANY',
+                'allowedFunctionNames': ['someFunction'],
+              }
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([Content.text(prompt)]);
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can override tools and function calling config', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'tools': [
+              {
+                'functionDeclarations': [
+                  {
+                    'name': 'someFunction',
+                    'description': 'Some cool function.',
+                    'parameters': {
+                      'type': 'STRING',
+                      'description': 'Some parameter.'
+                    }
+                  }
+                ]
+              }
+            ],
+            'toolConfig': {
+              'functionCallingConfig': {
+                'mode': 'ANY',
+                'allowedFunctionNames': ['someFunction'],
+              }
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([
+          Content.text(prompt)
+        ],
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration('someFunction', 'Some cool function.',
+                    Schema(SchemaType.string, description: 'Some parameter.'))
+              ])
+            ],
+            toolConfig: ToolConfig(
+                functionCallingConfig: FunctionCallingConfig(
+                    mode: FunctionCallingMode.any,
+                    allowedFunctionNames: {'someFunction'})));
         expect(
             response,
             matchesGenerateContentResponse(GenerateContentResponse([

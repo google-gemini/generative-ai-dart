@@ -75,5 +75,12 @@ export 'src/error.dart'
         ServerException,
         UnsupportedUserLocation;
 export 'src/function_calling.dart'
-    show FunctionDeclaration, Schema, SchemaType, Tool;
+    show
+        FunctionCallingConfig,
+        FunctionCallingMode,
+        FunctionDeclaration,
+        Schema,
+        SchemaType,
+        Tool,
+        ToolConfig;
 export 'src/model.dart' show GenerativeModel, RequestOptions;
