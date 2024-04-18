@@ -1,4 +1,4 @@
-## 0.3.1-wip
+## 0.3.1
 
 - Add support on content generating methods for overriding "tools" passed when
   the generative model was instantiated.
