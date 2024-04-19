@@ -21,7 +21,7 @@ import 'client.dart';
 import 'content.dart';
 import 'function_calling.dart';
 
-const _apiVersion = 'v1';
+const _apiVersion = 'v1beta';
 Uri _googleAIBaseUri(RequestOptions? options) => Uri.https(
     'generativelanguage.googleapis.com', options?.apiVersion ?? _apiVersion);
 
@@ -40,8 +40,7 @@ enum Task {
 final class RequestOptions {
   /// The API version used to make requests.
   ///
-  /// By default the version is `v1`. This may be specified as `v1beta` to use
-  /// beta features.
+  /// By default the version is `v1beta`.
   final String? apiVersion;
   const RequestOptions({this.apiVersion});
 }
@@ -86,15 +85,12 @@ final class GenerativeModel {
   /// request.
   ///
   /// Functions that the model may call while generating content can be passed
-  /// in [tools]. When using tools [requestOptions] must be passed to
-  /// override the `apiVersion` to `v1beta`. Tool usage by the model can be
-  /// configured with [toolConfig]. Tools and tool configuration can be
-  /// overridden for individual requests with arguments to [generateContent] or
-  /// [generateContentStream].
+  /// in [tools]. Tool usage by the model can be configured with [toolConfig].
+  /// Tools and tool configuration can be overridden for individual requests
+  /// with arguments to [generateContent] or [generateContentStream].
   ///
   /// A [Content.system] can be passed to [systemInstruction] to give
-  /// high priority instructions to the model. When using system instructions
-  /// [requestOptions] must be passed to override the `apiVersion` to `v1beta`.
+  /// high priority instructions to the model.
   factory GenerativeModel({
     required String model,
     required String apiKey,

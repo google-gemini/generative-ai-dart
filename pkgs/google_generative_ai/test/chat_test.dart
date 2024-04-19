@@ -39,7 +39,7 @@ void main() {
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
-        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
             'models/some-model:generateContent'),
         {
           'contents': [
@@ -95,7 +95,7 @@ void main() {
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
-        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
             'models/some-model:generateContent'),
         {
           'contents': [
@@ -143,7 +143,7 @@ void main() {
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stubStream(
-        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
             'models/some-model:streamGenerateContent'),
         {
           'contents': [
@@ -196,7 +196,7 @@ void main() {
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
-        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
             'models/some-model:generateContent'),
         {
           'contents': [
