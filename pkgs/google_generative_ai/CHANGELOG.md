@@ -1,3 +1,7 @@
+## 0.3.2-wip
+
+- Use API version `v1beta` by default.
+
 ## 0.3.1
 
 - Add support on content generating methods for overriding "tools" passed when
