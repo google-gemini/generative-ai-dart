@@ -22,72 +22,68 @@ void main() async {
     stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
+
+  final exchangeRateTool = FunctionDeclaration(
+      'findExchangeRate',
+      'Returns the exchange rate between currencies on given date.',
+      Schema(SchemaType.object, properties: {
+        'currency_date': Schema(SchemaType.string,
+            description: 'A date in YYYY-MM-DD format or '
+                'the exact value "latest" if a time period is not specified.'),
+        'currency_from': Schema(SchemaType.string,
+            description: 'The currency code of the currency to convert from, '
+                'such as "USD".'),
+        'currency_to': Schema(SchemaType.string,
+            description: 'The currency code of the currency to convert to, '
+                'such as "USD".')
+      }));
+
   final model = GenerativeModel(
-    model: 'gemini-pro',
+    // Use a model that supports function calling, like Gemini 1.0 Pro
+    // See "Supported models" in the "Introduction to function calling" page.
+    model: 'gemini-1.0-pro',
     apiKey: apiKey,
     tools: [
-      Tool(functionDeclarations: [
-        FunctionDeclaration(
-            'fetchCurrentWeather',
-            'Returns the weather in a given location.',
-            Schema(SchemaType.object, properties: {
-              'location': Schema(SchemaType.string),
-              'unit': Schema(SchemaType.string,
-                  enumValues: ['celcius', 'farenheit'])
-            }, requiredProperties: [
-              'location'
-            ]))
-      ])
+      Tool(functionDeclarations: [exchangeRateTool])
     ],
   );
 
-  final prompt = 'What is the weather in Seattle?';
-  final content = [Content.text(prompt)];
-  final response = await model.generateContent(content);
+  final chat = model.startChat();
+  final prompt = 'How much is 50 US dollars worth in Swedish krona?';
+
+  // Send the message to the generative model.
+  var response = await chat.sendMessage(Content.text(prompt));
 
   final functionCalls = response.functionCalls.toList();
-  if (functionCalls.isEmpty) {
-    print('No function calls.');
-    print(response.text);
-  } else if (functionCalls.length > 1) {
-    print('Too many function calls.');
-    print(response.text);
-  } else {
-    content
-      ..add(response.candidates.first.content)
-      ..add(_dispatchFunctionCall(functionCalls.single));
-    final nextResponse = await model.generateContent(content);
-    print('Response: ${nextResponse.text}');
+  // When the model response with a function call, invoke the function.
+  if (functionCalls.isNotEmpty) {
+    final functionCall = functionCalls.first;
+    final result = switch (functionCall.name) {
+      // Forward arguments to the hypothetical API.
+      'findExchangeRate' => await findExchangeRate(functionCall.args),
+      // Throw an exception if the model attempted to call a function that was
+      // not declared.
+      _ => throw UnimplementedError(
+          'Function not implemented: ${functionCall.name}')
+    };
+    // Send the response to the model so that it can use the result to generate
+    // text for the user.
+    response = await chat
+        .sendMessage(Content.functionResponse(functionCall.name, result));
+  }
+  // When the model responds with non-null text content, print it.
+  if (response.text case final text?) {
+    print(text);
   }
 }
 
-Content _dispatchFunctionCall(FunctionCall call) {
-  final result = switch (call.name) {
-    'fetchCurrentWeather' => {
-        'weather': _fetchWeather(WeatherRequest._parse(call.args))
-      },
-    _ => throw UnimplementedError('Function not implemented: ${call.name}')
-  };
-  return Content.functionResponse(call.name, result);
-}
-
-class WeatherRequest {
-  static WeatherRequest _parse(Map<String, Object?> jsonObject) =>
-      switch (jsonObject) {
-        {'location': final String location} => WeatherRequest(location),
-        _ =>
-          throw FormatException('Unhandled WeatherRequest format', jsonObject),
-      };
-  final String location;
-  WeatherRequest(this.location);
-}
-
-String _fetchWeather(WeatherRequest request) {
-  const weather = {
-    'Seattle': 'rainy',
-    'Chicago': 'windy',
-    'Sunnyvale': 'sunny'
-  };
-  final location = request.location;
-  return weather[location] ?? 'who knows?';
-}
+Future<Map<String, Object?>> findExchangeRate(
+  Map<String, Object?> arguments,
+) async =>
+    // This hypothetical API returns a JSON such as:
+    // {"base":"USD","date":"2024-04-17","rates":{"SEK": 0.091}}
+    {
+      'date': arguments['currency_date'],
+      'base': arguments['currency_from'],
+      'rates': <String, Object?>{arguments['currency_to'] as String: 0.091}
+    };
