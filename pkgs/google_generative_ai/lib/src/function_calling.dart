@@ -105,7 +105,7 @@ enum FunctionCallingMode {
   /// The mode with default model behavior.
   ///
   /// Model decides to predict either a function call or a natural language
-  /// repspose.
+  /// response.
   auto,
 
   /// A mode where the Model is constrained to always predicting a function
