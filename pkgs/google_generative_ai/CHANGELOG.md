@@ -1,6 +1,7 @@
-## 0.3.2-wip
+## 0.3.2
 
 - Use API version `v1beta` by default.
+- Add note to README warning about leaking API keys.
 
 ## 0.3.1
 
