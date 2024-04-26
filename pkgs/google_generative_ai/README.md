@@ -11,6 +11,14 @@ applications. This SDK supports use cases like:
 -   Build multi-turn conversations (chat)
 -   Embedding
 
+> [!CAUTION]
+> **Using the Google AI SDK for Dart (Flutter) to call the Google AI Gemini API
+> directly from your app is recommended for prototyping only.** If you plan to
+> enable billing, we strongly recommend that you use the SDK to call the Google
+> AI Gemini API only server-side to keep your API key safe. You risk potentially
+> exposing your API key to malicious actors if you embed your API key directly
+> in your mobile or web app or fetch it remotely at runtime.
+
 ## Getting started
 
 ### Get an API key
