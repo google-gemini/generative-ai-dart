@@ -58,7 +58,6 @@ export 'src/api.dart'
         SafetyRating,
         SafetySetting,
         TaskType;
-
 export 'src/chat.dart' show ChatSession, StartChatExtension;
 export 'src/content.dart'
     show
