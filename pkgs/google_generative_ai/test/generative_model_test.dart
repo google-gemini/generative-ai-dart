@@ -27,6 +27,8 @@ void main() {
       String modelName = defaultModelName,
       RequestOptions? requestOptions,
       Content? systemInstruction,
+      List<Tool>? tools,
+      ToolConfig? toolConfig,
     }) {
       final client = StubClient();
       final model = createModelWithClient(
@@ -34,6 +36,8 @@ void main() {
         client: client,
         requestOptions: requestOptions,
         systemInstruction: systemInstruction,
+        tools: tools,
+        toolConfig: toolConfig,
       );
       return (client, model);
     }
@@ -44,7 +48,7 @@ void main() {
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
-        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
             'models/some-model:generateContent'),
         {
           'contents': [
@@ -84,7 +88,7 @@ void main() {
       final prompt = 'Some prompt';
       final result = 'Some response';
       client.stub(
-        Uri.parse('https://generativelanguage.googleapis.com/v1/'
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
             'tunedModels/some-model:generateContent'),
         {
           'contents': [
@@ -164,7 +168,7 @@ void main() {
         final prompt = 'Some prompt';
         final result = 'Some response';
         client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:generateContent'),
           {
             'contents': [
@@ -203,7 +207,7 @@ void main() {
         final prompt = 'Some prompt';
         final result = 'Some response';
         client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:generateContent'),
           {
             'contents': [
@@ -252,7 +256,7 @@ void main() {
         final prompt = 'Some prompt';
         final result = 'Some response';
         client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:generateContent'),
           {
             'contents': [
@@ -297,7 +301,7 @@ void main() {
         final prompt = 'Some prompt';
         final result = 'Some response';
         client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:generateContent'),
           {
             'contents': [
@@ -338,6 +342,146 @@ void main() {
                   Content('model', [TextPart(result)]), null, null, null, null),
             ], null)));
       });
+
+      test('can pass tools and function calling config', () async {
+        final (client, model) = createModel(
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration('someFunction', 'Some cool function.',
+                    Schema(SchemaType.string, description: 'Some parameter.'))
+              ])
+            ],
+            toolConfig: ToolConfig(
+                functionCallingConfig: FunctionCallingConfig(
+                    mode: FunctionCallingMode.any,
+                    allowedFunctionNames: {'someFunction'})));
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'tools': [
+              {
+                'functionDeclarations': [
+                  {
+                    'name': 'someFunction',
+                    'description': 'Some cool function.',
+                    'parameters': {
+                      'type': 'STRING',
+                      'description': 'Some parameter.'
+                    }
+                  }
+                ]
+              }
+            ],
+            'toolConfig': {
+              'functionCallingConfig': {
+                'mode': 'ANY',
+                'allowedFunctionNames': ['someFunction'],
+              }
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([Content.text(prompt)]);
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
+
+      test('can override tools and function calling config', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        final result = 'Some response';
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
+              'models/some-model:generateContent'),
+          {
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt}
+                ]
+              }
+            ],
+            'tools': [
+              {
+                'functionDeclarations': [
+                  {
+                    'name': 'someFunction',
+                    'description': 'Some cool function.',
+                    'parameters': {
+                      'type': 'STRING',
+                      'description': 'Some parameter.'
+                    }
+                  }
+                ]
+              }
+            ],
+            'toolConfig': {
+              'functionCallingConfig': {
+                'mode': 'ANY',
+                'allowedFunctionNames': ['someFunction'],
+              }
+            },
+          },
+          {
+            'candidates': [
+              {
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result}
+                  ]
+                }
+              }
+            ]
+          },
+        );
+        final response = await model.generateContent([
+          Content.text(prompt)
+        ],
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration('someFunction', 'Some cool function.',
+                    Schema(SchemaType.string, description: 'Some parameter.'))
+              ])
+            ],
+            toolConfig: ToolConfig(
+                functionCallingConfig: FunctionCallingConfig(
+                    mode: FunctionCallingMode.any,
+                    allowedFunctionNames: {'someFunction'})));
+        expect(
+            response,
+            matchesGenerateContentResponse(GenerateContentResponse([
+              Candidate(
+                  Content('model', [TextPart(result)]), null, null, null, null),
+            ], null)));
+      });
     });
 
     group('generate content stream', () {
@@ -346,7 +490,7 @@ void main() {
         final prompt = 'Some prompt';
         final results = {'First response', 'Second Response'};
         client.stubStream(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:streamGenerateContent'),
           {
             'contents': [
@@ -391,7 +535,7 @@ void main() {
         final prompt = 'Some prompt';
         final results = {'First response', 'Second Response'};
         client.stubStream(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:streamGenerateContent'),
           {
             'contents': [
@@ -446,7 +590,7 @@ void main() {
         final prompt = 'Some prompt';
         final results = {'First response', 'Second Response'};
         client.stubStream(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:streamGenerateContent'),
           {
             'contents': [
@@ -496,7 +640,7 @@ void main() {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
         client.stub(
-            Uri.parse('https://generativelanguage.googleapis.com/v1/'
+            Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
                 'models/some-model:countTokens'),
             {
               'contents': [
@@ -521,7 +665,7 @@ void main() {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
         client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:embedContent'),
           {
             'content': {
@@ -553,7 +697,7 @@ void main() {
         final embedding1 = [0.1, 0.2, 0.3];
         final embedding2 = [0.4, 0.5, 1.6];
         client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1/'
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
               'models/some-model:batchEmbedContents'),
           {
             'requests': [

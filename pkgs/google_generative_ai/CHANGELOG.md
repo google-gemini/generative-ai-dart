@@ -1,3 +1,15 @@
+## 0.3.2
+
+- Use API version `v1beta` by default.
+- Add note to README warning about leaking API keys.
+
+## 0.3.1
+
+- Add support on content generating methods for overriding "tools" passed when
+  the generative model was instantiated.
+- Add support for forcing the model to use or not use function calls to generate
+  content.
+
 ## 0.3.0
 
 - Allow specifying an API version in a `requestOptions` argument when

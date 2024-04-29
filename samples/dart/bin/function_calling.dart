@@ -23,23 +23,23 @@ void main() async {
     exit(1);
   }
   final model = GenerativeModel(
-      model: 'gemini-pro',
-      apiKey: apiKey,
-      tools: [
-        Tool(functionDeclarations: [
-          FunctionDeclaration(
-              'fetchCurrentWeather',
-              'Returns the weather in a given location.',
-              Schema(SchemaType.object, properties: {
-                'location': Schema(SchemaType.string),
-                'unit': Schema(SchemaType.string,
-                    enumValues: ['celcius', 'farenheit'])
-              }, requiredProperties: [
-                'location'
-              ]))
-        ])
-      ],
-      requestOptions: RequestOptions(apiVersion: 'v1beta'));
+    model: 'gemini-pro',
+    apiKey: apiKey,
+    tools: [
+      Tool(functionDeclarations: [
+        FunctionDeclaration(
+            'fetchCurrentWeather',
+            'Returns the weather in a given location.',
+            Schema(SchemaType.object, properties: {
+              'location': Schema(SchemaType.string),
+              'unit': Schema(SchemaType.string,
+                  enumValues: ['celcius', 'farenheit'])
+            }, requiredProperties: [
+              'location'
+            ]))
+      ])
+    ],
+  );
 
   final prompt = 'What is the weather in Seattle?';
   final content = [Content.text(prompt)];
