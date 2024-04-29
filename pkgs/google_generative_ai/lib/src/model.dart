@@ -315,7 +315,9 @@ GenerativeModel createModelWithBaseUri({
   required Uri baseUri,
   List<SafetySetting> safetySettings = const [],
   GenerationConfig? generationConfig,
+  List<Tool>? tools,
   Content? systemInstruction,
+  ToolConfig? toolConfig,
 }) =>
     GenerativeModel._withClient(
       client: HttpApiClient(apiKey: apiKey),
@@ -325,4 +327,6 @@ GenerativeModel createModelWithBaseUri({
       baseUri: baseUri,
       tools: null,
       systemInstruction: systemInstruction,
+      tools: tools,
+      toolConfig: toolConfig,
     );
