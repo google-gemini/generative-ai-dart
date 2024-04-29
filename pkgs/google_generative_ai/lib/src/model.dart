@@ -343,7 +343,9 @@ GenerativeModel createModelWithBaseUri({
   FutureOr<Map<String, String>> Function()? requestHeaders,
   List<SafetySetting> safetySettings = const [],
   GenerationConfig? generationConfig,
+  List<Tool>? tools,
   Content? systemInstruction,
+  ToolConfig? toolConfig,
 }) =>
     GenerativeModel._withClient(
       client: HttpApiClient(apiKey: apiKey, requestHeaders: requestHeaders),
@@ -352,6 +354,6 @@ GenerativeModel createModelWithBaseUri({
       generationConfig: generationConfig,
       baseUri: baseUri,
       systemInstruction: systemInstruction,
-      tools: null,
-      toolConfig: null,
+      tools: tools,
+      toolConfig: toolConfig,
     );
