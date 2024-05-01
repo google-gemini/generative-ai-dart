@@ -41,6 +41,7 @@ final class RequestOptions {
   /// The API version used to make requests.
   ///
   /// By default the version is `v1beta`.
+  /// See https://ai.google.dev/gemini-api/docs/api-versions for details.
   final String? apiVersion;
   const RequestOptions({this.apiVersion});
 }
