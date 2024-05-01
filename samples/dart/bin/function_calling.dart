@@ -27,16 +27,19 @@ void main() async {
       'findExchangeRate',
       'Returns the exchange rate between currencies on given date.',
       Schema(SchemaType.object, properties: {
-        'currency_date': Schema(SchemaType.string,
+        'currencyDate': Schema(SchemaType.string,
             description: 'A date in YYYY-MM-DD format or '
                 'the exact value "latest" if a time period is not specified.'),
-        'currency_from': Schema(SchemaType.string,
+        'currencyFrom': Schema(SchemaType.string,
             description: 'The currency code of the currency to convert from, '
                 'such as "USD".'),
-        'currency_to': Schema(SchemaType.string,
+        'currencyTo': Schema(SchemaType.string,
             description: 'The currency code of the currency to convert to, '
                 'such as "USD".')
-      }));
+      }, requiredProperties: [
+        'currencyDate',
+        'currencyFrom'
+      ]));
 
   final model = GenerativeModel(
     // Use a model that supports function calling, like Gemini 1.0 Pro
@@ -83,7 +86,7 @@ Future<Map<String, Object?>> findExchangeRate(
     // This hypothetical API returns a JSON such as:
     // {"base":"USD","date":"2024-04-17","rates":{"SEK": 0.091}}
     {
-      'date': arguments['currency_date'],
-      'base': arguments['currency_from'],
-      'rates': <String, Object?>{arguments['currency_to'] as String: 0.091}
+      'date': arguments['currencyDate'],
+      'base': arguments['currencyFrom'],
+      'rates': <String, Object?>{arguments['currencyTo'] as String: 0.091}
     };
