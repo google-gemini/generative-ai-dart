@@ -16,7 +16,7 @@ Large Language Models (LLMs) to build language applications.
 ### API keys
 
 To use the Gemini API, you'll need an API key. If you don't already have one, 
-create a key in Google AI Studio: https://makersuite.google.com/app/apikey.
+create a key in Google AI Studio: https://aistudio.google.com/app/apikey.
 
 ### Dart samples
 
