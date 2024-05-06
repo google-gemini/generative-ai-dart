@@ -36,6 +36,11 @@ void main() async {
 
   final responses = model.generateContentStream(content);
   await for (final response in responses) {
+    if (response.usageMetadata case final usageMetadata?) {
+      stdout.writeln('(Usage: prompt - ${usageMetadata.promptTokenCount}), '
+          'candidates - ${usageMetadata.candidatesTokenCount}, '
+          'total - ${usageMetadata.totalTokenCount}');
+    }
     stdout.write(response.text);
   }
   stdout.writeln();

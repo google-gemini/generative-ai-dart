@@ -1,4 +1,7 @@
-## 0.3.3-wip
+## 0.3.3
+
+- Add support for parsing the `usageMetadata` field in `GenerateContentResponse`
+  messages.
 
 ## 0.3.2
 
