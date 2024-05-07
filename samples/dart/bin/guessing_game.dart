@@ -27,23 +27,25 @@ Future<List<String>> _generateWords(String apiKey, String subject) async {
   );
   final content = [Content.text('Create and record a list of 20 $subject.')];
 
-  final response = await model.generateContent(content,
-      tools: [
-        Tool(functionDeclarations: [
-          FunctionDeclaration(
-              'recordWords',
-              'Stores a list of words for a guessing game.',
-              Schema(SchemaType.object, properties: {
-                'words': Schema(SchemaType.array,
-                    items: Schema(SchemaType.string,
-                        description:
-                            'A Single word that a player will need to guess.'))
-              }))
-        ])
-      ],
-      toolConfig: ToolConfig(
-          functionCallingConfig:
-              FunctionCallingConfig(mode: FunctionCallingMode.any)));
+  final response = await model.generateContent(
+    content,
+    tools: [
+      Tool(functionDeclarations: [
+        FunctionDeclaration(
+            'recordWords',
+            'Stores a list of words for a guessing game.',
+            Schema(SchemaType.object, properties: {
+              'words': Schema(SchemaType.array,
+                  items: Schema(SchemaType.string,
+                      description:
+                          'A single word that a player will need to guess.'))
+            }))
+      ])
+    ],
+    toolConfig: ToolConfig(
+        functionCallingConfig:
+            FunctionCallingConfig(mode: FunctionCallingMode.any)),
+  );
   final functionCall = response.functionCalls.first;
   return [
     for (final word in functionCall.args['words'] as List) word as String
