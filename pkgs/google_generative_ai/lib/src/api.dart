@@ -22,7 +22,10 @@ final class CountTokensResponse {
   /// Always non-negative.
   final int totalTokens;
 
-  CountTokensResponse(this.totalTokens);
+  /// Optional extra fields that returned from count token response
+  final Map<String, dynamic>? extraFields;
+
+  CountTokensResponse(this.totalTokens, {this.extraFields});
 }
 
 /// Response from the model; supports multiple candidates.
@@ -543,7 +546,8 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
 
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
   return switch (jsonObject) {
-    {'totalTokens': final int totalTokens} => CountTokensResponse(totalTokens),
+    {'totalTokens': final int totalTokens} =>
+      CountTokensResponse(totalTokens, extraFields: Map.from(jsonObject)),
     {'error': final Object error} => throw parseError(error),
     _ =>
       throw FormatException('Unhandled CountTokensResponse format', jsonObject)
