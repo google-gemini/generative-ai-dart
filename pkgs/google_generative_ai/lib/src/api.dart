@@ -33,7 +33,14 @@ final class GenerateContentResponse {
   /// Returns the prompt's feedback related to the content filters.
   final PromptFeedback? promptFeedback;
 
-  GenerateContentResponse(this.candidates, this.promptFeedback);
+  final UsageMetadata? usageMetadata;
+
+  // TODO(natebosch): Change `promptFeedback` to a named argument.
+  GenerateContentResponse(
+    this.candidates,
+    this.promptFeedback, {
+    this.usageMetadata,
+  });
 
   /// The text content of the first part of the first of [candidates], if any.
   ///
@@ -143,6 +150,24 @@ final class PromptFeedback {
   final List<SafetyRating> safetyRatings;
 
   PromptFeedback(this.blockReason, this.blockReasonMessage, this.safetyRatings);
+}
+
+/// Metadata on the generation request's token usage.
+final class UsageMetadata {
+  /// Number of tokens in the prompt.
+  final int? promptTokenCount;
+
+  /// Total number of tokens across the generated candidates.
+  final int? candidatesTokenCount;
+
+  /// Total token count for the generation request (prompt + candidates).
+  final int? totalTokenCount;
+
+  UsageMetadata({
+    this.promptTokenCount,
+    this.candidatesTokenCount,
+    this.totalTokenCount,
+  });
 }
 
 /// Response candidate generated from a [GenerativeModel].
@@ -496,20 +521,24 @@ enum TaskType {
 }
 
 GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
-  return switch (jsonObject) {
-    {'candidates': final List<Object?> candidates} => GenerateContentResponse(
-        candidates.map(_parseCandidate).toList(),
-        switch (jsonObject) {
-          {'promptFeedback': final promptFeedback?} =>
-            _parsePromptFeedback(promptFeedback),
-          _ => null
-        }),
-    {'promptFeedback': final promptFeedback?} =>
-      GenerateContentResponse([], _parsePromptFeedback(promptFeedback)),
-    {'error': final Object error} => throw parseError(error),
-    _ => throw FormatException(
-        'Unhandled GenerateContentResponse format', jsonObject)
+  if (jsonObject case {'error': final Object error}) throw parseError(error);
+  final candidates = switch (jsonObject) {
+    {'candidates': final List<Object?> candidates} =>
+      candidates.map(_parseCandidate).toList(),
+    _ => <Candidate>[]
   };
+  final promptFeedback = switch (jsonObject) {
+    {'promptFeedback': final promptFeedback?} =>
+      _parsePromptFeedback(promptFeedback),
+    _ => null,
+  };
+  final usageMedata = switch (jsonObject) {
+    {'usageMetadata': final usageMetadata?} =>
+      _parseUsageMetadata(usageMetadata),
+    _ => null,
+  };
+  return GenerateContentResponse(candidates, promptFeedback,
+      usageMetadata: usageMedata);
 }
 
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
@@ -592,6 +621,29 @@ PromptFeedback _parsePromptFeedback(Object jsonObject) {
           safetyRatings.map(_parseSafetyRating).toList()),
     _ => throw FormatException('Unhandled PromptFeedback format', jsonObject),
   };
+}
+
+UsageMetadata _parseUsageMetadata(Object jsonObject) {
+  if (jsonObject is! Map<String, Object?>) {
+    throw FormatException('Unhandled UsageMetadata format', jsonObject);
+  }
+  final promptTokenCount = switch (jsonObject) {
+    {'promptTokenCount': final int promptTokenCount} => promptTokenCount,
+    _ => null,
+  };
+  final candidatesTokenCount = switch (jsonObject) {
+    {'candidatesTokenCount': final int candidatesTokenCount} =>
+      candidatesTokenCount,
+    _ => null,
+  };
+  final totalTokenCount = switch (jsonObject) {
+    {'totalTokenCount': final int totalTokenCount} => totalTokenCount,
+    _ => null,
+  };
+  return UsageMetadata(
+      promptTokenCount: promptTokenCount,
+      candidatesTokenCount: candidatesTokenCount,
+      totalTokenCount: totalTokenCount);
 }
 
 SafetyRating _parseSafetyRating(Object? jsonObject) {
