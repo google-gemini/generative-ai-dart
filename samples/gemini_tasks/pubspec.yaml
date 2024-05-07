@@ -1,0 +1,29 @@
+name: gemini_tasks
+description: "Sample app for the google_generative_ai package"
+publish_to: 'none'
+version: 1.0.0+1
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_markdown: ^0.7.1
+  # Note: best practice here is to use a caret version constraint. We use `any`
+  # here just for the purpose of the sample.
+  google_generative_ai: any
+  url_launcher: ^6.2.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+# Note: this section is only used in order to resolve google_generative_ai to
+# the same repo as the sample.
+dependency_overrides:
+  google_generative_ai:
+    path: ../../pkgs/google_generative_ai
