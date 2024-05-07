@@ -1,4 +1,14 @@
-## 0.3.1-wip
+## 0.3.3
+
+- Add support for parsing the `usageMetadata` field in `GenerateContentResponse`
+  messages.
+
+## 0.3.2
+
+- Use API version `v1beta` by default.
+- Add note to README warning about leaking API keys.
+
+## 0.3.1
 
 - Add support on content generating methods for overriding "tools" passed when
   the generative model was instantiated.
