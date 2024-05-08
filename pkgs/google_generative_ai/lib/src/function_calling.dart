@@ -177,6 +177,82 @@ final class Schema {
     this.requiredProperties,
   });
 
+  Schema.string({
+    String? description,
+    bool? nullable,
+  }) : this(
+          SchemaType.string,
+          description: description,
+          nullable: nullable,
+        );
+  Schema.enumString({
+    required List<String> enumValues,
+    String? description,
+    bool? nullable,
+  }) : this(
+          SchemaType.string,
+          enumValues: enumValues,
+          description: description,
+          nullable: nullable,
+          format: 'enum',
+        );
+
+  /// Construct a schema for a non-integer number.
+  ///
+  /// The [format] may be "float" or "double".
+  Schema.number({
+    String? description,
+    bool? nullable,
+    String? format,
+  }) : this(
+          SchemaType.number,
+          description: description,
+          nullable: nullable,
+        );
+
+  /// Construct a schema for an integer number.
+  ///
+  /// The [format] may be "int32" or "int64".
+  Schema.integer({
+    String? description,
+    bool? nullable,
+    String? format,
+  }) : this(
+          SchemaType.integer,
+          description: description,
+          nullable: nullable,
+        );
+  Schema.boolean({
+    String? description,
+    bool? nullable,
+  }) : this(
+          SchemaType.boolean,
+          description: description,
+          nullable: nullable,
+        );
+  Schema.array({
+    required Schema items,
+    String? description,
+    bool? nullable,
+  }) : this(
+          SchemaType.array,
+          description: description,
+          nullable: nullable,
+          items: items,
+        );
+  Schema.object({
+    required Map<String, Schema> properties,
+    List<String>? requiredProperties,
+    String? description,
+    bool? nullable,
+  }) : this(
+          SchemaType.object,
+          properties: properties,
+          requiredProperties: requiredProperties,
+          description: description,
+          nullable: nullable,
+        );
+
   Map<String, Object> toJson() => {
         'type': type.toJson(),
         if (format case final format?) 'format': format,
