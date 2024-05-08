@@ -249,6 +249,26 @@ enum BlockReason {
 enum HarmCategory {
   unspecified,
 
+  /// Negative or harmful comments targeting identity and/or protected
+  /// attribute.
+  derogatory,
+
+  /// Content that is rude, disrespectful, or profane.
+  toxicity,
+
+  /// Describes scenarios depicting violence against an individual or group, or
+  /// general descriptions of gore.
+  violence,
+
+  /// Contains references to sexual acts or other lewd content.
+  sexual,
+
+  /// Promotes unchecked medical advice.
+  medical,
+
+  /// Dangerous content that promotes, facilitates, or encourages harmful acts.
+  dangerous,
+
   /// Malicious, intimidating, bullying, or abusive comments targeting another
   /// individual.
   harassment,
@@ -265,6 +285,12 @@ enum HarmCategory {
 
   static HarmCategory _parseValue(Object jsonObject) => switch (jsonObject) {
         'HARM_CATEGORY_UNSPECIFIED' => unspecified,
+        'HARM_CATEGORY_DEROGATORY' => derogatory,
+        'HARM_CATEGORY_TOXICITY' => toxicity,
+        'HARM_CATEGORY_VIOLENCE' => violence,
+        'HARM_CATEGORY_SEXUAL' => sexual,
+        'HARM_CATEGORY_MEDICAL' => medical,
+        'HARM_CATEGORY_DANGEROUS' => dangerous,
         'HARM_CATEGORY_HARASSMENT' => harassment,
         'HARM_CATEGORY_HATE_SPEECH' => hateSpeech,
         'HARM_CATEGORY_SEXUALLY_EXPLICIT' => sexuallyExplicit,
@@ -274,6 +300,12 @@ enum HarmCategory {
 
   String toJson() => switch (this) {
         unspecified => 'HARM_CATEGORY_UNSPECIFIED',
+        derogatory => 'HARM_CATEGORY_DEROGATORY',
+        toxicity => 'HARM_CATEGORY_TOXICITY',
+        violence => 'HARM_CATEGORY_VIOLENCE',
+        sexual => 'HARM_CATEGORY_SEXUAL',
+        medical => 'HARM_CATEGORY_MEDICAL',
+        dangerous => 'HARM_CATEGORY_DANGEROUS',
         harassment => 'HARM_CATEGORY_HARASSMENT',
         hateSpeech => 'HARM_CATEGORY_HATE_SPEECH',
         sexuallyExplicit => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
