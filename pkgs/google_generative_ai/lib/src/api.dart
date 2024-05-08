@@ -22,11 +22,23 @@ final class CountTokensResponse {
   /// Always non-negative.
   final int totalTokens;
 
-  /// Optional extra fields that returned from count token response
-  final Map<String, dynamic>? extraFields;
+  /// Optional extra fields in the Vertex AI data model.
+  final Map<String, Object?>? _extraFields;
 
-  CountTokensResponse(this.totalTokens, {this.extraFields});
+  CountTokensResponse(this.totalTokens) : _extraFields = null;
+  CountTokensResponse._(this.totalTokens, this._extraFields);
 }
+
+/// Returns the fields other than `totalTokens` that were parsed from JSON for
+/// [response].
+Map<String, Object?>? countTokensResponseFields(CountTokensResponse response) =>
+    response._extraFields;
+
+/// Returns a [CountTokensResponse] as if it was parsed from a JSON map with
+/// [extraFields] alongside the total tokends field.
+CountTokensResponse createCountTokensResponse(
+        int totalTokens, Map<String, Object>? extraFields) =>
+    CountTokensResponse._(totalTokens, extraFields);
 
 /// Response from the model; supports multiple candidates.
 final class GenerateContentResponse {
@@ -545,13 +557,18 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
 }
 
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
-  return switch (jsonObject) {
-    {'totalTokens': final int totalTokens} =>
-      CountTokensResponse(totalTokens, extraFields: Map.from(jsonObject)),
-    {'error': final Object error} => throw parseError(error),
-    _ =>
-      throw FormatException('Unhandled CountTokensResponse format', jsonObject)
-  };
+  if (jsonObject case {'error': final Object error}) throw parseError(error);
+  if (jsonObject case {'totalTokens': final int totalTokens}) {
+    final extraFields = {
+      for (final entry in jsonObject.entries)
+        if (entry.key case final String fieldName
+            when fieldName != 'totalTokens')
+          fieldName: entry.value
+    };
+    return CountTokensResponse._(totalTokens,
+        extraFields.isEmpty ? null : Map.unmodifiable(extraFields));
+  }
+  throw FormatException('Unhandled CountTokensResponse format', jsonObject);
 }
 
 EmbedContentResponse parseEmbedContentResponse(Object jsonObject) {
