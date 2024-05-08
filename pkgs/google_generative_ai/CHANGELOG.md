@@ -1,6 +1,6 @@
 ## 0.3.4-wip
 
-- Add optional `extraFields` to `CountTokensResponse`
+- Add support for parsing Vertex AI specific fields in CountTokensResponse.
 
 ## 0.3.3
 
