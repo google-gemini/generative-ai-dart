@@ -117,13 +117,18 @@ final class EmbedContentRequest {
   final TaskType? taskType;
   final String? title;
   final String? model;
-  EmbedContentRequest(this.content, {this.taskType, this.title, this.model});
+  final int? outputDimensionality;
+
+  EmbedContentRequest(this.content,
+      {this.taskType, this.title, this.model, this.outputDimensionality});
 
   Object toJson({String? defaultModel}) => {
         'content': content.toJson(),
         if (taskType case final taskType?) 'taskType': taskType.toJson(),
         if (title != null) 'title': title,
         if (model ?? defaultModel case final model?) 'model': model,
+        if (outputDimensionality != null)
+          'outputDimensionality': outputDimensionality,
       };
 }
 
