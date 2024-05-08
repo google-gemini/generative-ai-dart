@@ -246,6 +246,9 @@ enum BlockReason {
 ///
 /// These categories cover various kinds of harms that developers may wish to
 /// adjust.
+///
+/// Some categories from the rest API are excluded because they are not used by
+/// the Gemini generative models.
 enum HarmCategory {
   unspecified,
 
