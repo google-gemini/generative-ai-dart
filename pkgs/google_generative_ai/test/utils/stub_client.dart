@@ -61,7 +61,7 @@ class ClientController {
   Future<T> checkRequest<T>(
     Future<T> Function() body, {
     required Map<String, Object?> response,
-    FutureOr<void> Function(Uri, Map<String, Object?>)? verifyRequest,
+    void Function(Uri, Map<String, Object?>)? verifyRequest,
   }) async {
     _client._requestExpectations.addLast(verifyRequest);
     _client._responses.addLast([response]);
