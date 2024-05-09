@@ -1,0 +1,6 @@
+samples/*/.metadata linguist-generated=true
+samples/**/Flutter/GeneratedPluginRegistrant.swift linguist-generated=true
+samples/**/Runner.xcodeproj/ linguist-generated=true
+samples/**/Runner.xcworkspace/ linguist-generated=true
+samples/**/flutter/CMakeLists.txt linguist-generated=true
+samples/**/flutter/generated_* linguist-generated=true
