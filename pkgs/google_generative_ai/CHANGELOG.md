@@ -1,5 +1,7 @@
 ## 0.3.4-wip
 
+- Add named constructors on `Schema` for each value type.
+
 ## 0.3.3
 
 - Add support for parsing the `usageMetadata` field in `GenerateContentResponse`
