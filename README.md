@@ -3,6 +3,9 @@
 The Google Generative AI SDK for Dart allows developers to use state-of-the-art
 Large Language Models (LLMs) to build language applications.
 
+See the [API overview of Gemini][Gemini API] for more information about
+generative models features and behaviors.
+
 > [!CAUTION]
 > **Using the Google AI SDK for Dart (Flutter) to call the Google AI Gemini API
 > directly from your app is recommended for prototyping only.** If you plan to
@@ -10,6 +13,8 @@ Large Language Models (LLMs) to build language applications.
 > AI Gemini API only server-side to keep your API key safe. You risk potentially
 > exposing your API key to malicious actors if you embed your API key directly
 > in your mobile or web app or fetch it remotely at runtime.
+
+[Gemini API]: https://ai.google.dev/gemini-api/docs/api-overview#dart-flutter
 
 ## Getting Started
 
