@@ -1,5 +1,6 @@
 ## 0.3.4-wip
 
+- Add support for parsing Vertex AI specific fields in `CountTokensResponse`.
 - Add named constructors on `Schema` for each value type.
 
 ## 0.3.3
