@@ -177,6 +177,7 @@ final class Schema {
     this.requiredProperties,
   });
 
+  /// Construct a schema for a String value.
   Schema.string({
     String? description,
     bool? nullable,
@@ -185,6 +186,8 @@ final class Schema {
           description: description,
           nullable: nullable,
         );
+
+  /// Construct a schema for String value with enumerated possible values.
   Schema.enumString({
     required List<String> enumValues,
     String? description,
@@ -222,6 +225,8 @@ final class Schema {
           description: description,
           nullable: nullable,
         );
+
+  /// Construct a schema for bool value.
   Schema.boolean({
     String? description,
     bool? nullable,
@@ -230,6 +235,8 @@ final class Schema {
           description: description,
           nullable: nullable,
         );
+
+  /// Construct a schema for an array of values with a specified type.
   Schema.array({
     required Schema items,
     String? description,
@@ -240,6 +247,8 @@ final class Schema {
           nullable: nullable,
           items: items,
         );
+
+  /// Construct a schema for an object with one or more properties.
   Schema.object({
     required Map<String, Schema> properties,
     List<String>? requiredProperties,
