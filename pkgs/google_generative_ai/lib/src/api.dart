@@ -488,13 +488,22 @@ final class GenerationConfig {
   /// Note: The default value varies by model.
   final int? topK;
 
-  GenerationConfig(
-      {this.candidateCount,
-      this.stopSequences = const [],
-      this.maxOutputTokens,
-      this.temperature,
-      this.topP,
-      this.topK});
+  /// Output response mimetype of the generated candidate text.
+  ///
+  /// Supported mimetype:
+  /// - `text/plain`: (default) Text output.
+  /// - `application/json`: JSON response in the candidates.
+  final String? responseMimeType;
+
+  GenerationConfig({
+    this.candidateCount,
+    this.stopSequences = const [],
+    this.maxOutputTokens,
+    this.temperature,
+    this.topP,
+    this.topK,
+    this.responseMimeType,
+  });
 
   Map<String, Object?> toJson() => {
         if (candidateCount case final candidateCount?)
@@ -505,6 +514,8 @@ final class GenerationConfig {
         if (temperature case final temperature?) 'temperature': temperature,
         if (topP case final topP?) 'topP': topP,
         if (topK case final topK?) 'topK': topK,
+        if (responseMimeType case final responseMimeType?)
+          'responseMimeType': responseMimeType,
       };
 }
 
