@@ -55,9 +55,15 @@ void main() {
 ''';
       final decoded = jsonDecode(response) as Object;
       expect(
-          () => parseGenerateContentResponse(decoded),
-          throwsA(isA<FormatException>().having((e) => e.message, 'message',
-              startsWith('Unhandled Content format'))));
+        () => parseGenerateContentResponse(decoded),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            startsWith('Unhandled Content format'),
+          ),
+        ),
+      );
     });
 
     test('with a blocked prompt', () {
@@ -89,22 +95,35 @@ void main() {
       final decoded = jsonDecode(response) as Object;
       final generateContentResponse = parseGenerateContentResponse(decoded);
       expect(
-          generateContentResponse,
-          matchesGenerateContentResponse(GenerateContentResponse(
-              [],
-              PromptFeedback(BlockReason.safety, null, [
-                SafetyRating(
-                    HarmCategory.sexuallyExplicit, HarmProbability.negligible),
-                SafetyRating(HarmCategory.hateSpeech, HarmProbability.high),
-                SafetyRating(
-                    HarmCategory.harassment, HarmProbability.negligible),
-                SafetyRating(
-                    HarmCategory.dangerousContent, HarmProbability.negligible),
-              ]))));
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [],
+            PromptFeedback(BlockReason.safety, null, [
+              SafetyRating(
+                HarmCategory.sexuallyExplicit,
+                HarmProbability.negligible,
+              ),
+              SafetyRating(HarmCategory.hateSpeech, HarmProbability.high),
+              SafetyRating(HarmCategory.harassment, HarmProbability.negligible),
+              SafetyRating(
+                HarmCategory.dangerousContent,
+                HarmProbability.negligible,
+              ),
+            ]),
+          ),
+        ),
+      );
       expect(
-          () => generateContentResponse.text,
-          throwsA(isA<GenerativeAIException>().having((e) => e.message,
-              'message', startsWith('Response was blocked due to safety'))));
+        () => generateContentResponse.text,
+        throwsA(
+          isA<GenerativeAIException>().having(
+            (e) => e.message,
+            'message',
+            startsWith('Response was blocked due to safety'),
+          ),
+        ),
+      );
     });
   });
 
@@ -169,36 +188,52 @@ void main() {
       final decoded = jsonDecode(response) as Object;
       final generateContentResponse = parseGenerateContentResponse(decoded);
       expect(
-          generateContentResponse,
-          matchesGenerateContentResponse(GenerateContentResponse(
-              [
-                Candidate(
-                    Content.model(
-                        [TextPart('Mountain View, California, United States')]),
-                    [
-                      SafetyRating(HarmCategory.sexuallyExplicit,
-                          HarmProbability.negligible),
-                      SafetyRating(
-                          HarmCategory.hateSpeech, HarmProbability.negligible),
-                      SafetyRating(
-                          HarmCategory.harassment, HarmProbability.negligible),
-                      SafetyRating(HarmCategory.dangerousContent,
-                          HarmProbability.negligible),
-                    ],
-                    null,
-                    FinishReason.stop,
-                    null),
-              ],
-              PromptFeedback(null, null, [
-                SafetyRating(
-                    HarmCategory.sexuallyExplicit, HarmProbability.negligible),
-                SafetyRating(
-                    HarmCategory.hateSpeech, HarmProbability.negligible),
-                SafetyRating(
-                    HarmCategory.harassment, HarmProbability.negligible),
-                SafetyRating(
-                    HarmCategory.dangerousContent, HarmProbability.negligible),
-              ]))));
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content.model([
+                  TextPart('Mountain View, California, United States'),
+                ]),
+                [
+                  SafetyRating(
+                    HarmCategory.sexuallyExplicit,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.hateSpeech,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.harassment,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.dangerousContent,
+                    HarmProbability.negligible,
+                  ),
+                ],
+                null,
+                FinishReason.stop,
+                null,
+              ),
+            ],
+            PromptFeedback(null, null, [
+              SafetyRating(
+                HarmCategory.sexuallyExplicit,
+                HarmProbability.negligible,
+              ),
+              SafetyRating(HarmCategory.hateSpeech, HarmProbability.negligible),
+              SafetyRating(HarmCategory.harassment, HarmProbability.negligible),
+              SafetyRating(
+                HarmCategory.dangerousContent,
+                HarmProbability.negligible,
+              ),
+            ]),
+          ),
+        ),
+      );
     });
 
     test('with a citation', () async {
@@ -286,40 +321,53 @@ void main() {
       final decoded = jsonDecode(response) as Object;
       final generateContentResponse = parseGenerateContentResponse(decoded);
       expect(
-          generateContentResponse,
-          matchesGenerateContentResponse(GenerateContentResponse(
-              [
-                Candidate(
-                    Content.model([TextPart('placeholder')]),
-                    [
-                      SafetyRating(HarmCategory.sexuallyExplicit,
-                          HarmProbability.negligible),
-                      SafetyRating(
-                          HarmCategory.hateSpeech, HarmProbability.negligible),
-                      SafetyRating(
-                          HarmCategory.harassment, HarmProbability.negligible),
-                      SafetyRating(HarmCategory.dangerousContent,
-                          HarmProbability.negligible),
-                    ],
-                    CitationMetadata([
-                      CitationSource(
-                          574, 705, Uri.https('example.com', ''), ''),
-                      CitationSource(
-                          899, 1026, Uri.https('example.com', ''), ''),
-                    ]),
-                    FinishReason.stop,
-                    null),
-              ],
-              PromptFeedback(null, null, [
-                SafetyRating(
-                    HarmCategory.sexuallyExplicit, HarmProbability.negligible),
-                SafetyRating(
-                    HarmCategory.hateSpeech, HarmProbability.negligible),
-                SafetyRating(
-                    HarmCategory.harassment, HarmProbability.negligible),
-                SafetyRating(
-                    HarmCategory.dangerousContent, HarmProbability.negligible),
-              ]))));
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content.model([TextPart('placeholder')]),
+                [
+                  SafetyRating(
+                    HarmCategory.sexuallyExplicit,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.hateSpeech,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.harassment,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.dangerousContent,
+                    HarmProbability.negligible,
+                  ),
+                ],
+                CitationMetadata([
+                  CitationSource(574, 705, Uri.https('example.com', ''), ''),
+                  CitationSource(899, 1026, Uri.https('example.com', ''), ''),
+                ]),
+                FinishReason.stop,
+                null,
+              ),
+            ],
+            PromptFeedback(null, null, [
+              SafetyRating(
+                HarmCategory.sexuallyExplicit,
+                HarmProbability.negligible,
+              ),
+              SafetyRating(HarmCategory.hateSpeech, HarmProbability.negligible),
+              SafetyRating(HarmCategory.harassment, HarmProbability.negligible),
+              SafetyRating(
+                HarmCategory.dangerousContent,
+                HarmProbability.negligible,
+              ),
+            ]),
+          ),
+        ),
+      );
     });
 
     test('allows missing content', () async {
@@ -356,27 +404,27 @@ void main() {
       expect(
         generateContentResponse,
         matchesGenerateContentResponse(
-          GenerateContentResponse(
-            [
-              Candidate(
+          GenerateContentResponse([
+            Candidate(
                 Content(null, []),
                 [
-                  SafetyRating(HarmCategory.sexuallyExplicit,
-                      HarmProbability.negligible),
+                  SafetyRating(
+                    HarmCategory.sexuallyExplicit,
+                    HarmProbability.negligible,
+                  ),
                   SafetyRating(
                       HarmCategory.hateSpeech, HarmProbability.negligible),
                   SafetyRating(
                       HarmCategory.harassment, HarmProbability.negligible),
-                  SafetyRating(HarmCategory.dangerousContent,
-                      HarmProbability.negligible),
+                  SafetyRating(
+                    HarmCategory.dangerousContent,
+                    HarmProbability.negligible,
+                  ),
                 ],
                 CitationMetadata([]),
                 FinishReason.safety,
-                null,
-              ),
-            ],
-            null,
-          ),
+                null),
+          ], null),
         ),
       );
     });
@@ -408,10 +456,13 @@ void main() {
 }
 ''';
       final decoded = jsonDecode(response) as Object;
-      final expectedThrow = throwsA(isA<InvalidApiKey>().having(
+      final expectedThrow = throwsA(
+        isA<InvalidApiKey>().having(
           (e) => e.message,
           'message',
-          'API key not valid. Please pass a valid API key.'));
+          'API key not valid. Please pass a valid API key.',
+        ),
+      );
       expect(() => parseGenerateContentResponse(decoded), expectedThrow);
       expect(() => parseCountTokensResponse(decoded), expectedThrow);
       expect(() => parseEmbedContentResponse(decoded), expectedThrow);
@@ -434,10 +485,13 @@ void main() {
 }
 ''';
       final decoded = jsonDecode(response) as Object;
-      final expectedThrow = throwsA(isA<UnsupportedUserLocation>().having(
+      final expectedThrow = throwsA(
+        isA<UnsupportedUserLocation>().having(
           (e) => e.message,
           'message',
-          'User location is not supported for the API use.'));
+          'User location is not supported for the API use.',
+        ),
+      );
       expect(() => parseGenerateContentResponse(decoded), expectedThrow);
       expect(() => parseCountTokensResponse(decoded), expectedThrow);
       expect(() => parseEmbedContentResponse(decoded), expectedThrow);
@@ -460,11 +514,16 @@ void main() {
 }
 ''';
       final decoded = jsonDecode(response) as Object;
-      final expectedThrow = throwsA(isA<ServerException>().having(
+      final expectedThrow = throwsA(
+        isA<ServerException>().having(
           (e) => e.message,
           'message',
-          startsWith('models/unknown is not found for API version v1, '
-              'or is not supported for GenerateContent.')));
+          startsWith(
+            'models/unknown is not found for API version v1, '
+            'or is not supported for GenerateContent.',
+          ),
+        ),
+      );
       expect(() => parseGenerateContentResponse(decoded), expectedThrow);
       expect(() => parseCountTokensResponse(decoded), expectedThrow);
       expect(() => parseEmbedContentResponse(decoded), expectedThrow);
