@@ -41,6 +41,7 @@ Matcher matchesPart(Part part) => switch (part) {
             // TODO: When updating min SDK remove ignore.
             // ignore: unused_result, implementation bug
             .having((p) => p.response, 'args', response),
+      _ => throw StateError('Unhandled Part type.'),
     };
 
 Matcher matchesContent(Content content) => isA<Content>()

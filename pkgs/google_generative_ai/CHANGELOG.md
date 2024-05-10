@@ -1,4 +1,4 @@
-## 0.3.4-wip
+## 0.4.0
 
 - Add support for parsing Vertex AI specific fields in `CountTokensResponse`.
 - Add named constructors on `Schema` for each value type.
@@ -6,6 +6,8 @@
   `'application/json'` to force the model to reply with JSON parseable output.
 - Add `outputDimensionality` argument support for `embedContent` and
   `batchEmbedContent`.
+- **Breaking** The `Part` class is no longer `sealed`. Exhaustive switches over
+  a `Part` instance will need to add a wildcard case.
 
 ## 0.3.3
 

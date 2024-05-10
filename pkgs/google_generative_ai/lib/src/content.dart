@@ -80,7 +80,7 @@ Part _parsePart(Object? jsonObject) {
 }
 
 /// A datatype containing media that is part of a multi-part [Content] message.
-sealed class Part {
+abstract interface class Part {
   Object toJson();
 }
 
