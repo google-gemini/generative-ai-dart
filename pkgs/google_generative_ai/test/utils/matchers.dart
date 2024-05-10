@@ -47,30 +47,43 @@ Matcher matchesContent(Content content) => isA<Content>()
     .having((c) => c.role, 'role', content.role)
     .having((c) => c.parts, 'parts', content.parts.map(matchesPart).toList());
 
-Matcher matchesCandidate(Candidate candidate) => isA<Candidate>()
-    .having((c) => c.content, 'content', matchesContent(candidate.content));
+Matcher matchesCandidate(Candidate candidate) => isA<Candidate>().having(
+      (c) => c.content,
+      'content',
+      matchesContent(candidate.content),
+    );
 
 Matcher matchesGenerateContentResponse(GenerateContentResponse response) =>
     isA<GenerateContentResponse>()
-        .having((r) => r.candidates, 'candidates',
-            response.candidates.map(matchesCandidate).toList())
         .having(
-            (r) => r.promptFeedback,
-            'promptFeedback',
-            response.promptFeedback == null
-                ? isNull
-                : matchesPromptFeedback(response.promptFeedback!));
+          (r) => r.candidates,
+          'candidates',
+          response.candidates.map(matchesCandidate).toList(),
+        )
+        .having(
+          (r) => r.promptFeedback,
+          'promptFeedback',
+          response.promptFeedback == null
+              ? isNull
+              : matchesPromptFeedback(response.promptFeedback!),
+        );
 
-Matcher matchesPromptFeedback(PromptFeedback promptFeedback) =>
+Matcher matchesPromptFeedback(
+  PromptFeedback promptFeedback,
+) =>
     isA<PromptFeedback>()
         .having((p) => p.blockReason, 'blockReason', promptFeedback.blockReason)
-        .having((p) => p.blockReasonMessage, 'blockReasonMessage',
-            promptFeedback.blockReasonMessage)
         .having(
-            (p) => p.safetyRatings,
-            'safetyRatings',
-            unorderedMatches(
-                promptFeedback.safetyRatings.map(matchesSafetyRating)));
+          (p) => p.blockReasonMessage,
+          'blockReasonMessage',
+          promptFeedback.blockReasonMessage,
+        )
+        .having(
+          (p) => p.safetyRatings,
+          'safetyRatings',
+          unorderedMatches(
+              promptFeedback.safetyRatings.map(matchesSafetyRating)),
+        );
 
 Matcher matchesSafetyRating(SafetyRating safetyRating) => isA<SafetyRating>()
     .having((s) => s.category, 'category', safetyRating.category)
@@ -81,16 +94,26 @@ Matcher matchesEmbedding(ContentEmbedding embedding) =>
 
 Matcher matchesEmbedContentResponse(EmbedContentResponse response) =>
     isA<EmbedContentResponse>().having(
-        (r) => r.embedding, 'embedding', matchesEmbedding(response.embedding));
+      (r) => r.embedding,
+      'embedding',
+      matchesEmbedding(response.embedding),
+    );
 
 Matcher matchesBatchEmbedContentsResponse(
-        BatchEmbedContentsResponse response) =>
-    isA<BatchEmbedContentsResponse>().having((r) => r.embeddings, 'embeddings',
-        response.embeddings.map(matchesEmbedding));
+  BatchEmbedContentsResponse response,
+) =>
+    isA<BatchEmbedContentsResponse>().having(
+      (r) => r.embeddings,
+      'embeddings',
+      response.embeddings.map(matchesEmbedding),
+    );
 
 Matcher matchesCountTokensResponse(CountTokensResponse response) =>
-    isA<CountTokensResponse>()
-        .having((r) => r.totalTokens, 'totalTokens', response.totalTokens);
+    isA<CountTokensResponse>().having(
+      (r) => r.totalTokens,
+      'totalTokens',
+      response.totalTokens,
+    );
 
 Matcher matchesRequest(http.Request request) => isA<http.Request>()
     .having((r) => r.headers, 'headers', request.headers)

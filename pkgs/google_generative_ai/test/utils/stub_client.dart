@@ -62,14 +62,18 @@ final class _ControlledClient implements ApiClient {
 
   @override
   Future<Map<String, Object?>> makeRequest(
-      Uri uri, Map<String, Object?> body) async {
+    Uri uri,
+    Map<String, Object?> body,
+  ) async {
     _requestExpectations.removeFirst()?.call(uri, body);
     return _responses.removeFirst().single;
   }
 
   @override
   Stream<Map<String, Object?>> streamRequest(
-      Uri uri, Map<String, Object?> body) {
+    Uri uri,
+    Map<String, Object?> body,
+  ) {
     _requestExpectations.removeFirst()?.call(uri, body);
     return Stream.fromIterable(_responses.removeFirst());
   }
@@ -81,9 +85,9 @@ const Map<String, Object?> arbitraryGenerateContentResponse = {
       'content': {
         'role': 'model',
         'parts': [
-          {'text': 'Some Response'}
-        ]
-      }
-    }
-  ]
+          {'text': 'Some Response'},
+        ],
+      },
+    },
+  ],
 };
