@@ -12,4 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const packageVersion = '0.3.4-wip';
+/// Extra APIs to impelement the Vertex AI SDK.
+///
+/// These APIs should not be exposed through the public libraries.
+library;
+
+export 'api.dart' show countTokensResponseFields, createCountTokensResponse;
+export 'model.dart' show createModelWithBaseUri;

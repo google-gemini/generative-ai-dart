@@ -22,8 +22,23 @@ final class CountTokensResponse {
   /// Always non-negative.
   final int totalTokens;
 
-  CountTokensResponse(this.totalTokens);
+  /// Optional extra fields in the Vertex AI data model.
+  final Map<String, Object?>? _extraFields;
+
+  CountTokensResponse(this.totalTokens) : _extraFields = null;
+  CountTokensResponse._(this.totalTokens, this._extraFields);
 }
+
+/// Returns the fields other than `totalTokens` that were parsed from JSON for
+/// [response].
+Map<String, Object?>? countTokensResponseFields(CountTokensResponse response) =>
+    response._extraFields;
+
+/// Returns a [CountTokensResponse] as if it was parsed from a JSON map with
+/// [extraFields] alongside the total tokends field.
+CountTokensResponse createCountTokensResponse(
+        int totalTokens, Map<String, Object>? extraFields) =>
+    CountTokensResponse._(totalTokens, extraFields);
 
 /// Response from the model; supports multiple candidates.
 final class GenerateContentResponse {
@@ -251,6 +266,9 @@ enum BlockReason {
 ///
 /// These categories cover various kinds of harms that developers may wish to
 /// adjust.
+///
+/// Some categories from the rest API are excluded because they are not used by
+/// the Gemini generative models.
 enum HarmCategory {
   unspecified,
 
@@ -475,13 +493,22 @@ final class GenerationConfig {
   /// Note: The default value varies by model.
   final int? topK;
 
-  GenerationConfig(
-      {this.candidateCount,
-      this.stopSequences = const [],
-      this.maxOutputTokens,
-      this.temperature,
-      this.topP,
-      this.topK});
+  /// Output response mimetype of the generated candidate text.
+  ///
+  /// Supported mimetype:
+  /// - `text/plain`: (default) Text output.
+  /// - `application/json`: JSON response in the candidates.
+  final String? responseMimeType;
+
+  GenerationConfig({
+    this.candidateCount,
+    this.stopSequences = const [],
+    this.maxOutputTokens,
+    this.temperature,
+    this.topP,
+    this.topK,
+    this.responseMimeType,
+  });
 
   Map<String, Object?> toJson() => {
         if (candidateCount case final candidateCount?)
@@ -492,6 +519,8 @@ final class GenerationConfig {
         if (temperature case final temperature?) 'temperature': temperature,
         if (topP case final topP?) 'topP': topP,
         if (topK case final topK?) 'topK': topK,
+        if (responseMimeType case final responseMimeType?)
+          'responseMimeType': responseMimeType,
       };
 }
 
@@ -547,12 +576,18 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
 }
 
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
-  return switch (jsonObject) {
-    {'totalTokens': final int totalTokens} => CountTokensResponse(totalTokens),
-    {'error': final Object error} => throw parseError(error),
-    _ =>
-      throw FormatException('Unhandled CountTokensResponse format', jsonObject)
-  };
+  if (jsonObject case {'error': final Object error}) throw parseError(error);
+  if (jsonObject case {'totalTokens': final int totalTokens}) {
+    final extraFields = {
+      for (final entry in jsonObject.entries)
+        if (entry.key case final String fieldName
+            when fieldName != 'totalTokens')
+          fieldName: entry.value
+    };
+    return CountTokensResponse._(totalTokens,
+        extraFields.isEmpty ? null : Map.unmodifiable(extraFields));
+  }
+  throw FormatException('Unhandled CountTokensResponse format', jsonObject);
 }
 
 EmbedContentResponse parseEmbedContentResponse(Object jsonObject) {

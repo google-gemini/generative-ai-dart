@@ -1,3 +1,10 @@
+## 0.3.4-wip
+
+- Add support for parsing Vertex AI specific fields in `CountTokensResponse`.
+- Add named constructors on `Schema` for each value type.
+- Add `GenerationConfig.responseMimeType` which supports setting
+  `'application/json'` to force the model to reply with JSON parseable output.
+
 ## 0.3.3
 
 - Add support for parsing the `usageMetadata` field in `GenerateContentResponse`
