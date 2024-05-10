@@ -837,6 +837,38 @@ void main() {
       });
     });
 
+    test('embed content with reduced output dimensionality', () async {
+      final (client, model) = createModel();
+      final content = 'Some content';
+      final outputDimensionality = 1;
+      final embeddingValues = [0.1];
+
+      client.stub(
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
+            'models/some-model:embedContent'),
+        {
+          'content': {
+            'role': 'user',
+            'parts': [
+              {'text': content}
+            ]
+          },
+          'outputDimensionality': outputDimensionality,
+        },
+        {
+          'embedding': {'values': embeddingValues}
+        },
+      );
+
+      final response = await model.embedContent(Content.text(content),
+          outputDimensionality: outputDimensionality);
+
+      expect(
+          response,
+          matchesEmbedContentResponse(
+              EmbedContentResponse(ContentEmbedding(embeddingValues))));
+    });
+
     group('batch embed contents', () {
       test('can make successful request', () async {
         final (client, model) = createModel();
@@ -891,6 +923,64 @@ void main() {
             ]),
           ),
         );
+      });
+
+      test('batch embed contents with reduced output dimensionality', () async {
+        final (client, model) = createModel();
+        final content1 = 'Some content 1';
+        final content2 = 'Some content 2';
+        final outputDimensionality = 1;
+        final embeddingValues1 = [0.1];
+        final embeddingValues2 = [0.4];
+
+        client.stub(
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
+              'models/some-model:batchEmbedContents'),
+          {
+            'requests': [
+              {
+                'content': {
+                  'role': 'user',
+                  'parts': [
+                    {'text': content1}
+                  ]
+                },
+                'model': 'models/$defaultModelName',
+                'outputDimensionality': outputDimensionality,
+              },
+              {
+                'content': {
+                  'role': 'user',
+                  'parts': [
+                    {'text': content2}
+                  ]
+                },
+                'model': 'models/$defaultModelName',
+                'outputDimensionality': outputDimensionality,
+              },
+            ],
+          },
+          {
+            'embeddings': [
+              {'values': embeddingValues1},
+              {'values': embeddingValues2},
+            ],
+          },
+        );
+
+        final response = await model.batchEmbedContents([
+          EmbedContentRequest(Content.text(content1),
+              outputDimensionality: outputDimensionality),
+          EmbedContentRequest(Content.text(content2),
+              outputDimensionality: outputDimensionality),
+        ]);
+
+        expect(
+            response,
+            matchesBatchEmbedContentsResponse(BatchEmbedContentsResponse([
+              ContentEmbedding(embeddingValues1),
+              ContentEmbedding(embeddingValues2),
+            ])));
       });
     });
   });

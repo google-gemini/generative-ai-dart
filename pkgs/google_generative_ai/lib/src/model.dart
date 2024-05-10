@@ -269,11 +269,13 @@ final class GenerativeModel {
   ///     (await model.embedContent([Content.text(prompt)])).embedding.values;
   /// ```
   Future<EmbedContentResponse> embedContent(Content content,
-      {TaskType? taskType, String? title}) async {
+      {TaskType? taskType, String? title, int? outputDimensionality}) async {
     final parameters = <String, Object?>{
       'content': content.toJson(),
       if (taskType != null) 'taskType': taskType.toJson(),
-      if (title != null) 'title': title
+      if (title != null) 'title': title,
+      if (outputDimensionality != null)
+        'outputDimensionality': outputDimensionality,
     };
     final response =
         await _client.makeRequest(_taskUri(Task.embedContent), parameters);
