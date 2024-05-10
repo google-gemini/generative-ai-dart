@@ -6,6 +6,8 @@
   `'application/json'` to force the model to reply with JSON parseable output.
 - Add `outputDimensionality` argument support for `embedContent` and
   `batchEmbedContent`.
+- Add `Content.functionResponses` utility to reply to multiple function calls in
+  parallel.
 - **Breaking** The `Part` class is no longer `sealed`. Exhaustive switches over
   a `Part` instance will need to add a wildcard case.
 

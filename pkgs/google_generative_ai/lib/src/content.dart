@@ -38,6 +38,8 @@ final class Content {
   static Content functionResponse(
           String name, Map<String, Object?>? response) =>
       Content('function', [FunctionResponse(name, response)]);
+  static Content functionResponses(Iterable<FunctionResponse> responses) =>
+      Content('function', responses.toList());
   static Content system(String instructions) =>
       Content('system', [TextPart(instructions)]);
 
