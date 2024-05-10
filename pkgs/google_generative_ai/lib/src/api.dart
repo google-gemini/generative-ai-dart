@@ -132,13 +132,18 @@ final class EmbedContentRequest {
   final TaskType? taskType;
   final String? title;
   final String? model;
-  EmbedContentRequest(this.content, {this.taskType, this.title, this.model});
+  final int? outputDimensionality;
+
+  EmbedContentRequest(this.content,
+      {this.taskType, this.title, this.model, this.outputDimensionality});
 
   Object toJson({String? defaultModel}) => {
         'content': content.toJson(),
         if (taskType case final taskType?) 'taskType': taskType.toJson(),
         if (title != null) 'title': title,
         if (model ?? defaultModel case final model?) 'model': model,
+        if (outputDimensionality != null)
+          'outputDimensionality': outputDimensionality,
       };
 }
 
@@ -488,13 +493,22 @@ final class GenerationConfig {
   /// Note: The default value varies by model.
   final int? topK;
 
-  GenerationConfig(
-      {this.candidateCount,
-      this.stopSequences = const [],
-      this.maxOutputTokens,
-      this.temperature,
-      this.topP,
-      this.topK});
+  /// Output response mimetype of the generated candidate text.
+  ///
+  /// Supported mimetype:
+  /// - `text/plain`: (default) Text output.
+  /// - `application/json`: JSON response in the candidates.
+  final String? responseMimeType;
+
+  GenerationConfig({
+    this.candidateCount,
+    this.stopSequences = const [],
+    this.maxOutputTokens,
+    this.temperature,
+    this.topP,
+    this.topK,
+    this.responseMimeType,
+  });
 
   Map<String, Object?> toJson() => {
         if (candidateCount case final candidateCount?)
@@ -505,6 +519,8 @@ final class GenerationConfig {
         if (temperature case final temperature?) 'temperature': temperature,
         if (topP case final topP?) 'topP': topP,
         if (topK case final topK?) 'topK': topK,
+        if (responseMimeType case final responseMimeType?)
+          'responseMimeType': responseMimeType,
       };
 }
 
