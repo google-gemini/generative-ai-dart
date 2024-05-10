@@ -23,7 +23,7 @@ void main() async {
     exit(1);
   }
   final model = GenerativeModel(
-    model: 'gemini-pro',
+    model: 'gemini-1.5-pro-latest',
     apiKey: apiKey,
     tools: [
       Tool(functionDeclarations: [
@@ -31,9 +31,8 @@ void main() async {
             'fetchCurrentWeather',
             'Returns the weather in a given location.',
             Schema(SchemaType.object, properties: {
-              'location': Schema(SchemaType.string),
-              'unit': Schema(SchemaType.string,
-                  enumValues: ['celcius', 'farenheit'])
+              'location':
+                  Schema.string(description: 'A location name, like "London".'),
             }, requiredProperties: [
               'location'
             ]))
@@ -41,34 +40,36 @@ void main() async {
     ],
   );
 
-  final prompt = 'What is the weather in Seattle?';
+  final prompt =
+      "I'm trying to decide whether to go to London or Zurich this weekend. "
+      'How hot are those cities? How about Singapore? Or maybe Tokyo. '
+      'I want to go somewhere not that cold but not too hot either. '
+      'Suggest a destination.';
   final content = [Content.text(prompt)];
-  final response = await model.generateContent(content);
+  var response = await model.generateContent(content);
 
-  final functionCalls = response.functionCalls.toList();
-  if (functionCalls.isEmpty) {
-    print('No function calls.');
-    print(response.text);
-  } else if (functionCalls.length > 1) {
-    print('Too many function calls.');
-    print(response.text);
-  } else {
+  List<FunctionCall> functionCalls;
+  while ((functionCalls = response.functionCalls.toList()).isNotEmpty) {
+    var responses = <FunctionResponse>[
+      for (final functionCall in functionCalls)
+        _dispatchFunctionCall(functionCall)
+    ];
     content
       ..add(response.candidates.first.content)
-      ..add(_dispatchFunctionCall(functionCalls.single));
-    final nextResponse = await model.generateContent(content);
-    print('Response: ${nextResponse.text}');
+      ..add(Content.functionResponses(responses));
+    response = await model.generateContent(content);
   }
+  print('Response: ${response.text}');
 }
 
-Content _dispatchFunctionCall(FunctionCall call) {
+FunctionResponse _dispatchFunctionCall(FunctionCall call) {
   final result = switch (call.name) {
     'fetchCurrentWeather' => {
         'weather': _fetchWeather(WeatherRequest._parse(call.args))
       },
     _ => throw UnimplementedError('Function not implemented: ${call.name}')
   };
-  return Content.functionResponse(call.name, result);
+  return FunctionResponse(call.name, result);
 }
 
 class WeatherRequest {
@@ -80,14 +81,19 @@ class WeatherRequest {
       };
   final String location;
   WeatherRequest(this.location);
+
+  @override
+  String toString() => {'location': location}.toString();
 }
 
-String _fetchWeather(WeatherRequest request) {
-  const weather = {
-    'Seattle': 'rainy',
-    'Chicago': 'windy',
-    'Sunnyvale': 'sunny'
-  };
-  final location = request.location;
-  return weather[location] ?? 'who knows?';
+var _responseIndex = -1;
+Map<String, Object?> _fetchWeather(WeatherRequest request) {
+  const responses = <Map<String, Object?>>[
+    {'condition': 'sunny', 'temp_c': -23.9},
+    {'condition': 'extreme rainstorm', 'temp_c': 13.9},
+    {'condition': 'cloudy', 'temp_c': 33.9},
+    {'condition': 'moderate', 'temp_c': 19.9},
+  ];
+  _responseIndex = (_responseIndex + 1) % responses.length;
+  return responses[_responseIndex];
 }
