@@ -74,6 +74,8 @@ export 'src/error.dart'
         InvalidApiKey,
         ServerException,
         UnsupportedUserLocation;
+export 'src/files.dart'
+    show AsPart, CreateFileResponse, FileService, ServerFile;
 export 'src/function_calling.dart'
     show
         FunctionCallingConfig,

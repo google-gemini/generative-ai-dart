@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -22,6 +23,9 @@ import 'version.dart';
 const clientName = 'genai-dart/$packageVersion';
 
 abstract interface class ApiClient {
+  Future<Map<String, Object?>> fetch(Uri uri);
+  Future<Map<String, Object?>> postBytes(
+      Uri uri, String mimeType, Uint8List bytes, Map<String, String> headers);
   Future<Map<String, Object?>> makeRequest(Uri uri, Map<String, Object?> body);
   Stream<Map<String, Object?>> streamRequest(
       Uri uri, Map<String, Object?> body);
@@ -54,15 +58,39 @@ final class HttpApiClient implements ApiClient {
       };
 
   @override
-  Future<Map<String, Object?>> makeRequest(
-      Uri uri, Map<String, Object?> body) async {
-    final response = await (_httpClient?.post ?? http.post)(
+  Future<Map<String, Object?>> fetch(Uri uri) async {
+    final requestHeaders = {
+      'x-goog-api-key': _apiKey,
+      'x-goog-api-client': clientName,
+    };
+    final response = await (_httpClient?.get ?? http.get)(
       uri,
-      headers: await _headers(),
-      body: _utf8Json.encode(body),
+      headers: requestHeaders,
     );
     return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
   }
+
+  @override
+  Future<Map<String, Object?>> postBytes(Uri uri, String mimeType,
+      List<int> bytes, Map<String, String> headers) async {
+    final requestHeaders = {
+      'x-goog-api-key': _apiKey,
+      'x-goog-api-client': clientName,
+      'Content-Type': mimeType,
+      ...headers,
+    };
+    final response = await (_httpClient?.post ?? http.post)(
+      uri,
+      headers: requestHeaders,
+      body: bytes,
+    );
+    return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
+  }
+
+  @override
+  Future<Map<String, Object?>> makeRequest(
+          Uri uri, Map<String, Object?> body) =>
+      postBytes(uri, 'application/json', _utf8Json.encode(body), {});
 
   @override
   Stream<Map<String, Object?>> streamRequest(
