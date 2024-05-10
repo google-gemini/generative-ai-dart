@@ -18,4 +18,5 @@
 library;
 
 export 'api.dart' show countTokensResponseFields, createCountTokensResponse;
+export 'content.dart' show VertexPart;
 export 'model.dart' show createModelWithBaseUri;

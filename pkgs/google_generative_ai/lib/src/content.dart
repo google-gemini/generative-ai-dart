@@ -114,6 +114,14 @@ final class FilePart implements Part {
       };
 }
 
+/// A [Part] for Vertex AI SDK to pass in json object directly.
+final class VertexPart implements Part {
+  final Object jsonObject;
+  VertexPart(this.jsonObject);
+  @override
+  Object toJson() => jsonObject;
+}
+
 /// A predicted `FunctionCall` returned from the model that contains
 /// a string representing the `FunctionDeclaration.name` with the
 /// arguments and their values.
