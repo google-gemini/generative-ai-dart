@@ -23,11 +23,14 @@ void main() {
   group('Chat', () {
     const defaultModelName = 'some-model';
 
-    (StubClient, GenerativeModel) createModel([
+    (ClientController, GenerativeModel) createModel([
       String modelName = defaultModelName,
     ]) {
-      final client = StubClient();
-      final model = createModelWithClient(model: modelName, client: client);
+      final client = ClientController();
+      final model = createModelWithClient(
+        model: modelName,
+        client: client.client,
+      );
       return (client, model);
     }
 
@@ -38,61 +41,13 @@ void main() {
         Content.model([TextPart('Hello, how can I help you today?')]),
       ]);
       final prompt = 'Some prompt';
-      final result = 'Some response';
-      client.stub(
-        Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/'
-          'models/some-model:generateContent',
-        ),
-        {
-          'contents': [
-            {
-              'role': 'user',
-              'parts': [
-                {'text': 'Hi!'},
-              ],
-            },
-            {
-              'role': 'model',
-              'parts': [
-                {'text': 'Hello, how can I help you today?'},
-              ],
-            },
-            {
-              'role': 'user',
-              'parts': [
-                {'text': prompt},
-              ],
-            },
-          ],
+      final response = await client.checkRequest(
+        () => chat.sendMessage(Content.text(prompt)),
+        verifyRequest: (_, request) {
+          final contents = request['contents'];
+          expect(contents, hasLength(3));
         },
-        {
-          'candidates': [
-            {
-              'content': {
-                'role': 'model',
-                'parts': [
-                  {'text': result},
-                ],
-              },
-            },
-          ],
-        },
-      );
-      final response = await chat.sendMessage(Content.text(prompt));
-      expect(
-        response,
-        matchesGenerateContentResponse(
-          GenerateContentResponse([
-            Candidate(
-              Content('model', [TextPart(result)]),
-              null,
-              null,
-              null,
-              null,
-            ),
-          ], null),
-        ),
+        response: arbitraryGenerateContentResponse,
       );
       expect(
         chat.history.last,
@@ -106,55 +61,17 @@ void main() {
         SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high),
       ]);
       final prompt = 'Some prompt';
-      final result = 'Some response';
-      client.stub(
-        Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/'
-          'models/some-model:generateContent',
-        ),
-        {
-          'contents': [
-            {
-              'role': 'user',
-              'parts': [
-                {'text': prompt},
-              ],
-            },
-          ],
-          'safetySettings': [
+      await client.checkRequest(
+        () => chat.sendMessage(Content.text(prompt)),
+        verifyRequest: (_, request) {
+          expect(request['safetySettings'], [
             {
               'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
               'threshold': 'BLOCK_ONLY_HIGH',
             },
-          ],
+          ]);
         },
-        {
-          'candidates': [
-            {
-              'content': {
-                'role': 'model',
-                'parts': [
-                  {'text': result},
-                ],
-              },
-            },
-          ],
-        },
-      );
-      final response = await chat.sendMessage(Content.text(prompt));
-      expect(
-        response,
-        matchesGenerateContentResponse(
-          GenerateContentResponse([
-            Candidate(
-              Content('model', [TextPart(result)]),
-              null,
-              null,
-              null,
-              null,
-            ),
-          ], null),
-        ),
+        response: arbitraryGenerateContentResponse,
       );
     });
 
@@ -164,61 +81,19 @@ void main() {
         SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high),
       ], generationConfig: GenerationConfig(stopSequences: ['a']));
       final prompt = 'Some prompt';
-      final result = 'Some response';
-      client.stubStream(
-        Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/'
-          'models/some-model:streamGenerateContent',
-        ),
-        {
-          'contents': [
-            {
-              'role': 'user',
-              'parts': [
-                {'text': prompt},
-              ],
-            },
-          ],
-          'safetySettings': [
+      final responses = await client.checkStreamRequest(
+        () async => chat.sendMessageStream(Content.text(prompt)),
+        verifyRequest: (_, request) {
+          expect(request['safetySettings'], [
             {
               'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
               'threshold': 'BLOCK_ONLY_HIGH',
             },
-          ],
-          'generationConfig': {
-            'stopSequences': ['a'],
-          },
+          ]);
         },
-        [
-          {
-            'candidates': [
-              {
-                'content': {
-                  'role': 'model',
-                  'parts': [
-                    {'text': result},
-                  ],
-                },
-              },
-            ],
-          },
-        ],
+        responses: [arbitraryGenerateContentResponse],
       );
-      final responses =
-          await chat.sendMessageStream(Content.text(prompt)).toList();
-      expect(responses, [
-        matchesGenerateContentResponse(
-          GenerateContentResponse([
-            Candidate(
-              Content('model', [TextPart(result)]),
-              null,
-              null,
-              null,
-              null,
-            ),
-          ], null),
-        ),
-      ]);
+      await responses.drain<void>();
     });
 
     test('forwards generation config', () async {
@@ -227,52 +102,14 @@ void main() {
         generationConfig: GenerationConfig(stopSequences: ['a']),
       );
       final prompt = 'Some prompt';
-      final result = 'Some response';
-      client.stub(
-        Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/'
-          'models/some-model:generateContent',
-        ),
-        {
-          'contents': [
-            {
-              'role': 'user',
-              'parts': [
-                {'text': prompt},
-              ],
-            },
-          ],
-          'generationConfig': {
+      await client.checkRequest(
+        () => chat.sendMessage(Content.text(prompt)),
+        verifyRequest: (_, request) {
+          expect(request['generationConfig'], {
             'stopSequences': ['a'],
-          },
+          });
         },
-        {
-          'candidates': [
-            {
-              'content': {
-                'role': 'model',
-                'parts': [
-                  {'text': result},
-                ],
-              },
-            },
-          ],
-        },
-      );
-      final response = await chat.sendMessage(Content.text(prompt));
-      expect(
-        response,
-        matchesGenerateContentResponse(
-          GenerateContentResponse([
-            Candidate(
-              Content('model', [TextPart(result)]),
-              null,
-              null,
-              null,
-              null,
-            ),
-          ], null),
-        ),
+        response: arbitraryGenerateContentResponse,
       );
     });
   });
