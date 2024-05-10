@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_generative_ai/src/model.dart';
 import 'package:test/test.dart';
@@ -23,26 +22,7 @@ void main() {
   group('GenerativeModel', () {
     const defaultModelName = 'some-model';
 
-    (StubClient, GenerativeModel) createModel({
-      String modelName = defaultModelName,
-      RequestOptions? requestOptions,
-      Content? systemInstruction,
-      List<Tool>? tools,
-      ToolConfig? toolConfig,
-    }) {
-      final client = StubClient();
-      final model = createModelWithClient(
-        model: modelName,
-        client: client,
-        requestOptions: requestOptions,
-        systemInstruction: systemInstruction,
-        tools: tools,
-        toolConfig: toolConfig,
-      );
-      return (client, model);
-    }
-
-    (ClientController, GenerativeModel) createModel2({
+    (ClientController, GenerativeModel) createModel({
       String modelName = defaultModelName,
       RequestOptions? requestOptions,
       Content? systemInstruction,
@@ -62,220 +42,186 @@ void main() {
     }
 
     test('strips leading "models/" from model name', () async {
-      final (client, model) =
-          createModel2(modelName: 'models/$defaultModelName');
+      final (client, model) = createModel(
+        modelName: 'models/$defaultModelName',
+      );
       final prompt = 'Some prompt';
       await client.checkRequest(
-          () => model.generateContent([Content.text(prompt)]),
-          response: arbitraryGenerateContentResponse, verifyRequest: (uri, _) {
-        expect(uri.path, endsWith('/models/some-model:generateContent'));
-      });
+        () => model.generateContent([Content.text(prompt)]),
+        response: arbitraryGenerateContentResponse,
+        verifyRequest: (uri, _) {
+          expect(uri.path, endsWith('/models/some-model:generateContent'));
+        },
+      );
     });
 
     test('allows specifying a tuned model', () async {
-      final (client, model) =
-          createModel2(modelName: 'tunedModels/$defaultModelName');
+      final (client, model) = createModel(
+        modelName: 'tunedModels/$defaultModelName',
+      );
       final prompt = 'Some prompt';
       await client.checkRequest(
-          () => model.generateContent([Content.text(prompt)]),
-          response: arbitraryGenerateContentResponse, verifyRequest: (uri, _) {
-        expect(uri.path, endsWith('/tunedModels/some-model:generateContent'));
-      });
+        () => model.generateContent([Content.text(prompt)]),
+        response: arbitraryGenerateContentResponse,
+        verifyRequest: (uri, _) {
+          expect(uri.path, endsWith('/tunedModels/some-model:generateContent'));
+        },
+      );
     });
 
     test('allows specifying an API version', () async {
-      final (client, model) = createModel2(
-          requestOptions: RequestOptions(apiVersion: 'override_version'));
+      final (client, model) = createModel(
+        requestOptions: RequestOptions(apiVersion: 'override_version'),
+      );
       final prompt = 'Some prompt';
       await client.checkRequest(
-          () => model.generateContent([Content.text(prompt)]),
-          response: arbitraryGenerateContentResponse, verifyRequest: (uri, _) {
-        expect(uri.path, startsWith('/override_version/'));
-      });
+        () => model.generateContent([Content.text(prompt)]),
+        response: arbitraryGenerateContentResponse,
+        verifyRequest: (uri, _) {
+          expect(uri.path, startsWith('/override_version/'));
+        },
+      );
     });
 
     group('generate unary content', () {
       test('can make successful request', () async {
-        final (client, model) = createModel2();
+        final (client, model) = createModel();
         final prompt = 'Some prompt';
         final result = 'Some response';
-        final response = await client
-            .checkRequest(() => model.generateContent([Content.text(prompt)]),
-                verifyRequest: (uri, request) {
-          expect(
+        final response = await client.checkRequest(
+          () => model.generateContent([Content.text(prompt)]),
+          verifyRequest: (uri, request) {
+            expect(
               uri,
-              Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-                  'models/some-model:generateContent'));
-          expect(request, {
-            'contents': [
+              Uri.parse(
+                'https://generativelanguage.googleapis.com/v1beta/'
+                'models/some-model:generateContent',
+              ),
+            );
+            expect(request, {
+              'contents': [
+                {
+                  'role': 'user',
+                  'parts': [
+                    {'text': prompt},
+                  ],
+                },
+              ],
+            });
+          },
+          response: {
+            'candidates': [
               {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ]
-          });
-        }, response: {
-          'candidates': [
-            {
-              'content': {
-                'role': 'model',
-                'parts': [
-                  {'text': result}
-                ]
-              }
-            }
-          ]
-        });
+                'content': {
+                  'role': 'model',
+                  'parts': [
+                    {'text': result},
+                  ],
+                },
+              },
+            ],
+          },
+        );
         expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
+          response,
+          matchesGenerateContentResponse(
+            GenerateContentResponse([
               Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
+                Content('model', [TextPart(result)]),
+                null,
+                null,
+                null,
+                null,
+              ),
+            ], null),
+          ),
+        );
       });
 
       test('can override safety settings', () async {
-        final (client, model) = createModel2();
+        final (client, model) = createModel();
         final prompt = 'Some prompt';
         await client.checkRequest(
-            () => model.generateContent([
-                  Content.text(prompt)
-                ], safetySettings: [
-                  SafetySetting(
-                      HarmCategory.dangerousContent, HarmBlockThreshold.high)
-                ]),
-            response: arbitraryGenerateContentResponse,
-            verifyRequest: (_, request) {
-          expect(request['safetySettings'], [
-            {
-              'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-              'threshold': 'BLOCK_ONLY_HIGH'
-            }
-          ]);
-        });
+          () => model.generateContent(
+            [Content.text(prompt)],
+            safetySettings: [
+              SafetySetting(
+                HarmCategory.dangerousContent,
+                HarmBlockThreshold.high,
+              ),
+            ],
+          ),
+          response: arbitraryGenerateContentResponse,
+          verifyRequest: (_, request) {
+            expect(request['safetySettings'], [
+              {
+                'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                'threshold': 'BLOCK_ONLY_HIGH',
+              },
+            ]);
+          },
+        );
       });
 
       test('can override generation config', () async {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
-        final result = 'Some response';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:generateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ],
-            'generationConfig': {
-              'stopSequences': ['a']
-            },
+        await client.checkRequest(
+          () => model.generateContent([
+            Content.text(prompt),
+          ], generationConfig: GenerationConfig(stopSequences: ['a'])),
+          verifyRequest: (_, request) {
+            expect(request['generationConfig'], {
+              'stopSequences': ['a'],
+            });
           },
-          {
-            'candidates': [
-              {
-                'content': {
-                  'role': 'model',
-                  'parts': [
-                    {'text': result}
-                  ]
-                }
-              }
-            ]
-          },
+          response: arbitraryGenerateContentResponse,
         );
-        final response = await model.generateContent([Content.text(prompt)],
-            generationConfig: GenerationConfig(stopSequences: ['a']));
-        expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
-              Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
       });
 
       test('can pass system instructions', () async {
         final instructions = 'Do a good job';
-        final (client, model) =
-            createModel(systemInstruction: Content.system(instructions));
+        final (client, model) = createModel(
+          systemInstruction: Content.system(instructions),
+        );
         final prompt = 'Some prompt';
-        final result = 'Some response';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:generateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ],
-            'systemInstruction': {
+        await client.checkRequest(
+          () => model.generateContent([Content.text(prompt)]),
+          verifyRequest: (_, request) {
+            expect(request['systemInstruction'], {
               'role': 'system',
               'parts': [
-                {'text': instructions}
+                {'text': instructions},
               ],
-            },
+            });
           },
-          {
-            'candidates': [
-              {
-                'content': {
-                  'role': 'model',
-                  'parts': [
-                    {'text': result}
-                  ]
-                }
-              }
-            ]
-          },
+          response: arbitraryGenerateContentResponse,
         );
-        final response = await model.generateContent(
-          [Content.text(prompt)],
-        );
-        expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
-              Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
       });
 
       test('can pass tools and function calling config', () async {
         final (client, model) = createModel(
-            tools: [
-              Tool(functionDeclarations: [
-                FunctionDeclaration('someFunction', 'Some cool function.',
-                    Schema(SchemaType.string, description: 'Some parameter.'))
-              ])
-            ],
-            toolConfig: ToolConfig(
-                functionCallingConfig: FunctionCallingConfig(
-                    mode: FunctionCallingMode.any,
-                    allowedFunctionNames: {'someFunction'})));
+          tools: [
+            Tool(functionDeclarations: [
+              FunctionDeclaration(
+                'someFunction',
+                'Some cool function.',
+                Schema(SchemaType.string, description: 'Some parameter.'),
+              ),
+            ]),
+          ],
+          toolConfig: ToolConfig(
+            functionCallingConfig: FunctionCallingConfig(
+              mode: FunctionCallingMode.any,
+              allowedFunctionNames: {'someFunction'},
+            ),
+          ),
+        );
         final prompt = 'Some prompt';
-        final result = 'Some response';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:generateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ],
-            'tools': [
+        await client.checkRequest(
+          () => model.generateContent([Content.text(prompt)]),
+          verifyRequest: (_, request) {
+            expect(request['tools'], [
               {
                 'functionDeclarations': [
                   {
@@ -283,58 +229,47 @@ void main() {
                     'description': 'Some cool function.',
                     'parameters': {
                       'type': 'STRING',
-                      'description': 'Some parameter.'
-                    }
-                  }
-                ]
-              }
-            ],
-            'toolConfig': {
+                      'description': 'Some parameter.',
+                    },
+                  },
+                ],
+              },
+            ]);
+            expect(request['toolConfig'], {
               'functionCallingConfig': {
                 'mode': 'ANY',
                 'allowedFunctionNames': ['someFunction'],
-              }
-            },
+              },
+            });
           },
-          {
-            'candidates': [
-              {
-                'content': {
-                  'role': 'model',
-                  'parts': [
-                    {'text': result}
-                  ]
-                }
-              }
-            ]
-          },
+          response: arbitraryGenerateContentResponse,
         );
-        final response = await model.generateContent([Content.text(prompt)]);
-        expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
-              Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
       });
 
       test('can override tools and function calling config', () async {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
-        final result = 'Some response';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:generateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
+        await client.checkRequest(
+          () => model.generateContent(
+            [Content.text(prompt)],
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration(
+                  'someFunction',
+                  'Some cool function.',
+                  Schema(SchemaType.string, description: 'Some parameter.'),
+                ),
+              ]),
             ],
-            'tools': [
+            toolConfig: ToolConfig(
+              functionCallingConfig: FunctionCallingConfig(
+                mode: FunctionCallingMode.any,
+                allowedFunctionNames: {'someFunction'},
+              ),
+            ),
+          ),
+          verifyRequest: (_, request) {
+            expect(request['tools'], [
               {
                 'functionDeclarations': [
                   {
@@ -342,204 +277,126 @@ void main() {
                     'description': 'Some cool function.',
                     'parameters': {
                       'type': 'STRING',
-                      'description': 'Some parameter.'
-                    }
-                  }
-                ]
-              }
-            ],
-            'toolConfig': {
+                      'description': 'Some parameter.',
+                    },
+                  },
+                ],
+              },
+            ]);
+            expect(request['toolConfig'], {
               'functionCallingConfig': {
                 'mode': 'ANY',
                 'allowedFunctionNames': ['someFunction'],
-              }
-            },
+              },
+            });
           },
-          {
-            'candidates': [
-              {
-                'content': {
-                  'role': 'model',
-                  'parts': [
-                    {'text': result}
-                  ]
-                }
-              }
-            ]
-          },
+          response: arbitraryGenerateContentResponse,
         );
-        final response = await model.generateContent([
-          Content.text(prompt)
-        ],
-            tools: [
-              Tool(functionDeclarations: [
-                FunctionDeclaration('someFunction', 'Some cool function.',
-                    Schema(SchemaType.string, description: 'Some parameter.'))
-              ])
-            ],
-            toolConfig: ToolConfig(
-                functionCallingConfig: FunctionCallingConfig(
-                    mode: FunctionCallingMode.any,
-                    allowedFunctionNames: {'someFunction'})));
-        expect(
-            response,
-            matchesGenerateContentResponse(GenerateContentResponse([
-              Candidate(
-                  Content('model', [TextPart(result)]), null, null, null, null),
-            ], null)));
       });
     });
 
     group('generate content stream', () {
       test('can make successful request', () async {
-        final (client, model) = createModel2();
+        final (client, model) = createModel();
         final prompt = 'Some prompt';
         final results = {'First response', 'Second Response'};
         final response = await client.checkStreamRequest(
-            () async => model.generateContentStream([Content.text(prompt)]),
-            verifyRequest: (uri, request) {
-          expect(
+          () async => model.generateContentStream([Content.text(prompt)]),
+          verifyRequest: (uri, request) {
+            expect(
               uri,
-              Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-                  'models/some-model:streamGenerateContent'));
-          expect(request, {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ]
-          });
-        }, responses: [
-          for (final result in results)
-            {
-              'candidates': [
+              Uri.parse(
+                'https://generativelanguage.googleapis.com/v1beta/'
+                'models/some-model:streamGenerateContent',
+              ),
+            );
+            expect(request, {
+              'contents': [
                 {
-                  'content': {
-                    'role': 'model',
-                    'parts': [
-                      {'text': result}
-                    ]
-                  }
-                }
-              ]
-            }
-        ]);
+                  'role': 'user',
+                  'parts': [
+                    {'text': prompt},
+                  ],
+                },
+              ],
+            });
+          },
+          responses: [
+            for (final result in results)
+              {
+                'candidates': [
+                  {
+                    'content': {
+                      'role': 'model',
+                      'parts': [
+                        {'text': result},
+                      ],
+                    },
+                  },
+                ],
+              },
+          ],
+        );
         expect(
-            response,
-            emitsInOrder([
-              for (final result in results)
-                matchesGenerateContentResponse(GenerateContentResponse([
-                  Candidate(Content('model', [TextPart(result)]), null, null,
-                      null, null),
-                ], null))
-            ]));
+          response,
+          emitsInOrder([
+            for (final result in results)
+              matchesGenerateContentResponse(
+                GenerateContentResponse([
+                  Candidate(
+                    Content('model', [TextPart(result)]),
+                    null,
+                    null,
+                    null,
+                    null,
+                  ),
+                ], null),
+              ),
+          ]),
+        );
       });
 
       test('can override safety settings', () async {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
-        final results = {'First response', 'Second Response'};
-        client.stubStream(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:streamGenerateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
+        final responses = await client.checkStreamRequest(
+          () async => model.generateContentStream(
+            [Content.text(prompt)],
+            safetySettings: [
+              SafetySetting(
+                HarmCategory.dangerousContent,
+                HarmBlockThreshold.high,
+              ),
             ],
-            'safetySettings': [
+          ),
+          verifyRequest: (_, request) {
+            expect(request['safetySettings'], [
               {
                 'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                'threshold': 'BLOCK_ONLY_HIGH'
-              }
-            ],
+                'threshold': 'BLOCK_ONLY_HIGH',
+              },
+            ]);
           },
-          [
-            for (final result in results)
-              {
-                'candidates': [
-                  {
-                    'content': {
-                      'role': 'model',
-                      'parts': [
-                        {'text': result}
-                      ]
-                    }
-                  }
-                ]
-              }
-          ],
+          responses: [arbitraryGenerateContentResponse],
         );
-        final response = model.generateContentStream([
-          Content.text(prompt)
-        ], safetySettings: [
-          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
-        ]);
-        expect(
-            response,
-            emitsInOrder([
-              for (final result in results)
-                matchesGenerateContentResponse(GenerateContentResponse([
-                  Candidate(Content('model', [TextPart(result)]), null, null,
-                      null, null),
-                ], null))
-            ]));
+        await responses.drain<void>();
       });
 
       test('can override generation config', () async {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
-        final results = {'First response', 'Second Response'};
-        client.stubStream(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:streamGenerateContent'),
-          {
-            'contents': [
-              {
-                'role': 'user',
-                'parts': [
-                  {'text': prompt}
-                ]
-              }
-            ],
-            'generationConfig': {
-              'stopSequences': ['a']
-            },
+        final responses = await client.checkStreamRequest(
+          () async => model.generateContentStream([
+            Content.text(prompt),
+          ], generationConfig: GenerationConfig(stopSequences: ['a'])),
+          verifyRequest: (_, request) {
+            expect(request['generationConfig'], {
+              'stopSequences': ['a'],
+            });
           },
-          [
-            for (final result in results)
-              {
-                'candidates': [
-                  {
-                    'content': {
-                      'role': 'model',
-                      'parts': [
-                        {'text': result}
-                      ]
-                    }
-                  }
-                ]
-              }
-          ],
+          responses: [arbitraryGenerateContentResponse],
         );
-        final response = model.generateContentStream([Content.text(prompt)],
-            generationConfig: GenerationConfig(stopSequences: ['a']));
-        expect(
-            response,
-            emitsInOrder([
-              for (final result in results)
-                matchesGenerateContentResponse(GenerateContentResponse([
-                  Candidate(Content('model', [TextPart(result)]), null, null,
-                      null, null),
-                ], null))
-            ]));
+        await responses.drain<void>();
       });
     });
 
@@ -547,23 +404,29 @@ void main() {
       test('can make successful request', () async {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
-        client.stub(
-            Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-                'models/some-model:countTokens'),
-            {
+        final response = await client.checkRequest(
+          () => model.countTokens([Content.text(prompt)]),
+          verifyRequest: (uri, request) {
+            expect(
+              uri,
+              Uri.parse(
+                'https://generativelanguage.googleapis.com/v1beta/'
+                'models/some-model:countTokens',
+              ),
+            );
+            expect(request, {
               'contents': [
                 {
                   'role': 'user',
                   'parts': [
-                    {'text': prompt}
-                  ]
-                }
-              ]
-            },
-            {
-              'totalTokens': 2
+                    {'text': prompt},
+                  ],
+                },
+              ],
             });
-        final response = await model.countTokens([Content.text(prompt)]);
+          },
+          response: {'totalTokens': 2},
+        );
         expect(response, matchesCountTokensResponse(CountTokensResponse(2)));
       });
     });
@@ -572,28 +435,37 @@ void main() {
       test('can make successful request', () async {
         final (client, model) = createModel();
         final prompt = 'Some prompt';
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:embedContent'),
-          {
-            'content': {
-              'role': 'user',
-              'parts': [
-                {'text': prompt}
-              ]
-            }
+        final response = await client.checkRequest(
+          () => model.embedContent(Content.text(prompt)),
+          verifyRequest: (uri, request) {
+            expect(
+              uri,
+              Uri.parse(
+                'https://generativelanguage.googleapis.com/v1beta/'
+                'models/some-model:embedContent',
+              ),
+            );
+            expect(request, {
+              'content': {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt},
+                ],
+              },
+            });
           },
-          {
+          response: {
             'embedding': {
-              'values': [0.1, 0.2, 0.3]
-            }
+              'values': [0.1, 0.2, 0.3],
+            },
           },
         );
-        final response = await model.embedContent(Content.text(prompt));
         expect(
-            response,
-            matchesEmbedContentResponse(
-                EmbedContentResponse(ContentEmbedding([0.1, 0.2, 0.3]))));
+          response,
+          matchesEmbedContentResponse(
+            EmbedContentResponse(ContentEmbedding([0.1, 0.2, 0.3])),
+          ),
+        );
       });
     });
 
@@ -604,46 +476,58 @@ void main() {
         final prompt2 = 'Another prompt';
         final embedding1 = [0.1, 0.2, 0.3];
         final embedding2 = [0.4, 0.5, 1.6];
-        client.stub(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/'
-              'models/some-model:batchEmbedContents'),
-          {
-            'requests': [
-              {
-                'content': {
-                  'role': 'user',
-                  'parts': [
-                    {'text': prompt1}
-                  ]
+        final response = await client.checkRequest(
+          () => model.batchEmbedContents([
+            EmbedContentRequest(Content.text(prompt1)),
+            EmbedContentRequest(Content.text(prompt2)),
+          ]),
+          verifyRequest: (uri, request) {
+            expect(
+              uri,
+              Uri.parse(
+                'https://generativelanguage.googleapis.com/v1beta/'
+                'models/some-model:batchEmbedContents',
+              ),
+            );
+            expect(request, {
+              'requests': [
+                {
+                  'content': {
+                    'role': 'user',
+                    'parts': [
+                      {'text': prompt1},
+                    ],
+                  },
+                  'model': 'models/$defaultModelName',
                 },
-                'model': 'models/$defaultModelName'
-              },
-              {
-                'content': {
-                  'role': 'user',
-                  'parts': [
-                    {'text': prompt2}
-                  ]
+                {
+                  'content': {
+                    'role': 'user',
+                    'parts': [
+                      {'text': prompt2},
+                    ],
+                  },
+                  'model': 'models/$defaultModelName',
                 },
-                'model': 'models/$defaultModelName'
-              }
-            ]
+              ],
+            });
           },
-          {
+          response: {
             'embeddings': [
               {'values': embedding1},
-              {'values': embedding2}
-            ]
+              {'values': embedding2},
+            ],
           },
         );
-        final response = await model.batchEmbedContents([
-          EmbedContentRequest(Content.text(prompt1)),
-          EmbedContentRequest(Content.text(prompt2))
-        ]);
         expect(
-            response,
-            matchesBatchEmbedContentsResponse(BatchEmbedContentsResponse(
-                [ContentEmbedding(embedding1), ContentEmbedding(embedding2)])));
+          response,
+          matchesBatchEmbedContentsResponse(
+            BatchEmbedContentsResponse([
+              ContentEmbedding(embedding1),
+              ContentEmbedding(embedding2),
+            ]),
+          ),
+        );
       });
     });
   });
