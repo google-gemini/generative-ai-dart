@@ -428,6 +428,36 @@ void main() {
         ),
       );
     });
+
+    test('text getter joins content', () async {
+      final response = '''
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Initial text"
+          },
+          {
+            "functionCall": {"name": "someFunction", "args": {}}
+          },
+          {
+            "text": " And more text"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ]
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final generateContentResponse = parseGenerateContentResponse(decoded);
+      expect(generateContentResponse.text, 'Initial text And more text');
+    });
   });
 
   group('parses and throws error responses', () {

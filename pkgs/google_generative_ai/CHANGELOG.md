@@ -1,3 +1,8 @@
+## 0.4.1-wip
+
+- Concatenate multiple `TextPart` into the `text` String in case the model
+  replies with more than one part.
+
 ## 0.4.0
 
 - Add support for parsing Vertex AI specific fields in `CountTokensResponse`.
