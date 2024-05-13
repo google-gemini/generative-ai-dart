@@ -57,17 +57,17 @@ final class GenerateContentResponse {
     this.usageMetadata,
   });
 
-  /// The text content of the first part of the first of [candidates], if any.
+  /// The text content of the text parts of the first of [candidates], if any.
   ///
   /// If the prompt was blocked, or the first candidate was finished for a reason
   /// of [FinishReason.recitation] or [FinishReason.safety], accessing this text
   /// will throw a [GenerativeAIException].
   ///
-  /// If the first candidate's content starts with a text part, this value is
-  /// that text.
+  /// If the first candidate's content contains any text parts, this value is
+  /// the concatenation of the text.
   ///
-  /// If there are no candidates, or if the first candidate does not start with
-  /// a text part, this value is `null`.
+  /// If there are no candidates, or if the first candidate does not contain any
+  /// text parts, this value is `null`.
   String? get text {
     return switch (candidates) {
       [] => switch (promptFeedback) {
@@ -96,8 +96,12 @@ final class GenerateContentResponse {
                   ? ': $finishMessage'
                   : ''),
         ),
+      // Special case for a single TextPart to avoid iterable chain.
       [Candidate(content: Content(parts: [TextPart(:final text)])), ...] =>
         text,
+      [Candidate(content: Content(:final parts)), ...]
+          when parts.any((p) => p is TextPart) =>
+        parts.whereType<TextPart>().map((p) => p.text).join(''),
       [Candidate(), ...] => null,
     };
   }
