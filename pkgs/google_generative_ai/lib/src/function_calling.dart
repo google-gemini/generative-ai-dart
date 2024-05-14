@@ -211,6 +211,7 @@ final class Schema {
           SchemaType.number,
           description: description,
           nullable: nullable,
+          format: format,
         );
 
   /// Construct a schema for an integer number.
@@ -224,6 +225,7 @@ final class Schema {
           SchemaType.integer,
           description: description,
           nullable: nullable,
+          format: format,
         );
 
   /// Construct a schema for bool value.
