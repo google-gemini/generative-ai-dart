@@ -17,5 +17,13 @@
 /// These APIs should not be exposed through the public libraries.
 library;
 
-export 'api.dart' show countTokensResponseFields, createCountTokensResponse;
+export 'api.dart'
+    show
+        countTokensResponseFields,
+        createCountTokensResponse,
+        parseBatchEmbedContentsResponse,
+        parseGenerateContentResponse,
+        parseCountTokensResponse,
+        parseEmbedContentResponse,
+        UsageMetadata;
 export 'model.dart' show createModelWithBaseUri;
