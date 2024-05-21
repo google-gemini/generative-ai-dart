@@ -22,8 +22,7 @@ export 'api.dart'
         countTokensResponseFields,
         createCountTokensResponse,
         parseBatchEmbedContentsResponse,
-        parseGenerateContentResponse,
         parseCountTokensResponse,
         parseEmbedContentResponse,
-        UsageMetadata;
+        parseGenerateContentResponse;
 export 'model.dart' show createModelWithBaseUri;
