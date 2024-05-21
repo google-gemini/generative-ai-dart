@@ -3,6 +3,7 @@
 - Concatenate multiple `TextPart` into the `text` String in case the model
   replies with more than one part.
 - Fix handling of `format` argument to `Schema.number` and `Schema.integer`.
+- Export `UsageMetadata`.
 
 ## 0.4.0
 
