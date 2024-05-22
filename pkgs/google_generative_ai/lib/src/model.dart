@@ -245,15 +245,15 @@ final class GenerativeModel {
     List<Tool>? tools,
     ToolConfig? toolConfig,
   }) async {
-    final response = await _client.makeRequest(
-        _taskUri(Task.countTokens),
-        _generateContentRequest(
-          contents,
-          safetySettings: safetySettings,
-          generationConfig: generationConfig,
-          tools: tools,
-          toolConfig: toolConfig,
-        ));
+    final response = await _client.makeRequest(_taskUri(Task.countTokens), {
+      'generateContentRequest': _generateContentRequest(
+        contents,
+        safetySettings: safetySettings,
+        generationConfig: generationConfig,
+        tools: tools,
+        toolConfig: toolConfig,
+      )
+    });
     return parseCountTokensResponse(response);
   }
 
@@ -319,6 +319,7 @@ final class GenerativeModel {
     tools ??= _tools;
     toolConfig ??= _toolConfig;
     return {
+      'model': '${_model.prefix}/${_model.name}',
       'contents': contents.map((c) => c.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
