@@ -221,10 +221,10 @@ final class GenerativeModel {
   /// Sends a "countTokens" API request for the configured model,
   /// and waits for the response.
   ///
-  /// The [safetySettings], [tools], and [toolConfig], override the arguments of
-  /// the same name passed to the [GenerativeModel.new] constructor. Each
-  /// argument, when non-null, overrides the model level configuration in its
-  /// entirety.
+  /// The [safetySettings], [generationConfig], [tools], and [toolConfig],
+  /// override the arguments of the same name passed to the
+  /// [GenerativeModel.new] constructor. Each argument, when non-null,
+  /// overrides the model level configuration in its entirety.
   ///
   /// Example:
   /// ```dart
