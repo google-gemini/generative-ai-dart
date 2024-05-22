@@ -7,7 +7,7 @@
 - Include the full `GenerateContentRequest` (previously omitted
   `safetySettings`, `generationConfig`, `tools`, `toolConfig`, and
   `systemInstruction`) in `countTokens` requests. This aligns the token count
-  with token count the backend will see in practice if it was a
+  with the token count the backend will see in practice for a
   `generateContent` request.
 
 ## 0.4.0
