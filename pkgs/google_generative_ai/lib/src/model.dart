@@ -241,6 +241,7 @@ final class GenerativeModel {
   Future<CountTokensResponse> countTokens(
     Iterable<Content> contents, {
     List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
     List<Tool>? tools,
     ToolConfig? toolConfig,
   }) async {
@@ -249,9 +250,9 @@ final class GenerativeModel {
         _generateContentRequest(
           contents,
           safetySettings: safetySettings,
+          generationConfig: generationConfig,
           tools: tools,
           toolConfig: toolConfig,
-          includeGenerationConfig: false,
         ));
     return parseCountTokensResponse(response);
   }
@@ -312,7 +313,6 @@ final class GenerativeModel {
     GenerationConfig? generationConfig,
     List<Tool>? tools,
     ToolConfig? toolConfig,
-    bool includeGenerationConfig = true,
   }) {
     safetySettings ??= _safetySettings;
     generationConfig ??= _generationConfig;
@@ -322,7 +322,7 @@ final class GenerativeModel {
       'contents': contents.map((c) => c.toJson()).toList(),
       if (safetySettings.isNotEmpty)
         'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
-      if (includeGenerationConfig && generationConfig != null)
+      if (generationConfig != null)
         'generationConfig': generationConfig.toJson(),
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
       if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
