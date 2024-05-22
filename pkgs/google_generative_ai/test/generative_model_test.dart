@@ -26,6 +26,7 @@ void main() {
       String modelName = defaultModelName,
       RequestOptions? requestOptions,
       Content? systemInstruction,
+      GenerationConfig? generationConfig,
       List<Tool>? tools,
       ToolConfig? toolConfig,
     }) {
@@ -35,6 +36,7 @@ void main() {
         client: client.client,
         requestOptions: requestOptions,
         systemInstruction: systemInstruction,
+        generationConfig: generationConfig,
         tools: tools,
         toolConfig: toolConfig,
       );
@@ -443,7 +445,6 @@ void main() {
                 HarmBlockThreshold.high,
               ),
             ],
-            generationConfig: GenerationConfig(stopSequences: ['a']),
             tools: [
               Tool(functionDeclarations: [
                 FunctionDeclaration(
@@ -467,9 +468,6 @@ void main() {
                 'threshold': 'BLOCK_ONLY_HIGH',
               },
             ]);
-            expect(request['generationConfig'], {
-              'stopSequences': ['a'],
-            });
             expect(request['tools'], [
               {
                 'functionDeclarations': [
@@ -490,6 +488,19 @@ void main() {
                 'allowedFunctionNames': ['someFunction'],
               },
             });
+          },
+        );
+      });
+
+      test('excludes generationConfig', () async {
+        final (client, model) = createModel(
+            generationConfig: GenerationConfig(maxOutputTokens: 1000));
+        final prompt = 'Some prompt';
+        await client.checkRequest(
+          response: {'totalTokens': 100},
+          () => model.countTokens([Content.text(prompt)]),
+          verifyRequest: (_, request) {
+            expect(request, isNot(contains('generationConfig')));
           },
         );
       });
