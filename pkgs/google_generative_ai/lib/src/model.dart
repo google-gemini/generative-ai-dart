@@ -168,23 +168,15 @@ final class GenerativeModel {
     List<Tool>? tools,
     ToolConfig? toolConfig,
   }) async {
-    safetySettings ??= _safetySettings;
-    generationConfig ??= _generationConfig;
-    tools ??= _tools;
-    toolConfig ??= _toolConfig;
-    final parameters = {
-      'contents': prompt.map((p) => p.toJson()).toList(),
-      if (safetySettings.isNotEmpty)
-        'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
-      if (generationConfig != null)
-        'generationConfig': generationConfig.toJson(),
-      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
-      if (_systemInstruction case final systemInstruction?)
-        'systemInstruction': systemInstruction.toJson(),
-    };
-    final response =
-        await _client.makeRequest(_taskUri(Task.generateContent), parameters);
+    final response = await _client.makeRequest(
+        _taskUri(Task.generateContent),
+        _generateContentRequest(
+          prompt,
+          safetySettings: safetySettings,
+          generationConfig: generationConfig,
+          tools: tools,
+          toolConfig: toolConfig,
+        ));
     return parseGenerateContentResponse(response);
   }
 
@@ -212,23 +204,15 @@ final class GenerativeModel {
     List<Tool>? tools,
     ToolConfig? toolConfig,
   }) {
-    safetySettings ??= _safetySettings;
-    generationConfig ??= _generationConfig;
-    tools ??= _tools;
-    toolConfig ??= _toolConfig;
-    final parameters = <String, Object?>{
-      'contents': prompt.map((p) => p.toJson()).toList(),
-      if (safetySettings.isNotEmpty)
-        'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
-      if (generationConfig != null)
-        'generationConfig': generationConfig.toJson(),
-      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
-      if (_systemInstruction case final systemInstruction?)
-        'systemInstruction': systemInstruction.toJson(),
-    };
-    final response =
-        _client.streamRequest(_taskUri(Task.streamGenerateContent), parameters);
+    final response = _client.streamRequest(
+        _taskUri(Task.streamGenerateContent),
+        _generateContentRequest(
+          prompt,
+          safetySettings: safetySettings,
+          generationConfig: generationConfig,
+          tools: tools,
+          toolConfig: toolConfig,
+        ));
     return response.map(parseGenerateContentResponse);
   }
 
@@ -236,6 +220,11 @@ final class GenerativeModel {
   ///
   /// Sends a "countTokens" API request for the configured model,
   /// and waits for the response.
+  ///
+  /// The [safetySettings], [generationConfig], [tools], and [toolConfig],
+  /// override the arguments of the same name passed to the
+  /// [GenerativeModel.new] constructor. Each argument, when non-null,
+  /// overrides the model level configuration in its entirety.
   ///
   /// Example:
   /// ```dart
@@ -249,12 +238,22 @@ final class GenerativeModel {
   ///   print(response.text);
   /// }
   /// ```
-  Future<CountTokensResponse> countTokens(Iterable<Content> contents) async {
-    final parameters = <String, Object?>{
-      'contents': contents.map((c) => c.toJson()).toList()
-    };
-    final response =
-        await _client.makeRequest(_taskUri(Task.countTokens), parameters);
+  Future<CountTokensResponse> countTokens(
+    Iterable<Content> contents, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+    List<Tool>? tools,
+    ToolConfig? toolConfig,
+  }) async {
+    final response = await _client.makeRequest(
+        _taskUri(Task.countTokens),
+        _generateContentRequest(
+          contents,
+          safetySettings: safetySettings,
+          generationConfig: generationConfig,
+          tools: tools,
+          toolConfig: toolConfig,
+        ));
     return parseCountTokensResponse(response);
   }
 
@@ -306,6 +305,30 @@ final class GenerativeModel {
     final response = await _client.makeRequest(
         _taskUri(Task.batchEmbedContents), parameters);
     return parseBatchEmbedContentsResponse(response);
+  }
+
+  Map<String, Object?> _generateContentRequest(
+    Iterable<Content> contents, {
+    List<SafetySetting>? safetySettings,
+    GenerationConfig? generationConfig,
+    List<Tool>? tools,
+    ToolConfig? toolConfig,
+  }) {
+    safetySettings ??= _safetySettings;
+    generationConfig ??= _generationConfig;
+    tools ??= _tools;
+    toolConfig ??= _toolConfig;
+    return {
+      'contents': contents.map((c) => c.toJson()).toList(),
+      if (safetySettings.isNotEmpty)
+        'safetySettings': safetySettings.map((s) => s.toJson()).toList(),
+      if (generationConfig != null)
+        'generationConfig': generationConfig.toJson(),
+      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
+      if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
+      if (_systemInstruction case final systemInstruction?)
+        'systemInstruction': systemInstruction.toJson(),
+    };
   }
 }
 
