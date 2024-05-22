@@ -99,6 +99,7 @@ void main() {
               ),
             );
             expect(request, {
+              'model': 'models/$defaultModelName',
               'contents': [
                 {
                   'role': 'user',
@@ -311,6 +312,7 @@ void main() {
               ),
             );
             expect(request, {
+              'model': 'models/$defaultModelName',
               'contents': [
                 {
                   'role': 'user',
@@ -415,19 +417,88 @@ void main() {
               ),
             );
             expect(request, {
-              'contents': [
-                {
-                  'role': 'user',
-                  'parts': [
-                    {'text': prompt},
-                  ],
-                },
-              ],
+              'generateContentRequest': {
+                'model': 'models/$defaultModelName',
+                'contents': [
+                  {
+                    'role': 'user',
+                    'parts': [
+                      {'text': prompt},
+                    ],
+                  },
+                ],
+              }
             });
           },
           response: {'totalTokens': 2},
         );
         expect(response, matchesCountTokensResponse(CountTokensResponse(2)));
+      });
+
+      test('can override GenerateContentRequest fields', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        await client.checkRequest(
+          response: {'totalTokens': 100},
+          () => model.countTokens(
+            [Content.text(prompt)],
+            safetySettings: [
+              SafetySetting(
+                HarmCategory.dangerousContent,
+                HarmBlockThreshold.high,
+              ),
+            ],
+            generationConfig: GenerationConfig(stopSequences: ['a']),
+            tools: [
+              Tool(functionDeclarations: [
+                FunctionDeclaration(
+                  'someFunction',
+                  'Some cool function.',
+                  Schema(SchemaType.string, description: 'Some parameter.'),
+                ),
+              ]),
+            ],
+            toolConfig: ToolConfig(
+              functionCallingConfig: FunctionCallingConfig(
+                mode: FunctionCallingMode.any,
+                allowedFunctionNames: {'someFunction'},
+              ),
+            ),
+          ),
+          verifyRequest: (_, countTokensRequest) {
+            final request = countTokensRequest['generateContentRequest']
+                as Map<String, Object?>;
+            expect(request['safetySettings'], [
+              {
+                'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                'threshold': 'BLOCK_ONLY_HIGH',
+              },
+            ]);
+            expect(request['generationConfig'], {
+              'stopSequences': ['a'],
+            });
+            expect(request['tools'], [
+              {
+                'functionDeclarations': [
+                  {
+                    'name': 'someFunction',
+                    'description': 'Some cool function.',
+                    'parameters': {
+                      'type': 'STRING',
+                      'description': 'Some parameter.',
+                    },
+                  },
+                ],
+              },
+            ]);
+            expect(request['toolConfig'], {
+              'functionCallingConfig': {
+                'mode': 'ANY',
+                'allowedFunctionNames': ['someFunction'],
+              },
+            });
+          },
+        );
       });
     });
 

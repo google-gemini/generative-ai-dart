@@ -4,6 +4,11 @@
   replies with more than one part.
 - Fix handling of `format` argument to `Schema.number` and `Schema.integer`.
 - Export `UsageMetadata`.
+- Include the full `GenerateContentRequest` (previously omitted
+  `safetySettings`, `generationConfig`, `tools`, `toolConfig`, and
+  `systemInstruction`) in `countTokens` requests. This aligns the token count
+  with the token count the backend will see in practice for a
+  `generateContent` request.
 
 ## 0.4.0
 

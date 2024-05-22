@@ -22,7 +22,13 @@ void main() async {
     stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
-  final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+  final model = GenerativeModel(
+      model: 'gemini-pro',
+      apiKey: apiKey,
+      safetySettings: [
+        SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
+      ],
+      generationConfig: GenerationConfig(maxOutputTokens: 200));
   final prompt = 'Write a story about a magic backpack.';
   print('Prompt: $prompt');
   final content = [Content.text(prompt)];
