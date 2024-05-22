@@ -99,6 +99,7 @@ void main() {
               ),
             );
             expect(request, {
+              'model': 'models/$defaultModelName',
               'contents': [
                 {
                   'role': 'user',
@@ -311,6 +312,7 @@ void main() {
               ),
             );
             expect(request, {
+              'model': 'models/$defaultModelName',
               'contents': [
                 {
                   'role': 'user',
@@ -415,14 +417,17 @@ void main() {
               ),
             );
             expect(request, {
-              'contents': [
-                {
-                  'role': 'user',
-                  'parts': [
-                    {'text': prompt},
-                  ],
-                },
-              ],
+              'generateContentRequest': {
+                'model': 'models/$defaultModelName',
+                'contents': [
+                  {
+                    'role': 'user',
+                    'parts': [
+                      {'text': prompt},
+                    ],
+                  },
+                ],
+              }
             });
           },
           response: {'totalTokens': 2},
@@ -460,7 +465,9 @@ void main() {
               ),
             ),
           ),
-          verifyRequest: (_, request) {
+          verifyRequest: (_, countTokensRequest) {
+            final request = countTokensRequest['generateContentRequest']
+                as Map<String, Object?>;
             expect(request['safetySettings'], [
               {
                 'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
