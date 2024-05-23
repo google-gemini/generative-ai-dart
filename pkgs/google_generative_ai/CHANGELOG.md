@@ -9,6 +9,8 @@
   `systemInstruction`) in `countTokens` requests. This aligns the token count
   with the token count the backend will see in practice for a
   `generateContent` request.
+- Add a `text` getter on `Candidate` to make it easer to retrieve the text from
+  candidates other than the first in a response.
 
 ## 0.4.0
 
