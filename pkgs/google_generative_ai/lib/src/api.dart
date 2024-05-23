@@ -68,43 +68,24 @@ final class GenerateContentResponse {
   ///
   /// If there are no candidates, or if the first candidate does not contain any
   /// text parts, this value is `null`.
-  String? get text {
-    return switch (candidates) {
-      [] => switch (promptFeedback) {
-          PromptFeedback(
-            :final blockReason,
-            :final blockReasonMessage,
-          ) =>
-            // TODO: Add a specific subtype for this exception?
-            throw GenerativeAIException('Response was blocked'
-                '${blockReason != null ? ' due to $blockReason' : ''}'
-                '${blockReasonMessage != null ? ': $blockReasonMessage' : ''}'),
-          _ => null,
-        },
-      [
-        Candidate(
-          finishReason: (FinishReason.recitation || FinishReason.safety) &&
-              final finishReason,
-          :final finishMessage,
-        ),
-        ...
-      ] =>
-        throw GenerativeAIException(
-          // ignore: prefer_interpolation_to_compose_strings
-          'Candidate was blocked due to $finishReason' +
-              (finishMessage != null && finishMessage.isNotEmpty
-                  ? ': $finishMessage'
-                  : ''),
-        ),
-      // Special case for a single TextPart to avoid iterable chain.
-      [Candidate(content: Content(parts: [TextPart(:final text)])), ...] =>
-        text,
-      [Candidate(content: Content(:final parts)), ...]
-          when parts.any((p) => p is TextPart) =>
-        parts.whereType<TextPart>().map((p) => p.text).join(''),
-      [Candidate(), ...] => null,
-    };
-  }
+  ///
+  /// If there is more than one candidate, all but the first are ignored. See
+  /// [Candidate.text] to get the text content of candidates other than the
+  /// first.
+  String? get text => switch (candidates) {
+        [] => switch (promptFeedback) {
+            PromptFeedback(
+              :final blockReason,
+              :final blockReasonMessage,
+            ) =>
+              // TODO: Add a specific subtype for this exception?
+              throw GenerativeAIException('Response was blocked'
+                  '${blockReason != null ? ' due to $blockReason' : ''}'
+                  '${blockReasonMessage != null ? ': $blockReasonMessage' : ''}'),
+            _ => null,
+          },
+        [final candidate, ...] => candidate.text,
+      };
 
   /// The function call parts of the first candidate in [candidates], if any.
   ///
@@ -221,6 +202,36 @@ final class Candidate {
   // TODO: token count?
   Candidate(this.content, this.safetyRatings, this.citationMetadata,
       this.finishReason, this.finishMessage);
+
+  /// The concatenation of the text parts of [content], if any.
+  ///
+  /// If this candidate was finished for a reason of [FinishReason.recitation]
+  /// or [FinishReason.safety], accessing this text will throw a
+  /// [GenerativeAIException].
+  ///
+  /// If [content] contains any text parts, this value is the concatenation of
+  /// the text.
+  ///
+  /// If [content] does not contain any text parts, this value is `null`.
+  String? get text {
+    if (finishReason case FinishReason.recitation || FinishReason.safety) {
+      final String suffix;
+      if (finishMessage case final message? when message.isNotEmpty) {
+        suffix = ': $message';
+      } else {
+        suffix = '';
+      }
+      throw GenerativeAIException(
+          'Candidate was blocked due to $finishReason$suffix');
+    }
+    return switch (content.parts) {
+      // Special case for a single TextPart to avoid iterable chain.
+      [TextPart(:final text)] => text,
+      final parts when parts.any((p) => p is TextPart) =>
+        parts.whereType<TextPart>().map((p) => p.text).join(''),
+      _ => null,
+    };
+  }
 }
 
 /// Safety rating for a piece of content.

@@ -457,6 +457,8 @@ void main() {
       final decoded = jsonDecode(response) as Object;
       final generateContentResponse = parseGenerateContentResponse(decoded);
       expect(generateContentResponse.text, 'Initial text And more text');
+      expect(generateContentResponse.candidates.single.text,
+          'Initial text And more text');
     });
   });
 
