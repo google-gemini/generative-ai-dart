@@ -214,7 +214,7 @@ final class Candidate {
   ///
   /// If [content] does not contain any text parts, this value is `null`.
   String? get text {
-    if (finishReason case (FinishReason.recitation || FinishReason.safety)) {
+    if (finishReason case FinishReason.recitation || FinishReason.safety) {
       final String suffix;
       if (finishMessage case final message? when message.isNotEmpty) {
         suffix = ': $message';
