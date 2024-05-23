@@ -1,4 +1,4 @@
-## 0.4.1-wip
+## 0.4.1
 
 - Concatenate multiple `TextPart` into the `text` String in case the model
   replies with more than one part.
