@@ -20,7 +20,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 Future<List<String>> _generateWords(String apiKey, String subject) async {
   final config = GenerationConfig(candidateCount: 1, temperature: 1.0);
   final model = GenerativeModel(
-    model: 'gemini-pro',
+    model: 'gemini-1.5-pro-latest',
     apiKey: apiKey,
     generationConfig: config,
     requestOptions: RequestOptions(apiVersion: 'v1beta'),
@@ -56,7 +56,7 @@ Future<List<(String, String)>> _generateHints(
     String apiKey, List<String> words) async {
   final config = GenerationConfig(candidateCount: 1, temperature: 0.5);
   final model = GenerativeModel(
-    model: 'gemini-pro',
+    model: 'gemini-1.5-pro-latest',
     apiKey: apiKey,
     generationConfig: config,
     requestOptions: RequestOptions(apiVersion: 'v1beta'),

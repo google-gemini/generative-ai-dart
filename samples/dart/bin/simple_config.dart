@@ -19,7 +19,9 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 Future<void> generate(GenerationConfig? generationConfig, String apiKey) async {
   final model = GenerativeModel(
-      model: 'gemini-pro', apiKey: apiKey, generationConfig: generationConfig);
+      model: 'gemini-1.5-flash-latest',
+      apiKey: apiKey,
+      generationConfig: generationConfig);
   final prompt = 'One, two, three, ';
   print('Prompt: $prompt');
   final content = [Content.text(prompt)];

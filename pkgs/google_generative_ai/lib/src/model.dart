@@ -64,8 +64,9 @@ final class GenerativeModel {
 
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
-  /// The [model] argument can be a model name (such as `'gemini-pro'`) or a
-  /// model code (such as `'models/gemini-pro'` or `'tunedModels/my-model'`).
+  /// The [model] argument can be a model name (such as
+  /// `'gemini-1.5-flash-latest'`) or a model code (such as
+  /// `'models/gemini-1.5-flash-latest'` or `'tunedModels/my-model'`).
   /// There is no creation time check for whether the `model` string identifies
   /// a known and supported model. If not, attempts to generate content
   /// will fail.

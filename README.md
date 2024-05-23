@@ -50,7 +50,7 @@ flutter pub add google_generative_ai
 ### Initializing the API client
 
 ```dart
-final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+final model = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: apiKey);
 ```
 
 ### Calling the API

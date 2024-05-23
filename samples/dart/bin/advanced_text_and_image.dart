@@ -25,7 +25,7 @@ void main() async {
     exit(1);
   }
   final model = GenerativeModel(
-      model: 'gemini-pro-vision',
+      model: 'gemini-1.5-flash-latest',
       apiKey: apiKey,
       generationConfig: GenerationConfig(temperature: 0));
   final prompt =

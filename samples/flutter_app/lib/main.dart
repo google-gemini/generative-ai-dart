@@ -81,7 +81,6 @@ class ChatWidget extends StatefulWidget {
 
 class _ChatWidgetState extends State<ChatWidget> {
   late final GenerativeModel _model;
-  late final GenerativeModel _visionModel;
   late final ChatSession _chat;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
@@ -94,12 +93,8 @@ class _ChatWidgetState extends State<ChatWidget> {
   void initState() {
     super.initState();
     _model = GenerativeModel(
-      model: 'gemini-pro',
+      model: 'gemini-1.5-flash-latest',
       apiKey: widget.apiKey,
-    );
-    _visionModel = GenerativeModel(
-      model: 'gemini-pro-vision',
-      apiKey: _apiKey,
     );
     _chat = _model.startChat();
   }
@@ -244,7 +239,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         fromUser: true
       ));
 
-      var response = await _visionModel.generateContent(content);
+      var response = await _model.generateContent(content);
       var text = response.text;
       _generatedContent.add((image: null, text: text, fromUser: false));
 
