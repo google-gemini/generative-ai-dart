@@ -24,7 +24,10 @@ void main() async {
     stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
-  final model = GenerativeModel(model: 'gemini-pro-vision', apiKey: apiKey);
+  final model = GenerativeModel(
+    model: 'gemini-1.5-flash-latest',
+    apiKey: apiKey,
+  );
   final prompt = 'What do you see?';
   print('Prompt: $prompt');
 

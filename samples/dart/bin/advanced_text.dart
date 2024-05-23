@@ -23,7 +23,7 @@ void main() async {
     exit(1);
   }
   final model = GenerativeModel(
-      model: 'gemini-pro',
+      model: 'gemini-1.5-flash-latest',
       apiKey: apiKey,
       safetySettings: [
         SafetySetting(HarmCategory.sexuallyExplicit, HarmBlockThreshold.none)

@@ -54,7 +54,10 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 const apiKey = ...;
 
 void main() async {
-  final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+  final model = GenerativeModel(
+      model: 'gemini-1.5-flash-latest',
+      apiKey: apiKey,
+  );
 
   final prompt = 'Write a story about a magic backpack.';
   final content = [Content.text(prompt)];
