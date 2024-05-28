@@ -1,3 +1,8 @@
+## 0.4.2-wip
+
+- Add support for `GenerationConfig.responseSchema` for constraining JSON mime
+  type output formats.
+
 ## 0.4.1
 
 - Concatenate multiple `TextPart` into the `text` String in case the model
