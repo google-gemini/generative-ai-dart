@@ -1,3 +1,7 @@
+## 0.4.2-wip
+
+- Require Dart 3.1.
+
 ## 0.4.1
 
 - Concatenate multiple `TextPart` into the `text` String in case the model
