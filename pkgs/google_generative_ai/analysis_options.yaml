@@ -30,4 +30,3 @@ linter:
 
     # documentation related
     - comment_references
-    - library_private_types_in_public_api

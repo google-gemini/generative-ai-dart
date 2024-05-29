@@ -7,13 +7,13 @@ description: >-
 repository: https://github.com/google-gemini/generative-ai-dart/tree/main/pkgs/google_generative_ai
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.1.0
 
 dependencies:
   http: ^1.1.0
 
 dev_dependencies:
-  lints: ^3.0.0
+  lints: ^4.0.0
   matcher: ^0.12.16
   test: ^1.24.0
   yaml: ^3.1.0
