@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -25,35 +26,27 @@ Future<List<String>> _generateWords(String apiKey, String subject) async {
     generationConfig: config,
     requestOptions: RequestOptions(apiVersion: 'v1beta'),
   );
-  final content = [Content.text('Create and record a list of 20 $subject.')];
+  final content = [Content.text('Create a list of 20 $subject.')];
 
   final response = await model.generateContent(
     content,
-    tools: [
-      Tool(functionDeclarations: [
-        FunctionDeclaration(
-            'recordWords',
-            'Stores a list of words for a guessing game.',
-            Schema(SchemaType.object, properties: {
-              'words': Schema(SchemaType.array,
-                  items: Schema(SchemaType.string,
-                      description:
-                          'A single word that a player will need to guess.'))
-            }))
-      ])
-    ],
-    toolConfig: ToolConfig(
-        functionCallingConfig:
-            FunctionCallingConfig(mode: FunctionCallingMode.any)),
+    generationConfig: GenerationConfig(
+      responseMimeType: 'application/json',
+      responseSchema: Schema.array(
+        items: Schema.string(
+          description: 'A single word that a player will need to guess.',
+        ),
+      ),
+    ),
   );
-  final functionCall = response.functionCalls.first;
-  return [
-    for (final word in functionCall.args['words'] as List) word as String
-  ];
+  final words = jsonDecode(response.text!) as List;
+  return [for (final word in words) word];
 }
 
 Future<List<(String, String)>> _generateHints(
-    String apiKey, List<String> words) async {
+  String apiKey,
+  List<String> words,
+) async {
   final config = GenerationConfig(candidateCount: 1, temperature: 0.5);
   final model = GenerativeModel(
     model: 'gemini-1.5-pro-latest',
@@ -63,31 +56,26 @@ Future<List<(String, String)>> _generateHints(
   );
   final content = [
     Content.text(
-        'Create and record a list of descriptions for these words: $words. '
-        'The descriptions should be in the same order as the words. '
-        'The descriptions cannot use the word itself. '
-        'The descriptions should make it easy to guess the word. '
-        'Each description should be 3 words long.')
+      'Create a list of descriptions for these words: $words. '
+      'The descriptions should be in the same order as the words. '
+      'The descriptions cannot use the word itself. '
+      'The descriptions should make it easy to guess the word. '
+      'Each description should be 3 words long.',
+    ),
   ];
 
-  final response = await model.generateContent(content,
-      tools: [
-        Tool(functionDeclarations: [
-          FunctionDeclaration(
-              'recordDescriptions',
-              'Stores a list of word descriptions for a guessing game.',
-              Schema(SchemaType.object, properties: {
-                'descriptions': Schema(SchemaType.array,
-                    items: Schema(SchemaType.string,
-                        description:
-                            'A 3 word description of some other hidden word.'))
-              }))
-        ])
-      ],
-      toolConfig: ToolConfig(
-          functionCallingConfig:
-              FunctionCallingConfig(mode: FunctionCallingMode.any)));
-  final hints = response.functionCalls.first.args['descriptions'] as List;
+  final response = await model.generateContent(
+    content,
+    generationConfig: GenerationConfig(
+      responseMimeType: 'application/json',
+      responseSchema: Schema.array(
+        items: Schema.string(
+          description: 'A 3 word description of some other hidden word.',
+        ),
+      ),
+    ),
+  );
+  final hints = jsonDecode(response.text!) as List;
   return [for (int i = 0; i < hints.length; ++i) (words[i], hints[i])];
 }
 

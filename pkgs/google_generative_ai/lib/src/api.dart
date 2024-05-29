@@ -14,6 +14,7 @@
 
 import 'content.dart';
 import 'error.dart';
+import 'function_calling.dart' show Schema;
 import 'model.dart';
 
 final class CountTokensResponse {
@@ -515,6 +516,12 @@ final class GenerationConfig {
   /// - `application/json`: JSON response in the candidates.
   final String? responseMimeType;
 
+  /// Output response schema of the generated candidate text.
+  ///
+  /// - Note: This only applies when the specified ``responseMIMEType`` supports
+  ///   a schema; currently this is limited to `application/json`.
+  final Schema? responseSchema;
+
   GenerationConfig({
     this.candidateCount,
     this.stopSequences = const [],
@@ -523,6 +530,7 @@ final class GenerationConfig {
     this.topP,
     this.topK,
     this.responseMimeType,
+    this.responseSchema,
   });
 
   Map<String, Object?> toJson() => {
@@ -536,6 +544,8 @@ final class GenerationConfig {
         if (topK case final topK?) 'topK': topK,
         if (responseMimeType case final responseMimeType?)
           'responseMimeType': responseMimeType,
+        if (responseSchema case final responseSchema?)
+          'responseSchema': responseSchema,
       };
 }
 

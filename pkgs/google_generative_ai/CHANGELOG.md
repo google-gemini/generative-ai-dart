@@ -1,5 +1,7 @@
 ## 0.4.2-wip
 
+- Add support for `GenerationConfig.responseSchema` for constraining JSON mime
+  type output formats.
 - Require Dart 3.1.
 
 ## 0.4.1
