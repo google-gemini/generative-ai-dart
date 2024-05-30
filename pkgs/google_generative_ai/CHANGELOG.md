@@ -1,4 +1,4 @@
-## 0.4.2-wip
+## 0.4.2
 
 - Add support for `GenerationConfig.responseSchema` for constraining JSON mime
   type output formats.
