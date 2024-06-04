@@ -168,18 +168,17 @@ final class GenerativeModel {
     GenerationConfig? generationConfig,
     List<Tool>? tools,
     ToolConfig? toolConfig,
-  }) async {
-    final response = await _client.makeRequest(
-        _taskUri(Task.generateContent),
-        _generateContentRequest(
-          prompt,
-          safetySettings: safetySettings,
-          generationConfig: generationConfig,
-          tools: tools,
-          toolConfig: toolConfig,
-        ));
-    return parseGenerateContentResponse(response);
-  }
+  }) =>
+      makeRequest(
+          Task.generateContent,
+          _generateContentRequest(
+            prompt,
+            safetySettings: safetySettings,
+            generationConfig: generationConfig,
+            tools: tools,
+            toolConfig: toolConfig,
+          ),
+          parseGenerateContentResponse);
 
   /// Generates a stream of content responding to [prompt].
   ///
@@ -245,18 +244,19 @@ final class GenerativeModel {
     GenerationConfig? generationConfig,
     List<Tool>? tools,
     ToolConfig? toolConfig,
-  }) async {
-    final response = await _client.makeRequest(_taskUri(Task.countTokens), {
-      'generateContentRequest': _generateContentRequest(
-        contents,
-        safetySettings: safetySettings,
-        generationConfig: generationConfig,
-        tools: tools,
-        toolConfig: toolConfig,
-      )
-    });
-    return parseCountTokensResponse(response);
-  }
+  }) =>
+      makeRequest(
+          Task.countTokens,
+          {
+            'generateContentRequest': _generateContentRequest(
+              contents,
+              safetySettings: safetySettings,
+              generationConfig: generationConfig,
+              tools: tools,
+              toolConfig: toolConfig,
+            )
+          },
+          parseCountTokensResponse);
 
   /// Creates an embedding (list of float values) representing [content].
   ///
@@ -268,19 +268,22 @@ final class GenerativeModel {
   /// final promptEmbedding =
   ///     (await model.embedContent([Content.text(prompt)])).embedding.values;
   /// ```
-  Future<EmbedContentResponse> embedContent(Content content,
-      {TaskType? taskType, String? title, int? outputDimensionality}) async {
-    final parameters = <String, Object?>{
-      'content': content.toJson(),
-      if (taskType != null) 'taskType': taskType.toJson(),
-      if (title != null) 'title': title,
-      if (outputDimensionality != null)
-        'outputDimensionality': outputDimensionality,
-    };
-    final response =
-        await _client.makeRequest(_taskUri(Task.embedContent), parameters);
-    return parseEmbedContentResponse(response);
-  }
+  Future<EmbedContentResponse> embedContent(
+    Content content, {
+    TaskType? taskType,
+    String? title,
+    int? outputDimensionality,
+  }) =>
+      makeRequest(
+          Task.embedContent,
+          {
+            'content': content.toJson(),
+            if (taskType != null) 'taskType': taskType.toJson(),
+            if (title != null) 'title': title,
+            if (outputDimensionality != null)
+              'outputDimensionality': outputDimensionality,
+          },
+          parseEmbedContentResponse);
 
   /// Creates embeddings (list of float values) representing each content in
   /// [requests].
@@ -297,16 +300,17 @@ final class GenerativeModel {
   ///     (await model.embedContent(requests)).embedding.values;
   /// ```
   Future<BatchEmbedContentsResponse> batchEmbedContents(
-      Iterable<EmbedContentRequest> requests) async {
-    final parameters = {
-      'requests': requests
-          .map((r) => r.toJson(defaultModel: '${_model.prefix}/${_model.name}'))
-          .toList()
-    };
-    final response = await _client.makeRequest(
-        _taskUri(Task.batchEmbedContents), parameters);
-    return parseBatchEmbedContentsResponse(response);
-  }
+    Iterable<EmbedContentRequest> requests,
+  ) =>
+      makeRequest(
+          Task.batchEmbedContents,
+          {
+            'requests': requests
+                .map((r) =>
+                    r.toJson(defaultModel: '${_model.prefix}/${_model.name}'))
+                .toList()
+          },
+          parseBatchEmbedContentsResponse);
 
   Map<String, Object?> _generateContentRequest(
     Iterable<Content> contents, {
@@ -332,6 +336,13 @@ final class GenerativeModel {
         'systemInstruction': systemInstruction.toJson(),
     };
   }
+}
+
+extension VertexExtensions on GenerativeModel {
+  /// Make a unary request for [task] with JSON encodable [params].
+  Future<T> makeRequest<T>(Task task, Map<String, Object?> params,
+          T Function(Map<String, Object?>) parse) =>
+      _client.makeRequest(_taskUri(task), params).then(parse);
 }
 
 /// Creates a model with an overridden [ApiClient] for testing.

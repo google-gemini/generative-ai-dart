@@ -25,4 +25,4 @@ export 'api.dart'
         parseCountTokensResponse,
         parseEmbedContentResponse,
         parseGenerateContentResponse;
-export 'model.dart' show createModelWithBaseUri;
+export 'model.dart' show Task, VertexExtensions, createModelWithBaseUri;

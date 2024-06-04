@@ -1,3 +1,7 @@
+## 0.4.3
+
+- Internal changes to enable reuse in the Vertex SDK. No user visible changes.
+
 ## 0.4.2
 
 - Add support for `GenerationConfig.responseSchema` for constraining JSON mime
