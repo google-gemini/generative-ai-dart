@@ -30,12 +30,15 @@ final class Tool {
   /// with the role "function" generation context for the next model turn.
   final List<FunctionDeclaration>? functionDeclarations;
 
-  Tool({this.functionDeclarations});
+  final CodeExecution? codeExecution;
+
+  Tool({this.functionDeclarations, this.codeExecution});
 
   Map<String, Object> toJson() => {
         if (functionDeclarations case final functionDeclarations?)
           'functionDeclarations':
               functionDeclarations.map((f) => f.toJson()).toList(),
+        if (codeExecution != null) 'codeExecution': <String, Object?>{},
       };
 }
 
@@ -65,6 +68,14 @@ final class FunctionDeclaration {
         if (parameters case final parameters?) 'parameters': parameters.toJson()
       };
 }
+
+/// An empty configuration marker to enable code execution.
+///
+/// When code execution is enabled the model may generate code and run it in the
+/// process of generating a response to the prompt. When this happens the code
+/// that was executed and it's output will be included in the response as
+/// [ExecutableCode] and [CodeExecutionResult] parts.
+class CodeExecution {}
 
 final class ToolConfig {
   final FunctionCallingConfig? functionCallingConfig;

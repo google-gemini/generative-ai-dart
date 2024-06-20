@@ -294,6 +294,36 @@ void main() {
           response: arbitraryGenerateContentResponse,
         );
       });
+
+      test('can enable code execution', () async {
+        final (client, model) =
+            createModel(tools: [Tool(codeExecution: CodeExecution())]);
+        final prompt = 'Some prompt';
+        await client.checkRequest(
+          () => model.generateContent([Content.text(prompt)]),
+          verifyRequest: (_, request) {
+            expect(request['tools'], [
+              {'codeExecution': <String, Object?>{}}
+            ]);
+          },
+          response: arbitraryGenerateContentResponse,
+        );
+      });
+
+      test('can override code execution', () async {
+        final (client, model) = createModel();
+        final prompt = 'Some prompt';
+        await client.checkRequest(
+          () => model.generateContent([Content.text(prompt)],
+              tools: [Tool(codeExecution: CodeExecution())]),
+          verifyRequest: (_, request) {
+            expect(request['tools'], [
+              {'codeExecution': <String, Object?>{}}
+            ]);
+          },
+          response: arbitraryGenerateContentResponse,
+        );
+      });
     });
 
     group('generate content stream', () {
