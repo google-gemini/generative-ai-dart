@@ -1,6 +1,6 @@
 # Google Generative AI SDK for Dart
 
-The Google AI Dart SDK is the easiest way for Dart developers to build with the Gemini API. The Gemini API gives you access to Gemini [models](https://ai.google.dev/models/gemini) created by [Google DeepMind](https://deepmind.google/technologies/gemini/#introduction). Gemini models are built from the ground up to be multimodal, so you can reason seamlessly across text, images, and code. 
+The Google AI Dart SDK is the easiest way for Dart developers to build with the Gemini API. The Gemini API gives you access to Gemini [models](https://ai.google.dev/models/gemini) created by [Google DeepMind](https://deepmind.google/technologies/gemini/#introduction). Gemini models are built from the ground up to be multimodal, so you can reason seamlessly across text, images, and code.
 
 > [!CAUTION]
 > **Using the Google AI SDK for Dart (Flutter) to call the Google AI Gemini API
@@ -18,10 +18,11 @@ The Google AI Dart SDK is the easiest way for Dart developers to build with the 
 2. Login with your Google account.
 3. [Create](https://aistudio.google.com/app/apikey) an API key. Note that in Europe the free tier is not available.
 4. Try a Dart SDK [example](samples/dart) or the [Flutter ample app](samples/flutter_app/).
-5. For detailed instructions, try the 
+5. For detailed instructions, try the
 [Dart SDK tutorial](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=dart) on [ai.google.dev](https://ai.google.dev).
 
 ## Usage example
+
 See the [Gemini API Cookbook](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=dart) or [ai.google.dev](https://ai.google.dev) for complete code.
 
 Add a dependency on the `package:google_generative_ai` package via:
