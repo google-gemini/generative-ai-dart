@@ -17,7 +17,7 @@ The Google AI Dart SDK is the easiest way for Dart developers to build with the 
 1. Go to [Google AI Studio](https://aistudio.google.com/).
 2. Login with your Google account.
 3. [Create an API key](https://aistudio.google.com/app/apikey). Note that in Europe the free tier is not available.
-4. Try a Dart SDK [example](samples/dart) or the [Flutter ample app](samples/flutter_app/).
+4. Try a [Dart CLI sample](samples/dart/) or the [Flutter sample app](samples/flutter_app/).
 5. For detailed instructions, try the
 [Dart SDK tutorial](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=dart) on [ai.google.dev](https://ai.google.dev).
 
