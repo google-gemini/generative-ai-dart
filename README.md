@@ -1,31 +1,40 @@
 # Google Generative AI SDK for Dart
 
-The Google AI Dart SDK is the easiest way for Dart developers to build with the Gemini API. The Gemini API gives you access to Gemini [models](https://ai.google.dev/models/gemini) created by [Google DeepMind](https://deepmind.google/technologies/gemini/#introduction). Gemini models are built from the ground up to be multimodal, so you can reason seamlessly across text, images, and code.
+The Google AI Dart SDK is the easiest way for Dart developers to build with the
+Gemini API. The Gemini API gives you access to Gemini
+[models](https://ai.google.dev/models/gemini) created by
+[Google DeepMind](https://deepmind.google/technologies/gemini/#introduction).
+Gemini models are built from the ground up to be multimodal, so you can reason
+seamlessly across text, images, and code.
 
-> [!CAUTION]
-> **Using the Google AI SDK for Dart (Flutter) to call the Google AI Gemini API
-> directly from your app is recommended for prototyping only.** If you plan to
-> enable billing, we strongly recommend that you use the SDK to call the Google
-> AI Gemini API only server-side to keep your API key safe. You risk potentially
-> exposing your API key to malicious actors if you embed your API key directly
-> in your mobile or web app or fetch it remotely at runtime.
+> [!CAUTION] **Using the Google AI SDK for Dart (Flutter) to call the Google AI
+> Gemini API directly from your app is recommended for prototyping only.** If
+> you plan to enable billing, we strongly recommend that you use the SDK to call
+> the Google AI Gemini API only server-side to keep your API key safe. You risk
+> potentially exposing your API key to malicious actors if you embed your API
+> key directly in your mobile or web app or fetch it remotely at runtime.
 
 ## Get started with the Gemini API
 
 ## Getting Started
 
-1. Go to [Google AI Studio](https://aistudio.google.com/).
-2. Login with your Google account.
-3. [Create an API key](https://aistudio.google.com/app/apikey). Note that in Europe the free tier is not available.
-4. Try a [Dart CLI sample](samples/dart/) or the [Flutter sample app](samples/flutter_app/).
-5. For detailed instructions, try the
-[Dart SDK tutorial](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=dart) on [ai.google.dev](https://ai.google.dev).
+1.  Go to [Google AI Studio](https://aistudio.google.com/).
+2.  Login with your Google account.
+3.  [Create an API key](https://aistudio.google.com/app/apikey). Note that in
+    Europe the free tier is not available.
+4.  Try a [Dart CLI sample](samples/dart/) or the
+    [Flutter sample app](samples/flutter_app/).
+5.  For detailed instructions, try the
+    [Dart SDK tutorial](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=dart)
+    on [ai.google.dev](https://ai.google.dev).
 
 ## Usage example
 
-See the [Gemini API Cookbook](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=dart) or [ai.google.dev](https://ai.google.dev) for complete code.
+See the
+[Gemini API Cookbook](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=dart)
+or [ai.google.dev](https://ai.google.dev) for complete code.
 
-1. Add a dependency on the `package:google_generative_ai` package via:
+1.  Add a dependency on the `package:google_generative_ai` package via:
 
 ```shell
 dart pub add google_generative_ai
@@ -37,13 +46,13 @@ or:
 flutter pub add google_generative_ai
 ```
 
-2. Initialize the API client
+1.  Initialize the API client
 
 ```dart
 final model = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: apiKey);
 ```
 
-3. Call the API to run a prompt
+1.  Call the API to run a prompt
 
 ```dart
 final prompt = 'Do these look store-bought or homemade?';
@@ -62,7 +71,9 @@ print(response.text);
 
 ## Documentation
 
-See the [Gemini API Cookbook](https://github.com/google-gemini/gemini-api-cookbook/) or [ai.google.dev](https://ai.google.dev) for complete documentation.
+See the
+[Gemini API Cookbook](https://github.com/google-gemini/gemini-api-cookbook/) or
+[ai.google.dev](https://ai.google.dev) for complete documentation.
 
 ## Contributing
 
