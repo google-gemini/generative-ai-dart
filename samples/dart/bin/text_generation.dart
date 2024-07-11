@@ -35,7 +35,6 @@ Future<void> textGenTextOnlyPrompt() async {
 
   final response = await model.generateContent([Content.text(prompt)]);
   print(response.text);
-
   // [END text_gen_text_only_prompt]
 }
 
