@@ -17,9 +17,9 @@ import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 final apiKey = () {
-  final apiKey = Platform.environment['GOOGLE_API_KEY'];
+  final apiKey = Platform.environment['GEMINI_API_KEY'];
   if (apiKey == null) {
-    stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
+    stderr.writeln(r'No $GEMINI_API_KEY environment variable');
     exit(1);
   }
   return apiKey;
@@ -53,7 +53,7 @@ Future<void> functionCalling() async {
   }
 
   final model = GenerativeModel(
-    model: 'gemini-1.5-pro-latest',
+    model: 'gemini-1.5-pro',
     apiKey: apiKey,
     tools: [
       Tool(functionDeclarations: [controlLightFunction])
