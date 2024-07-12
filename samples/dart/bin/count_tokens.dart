@@ -17,9 +17,9 @@ import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 final apiKey = () {
-  final apiKey = Platform.environment['GOOGLE_API_KEY'];
+  final apiKey = Platform.environment['GEMINI_API_KEY'];
   if (apiKey == null) {
-    stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
+    stderr.writeln(r'No $GEMINI_API_KEY environment variable');
     exit(1);
   }
   return apiKey;
@@ -116,7 +116,7 @@ Future<void> tokensSystemInstructions() async {
 }
 
 Future<void> tokensTools() async {
-  // [START tokens_system_instructions]
+  // [START tokens_tools]
   var model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -150,7 +150,7 @@ Future<void> tokensTools() async {
   );
   tokenCount = await model.countTokens([Content.text(prompt)]);
   print('Total tokens: ${tokenCount.totalTokens}');
-  // [END tokens_system_instructions]
+  // [END tokens_tools]
 }
 
 void main() async {
