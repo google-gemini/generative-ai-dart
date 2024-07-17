@@ -65,7 +65,7 @@ Future<void> tokensChat() async {
 }
 
 Future<void> tokensMultimodalImageInline() async {
-  // [START tokens_multimodel_image_inline]
+  // [START tokens_multimodal_image_inline]
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -90,7 +90,7 @@ Future<void> tokensMultimodalImageInline() async {
         'Candidates: ${usage.candidatesTokenCount}, '
         'Total: ${usage.totalTokenCount}');
   }
-  // [END tokens_multimodel_image_inline]
+  // [END tokens_multimodal_image_inline]
 }
 
 Future<void> tokensSystemInstructions() async {
