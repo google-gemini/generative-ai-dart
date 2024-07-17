@@ -94,7 +94,7 @@ Future<void> tokensMultimodalImageInline() async {
 }
 
 Future<void> tokensSystemInstructions() async {
-  // [START tokens_system_instructions]
+  // [START tokens_system_instruction]
   var model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -112,7 +112,7 @@ Future<void> tokensSystemInstructions() async {
   );
   tokenCount = await model.countTokens([Content.text(prompt)]);
   print('Total tokens: ${tokenCount.totalTokens}');
-  // [END tokens_system_instructions]
+  // [END tokens_system_instruction]
 }
 
 Future<void> tokensTools() async {
