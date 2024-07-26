@@ -27,9 +27,11 @@ import 'utils/mutex.dart';
 /// response.
 final class ChatSession {
   final Future<GenerateContentResponse> Function(Iterable<Content> content,
-      {List<SafetySetting>? safetySettings, GenerationConfig? generationConfig}) _generateContent;
+      {List<SafetySetting>? safetySettings,
+      GenerationConfig? generationConfig}) _generateContent;
   final Stream<GenerateContentResponse> Function(Iterable<Content> content,
-      {List<SafetySetting>? safetySettings, GenerationConfig? generationConfig}) _generateContentStream;
+      {List<SafetySetting>? safetySettings,
+      GenerationConfig? generationConfig}) _generateContentStream;
 
   final _mutex = Mutex();
 
@@ -37,8 +39,8 @@ final class ChatSession {
   final List<SafetySetting>? _safetySettings;
   final GenerationConfig? _generationConfig;
 
-  ChatSession._(
-      this._generateContent, this._generateContentStream, this._history, this._safetySettings, this._generationConfig);
+  ChatSession._(this._generateContent, this._generateContentStream,
+      this._history, this._safetySettings, this._generationConfig);
 
   /// The content that has been successfully sent to, or received from, the
   /// generative model.
@@ -100,7 +102,8 @@ final class ChatSession {
     _mutex.acquire().then((lock) async {
       try {
         final responses = _generateContentStream(_history.followedBy([message]),
-            safetySettings: _safetySettings, generationConfig: _generationConfig);
+            safetySettings: _safetySettings,
+            generationConfig: _generationConfig);
         final content = <Content>[];
         await for (final response in responses) {
           if (response.candidates case [final candidate, ...]) {
@@ -174,6 +177,9 @@ extension StartChatExtension on GenerativeModel {
   /// print(response.text);
   /// ```
   ChatSession startChat(
-          {List<Content>? history, List<SafetySetting>? safetySettings, GenerationConfig? generationConfig}) =>
-      ChatSession._(generateContent, generateContentStream, history ?? [], safetySettings, generationConfig);
+          {List<Content>? history,
+          List<SafetySetting>? safetySettings,
+          GenerationConfig? generationConfig}) =>
+      ChatSession._(generateContent, generateContentStream, history ?? [],
+          safetySettings, generationConfig);
 }
