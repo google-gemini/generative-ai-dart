@@ -736,6 +736,8 @@ CitationMetadata _parseCitationMetadata(Object? jsonObject) {
   return switch (jsonObject) {
     {'citationSources': final List<Object?> citationSources} =>
       CitationMetadata(citationSources.map(_parseCitationSource).toList()),
+    {'citations': final List<Object?> citationSources} =>
+      CitationMetadata(citationSources.map(_parseCitationSource).toList()),
     _ => throw FormatException('Unhandled CitationMetadata format', jsonObject),
   };
 }

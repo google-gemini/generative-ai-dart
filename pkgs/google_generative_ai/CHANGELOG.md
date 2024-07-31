@@ -1,3 +1,9 @@
+## 0.4.4
+
+- Allow the Vertex format for citation metadata - read either `citationSources`
+  or `citations` keys, whichever exists. Fixes a `FormatException` when parsing
+  vertex results with citations.
+
 ## 0.4.3
 
 - Internal changes to enable reuse in the Vertex SDK. No user visible changes.
