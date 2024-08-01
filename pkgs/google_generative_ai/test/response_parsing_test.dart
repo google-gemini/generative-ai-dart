@@ -370,6 +370,140 @@ void main() {
       );
     });
 
+    test('with a vertex formatted citation', () async {
+      final response = '''
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "placeholder"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "safetyRatings": [
+        {
+          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          "probability": "NEGLIGIBLE"
+        },
+        {
+          "category": "HARM_CATEGORY_HATE_SPEECH",
+          "probability": "NEGLIGIBLE"
+        },
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "probability": "NEGLIGIBLE"
+        },
+        {
+          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+          "probability": "NEGLIGIBLE"
+        }
+      ],
+      "citationMetadata": {
+        "citations": [
+          {
+            "startIndex": 574,
+            "endIndex": 705,
+            "uri": "https://example.com/",
+            "license": ""
+          },
+          {
+            "startIndex": 899,
+            "endIndex": 1026,
+            "uri": "https://example.com/",
+            "license": ""
+          },
+          {
+            "startIndex": 899,
+            "endIndex": 1026
+          },
+          {
+            "uri": "https://example.com/",
+            "license": ""
+          },
+          {}
+        ]
+      }
+    }
+  ],
+  "promptFeedback": {
+    "safetyRatings": [
+      {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "probability": "NEGLIGIBLE"
+      },
+      {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "probability": "NEGLIGIBLE"
+      },
+      {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "probability": "NEGLIGIBLE"
+      },
+      {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "probability": "NEGLIGIBLE"
+      }
+    ]
+  }
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final generateContentResponse = parseGenerateContentResponse(decoded);
+      expect(
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content.model([TextPart('placeholder')]),
+                [
+                  SafetyRating(
+                    HarmCategory.sexuallyExplicit,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.hateSpeech,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.harassment,
+                    HarmProbability.negligible,
+                  ),
+                  SafetyRating(
+                    HarmCategory.dangerousContent,
+                    HarmProbability.negligible,
+                  ),
+                ],
+                CitationMetadata([
+                  CitationSource(574, 705, Uri.https('example.com', ''), ''),
+                  CitationSource(899, 1026, Uri.https('example.com', ''), ''),
+                ]),
+                FinishReason.stop,
+                null,
+              ),
+            ],
+            PromptFeedback(null, null, [
+              SafetyRating(
+                HarmCategory.sexuallyExplicit,
+                HarmProbability.negligible,
+              ),
+              SafetyRating(HarmCategory.hateSpeech, HarmProbability.negligible),
+              SafetyRating(HarmCategory.harassment, HarmProbability.negligible),
+              SafetyRating(
+                HarmCategory.dangerousContent,
+                HarmProbability.negligible,
+              ),
+            ]),
+          ),
+        ),
+      );
+    });
+
     test('allows missing content', () async {
       final response = '''
 {
