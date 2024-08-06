@@ -31,6 +31,14 @@ Matcher matchesPart(Part part) => switch (part) {
         isA<FunctionResponse>()
             .having((p) => p.name, 'name', name)
             .having((p) => p.response, 'args', response),
+      ExecutableCode(language: final language, code: final code) =>
+        isA<ExecutableCode>()
+            .having((p) => p.language, 'language', language)
+            .having((p) => p.code, 'code', code),
+      CodeExecutionResult(outcome: final outcome, output: final output) =>
+        isA<CodeExecutionResult>()
+            .having((p) => p.outcome, 'outcome', outcome)
+            .having((p) => p.output, 'output', output),
       _ => throw StateError('Unhandled Part type.'),
     };
 

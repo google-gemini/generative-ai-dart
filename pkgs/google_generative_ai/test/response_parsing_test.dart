@@ -504,6 +504,62 @@ void main() {
       );
     });
 
+    test('with code execution', () async {
+      final response = '''
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "executableCode": {
+              "language": "PYTHON",
+              "code": "print('hello world')"
+            }
+          },
+          {
+            "codeExecutionResult": {
+              "outcome": "OUTCOME_OK",
+              "output": "hello world"
+            }
+          },
+          {
+            "text": "hello world"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ]
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final generateContentResponse = parseGenerateContentResponse(decoded);
+      expect(
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content.model([
+                  ExecutableCode(Language.python, 'print(\'hello world\')'),
+                  CodeExecutionResult(Outcome.ok, 'hello world'),
+                  TextPart('hello world')
+                ]),
+                [],
+                null,
+                FinishReason.stop,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
+      );
+    });
+
     test('allows missing content', () async {
       final response = '''
 {

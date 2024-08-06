@@ -1,3 +1,8 @@
+## 0.4.5
+
+- Add support for model side Code Execution. Enable code execution by
+  configuring `Tools` with a `codeExecution` argument.
+
 ## 0.4.4
 
 - Allow the Vertex format for citation metadata - read either `citationSources`
