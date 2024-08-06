@@ -18,28 +18,18 @@ import 'package:matcher/matcher.dart';
 
 Matcher matchesPart(Part part) => switch (part) {
       TextPart(text: final text) =>
-        // TODO: When updating min SDK remove ignore.
-        // ignore: unused_result, implementation bug
         isA<TextPart>().having((p) => p.text, 'text', text),
       DataPart(mimeType: final mimeType, bytes: final bytes) => isA<DataPart>()
           .having((p) => p.mimeType, 'mimeType', mimeType)
-          // TODO: When updating min SDK remove ignore.
-          // ignore: unused_result, implementation bug
           .having((p) => p.bytes, 'bytes', bytes),
       FilePart(uri: final uri) => isA<FilePart>()
-          // TODO: When updating min SDK remove ignore.
-          // ignore: unused_result, implementation bug
           .having((p) => p.uri, 'uri', uri),
       FunctionCall(name: final name, args: final args) => isA<FunctionCall>()
           .having((p) => p.name, 'name', name)
-          // TODO: When updating min SDK remove ignore.
-          // ignore: unused_result, implementation bug
           .having((p) => p.args, 'args', args),
       FunctionResponse(name: final name, response: final response) =>
         isA<FunctionResponse>()
             .having((p) => p.name, 'name', name)
-            // TODO: When updating min SDK remove ignore.
-            // ignore: unused_result, implementation bug
             .having((p) => p.response, 'args', response),
       _ => throw StateError('Unhandled Part type.'),
     };

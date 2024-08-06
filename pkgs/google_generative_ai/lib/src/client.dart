@@ -71,11 +71,7 @@ final class HttpApiClient implements ApiClient {
     final request = http.Request('POST', uri)
       ..bodyBytes = _utf8Json.encode(body)
       ..headers.addAll(await _headers());
-    // TODO: When updating min SDK remove workaround.
-    final httpClient = _httpClient;
-    final response = httpClient == null
-        ? await request.send()
-        : await httpClient.send(request);
+    final response = await (_httpClient?.send(request) ?? request.send());
     if (response.statusCode != 200) {
       final body = await response.stream.bytesToString();
       // Yeild a potential error object like a normal result for consistency
