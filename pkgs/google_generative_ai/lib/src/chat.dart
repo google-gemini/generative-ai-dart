@@ -68,7 +68,8 @@ final class ChatSession {
     try {
       final response = await _generateContent(_history.followedBy([message]),
           safetySettings: _safetySettings, generationConfig: _generationConfig);
-      if (response.candidates case [final candidate, ...]) {
+
+      if (response.candidates case [final candidate, ...] when candidate.content.role != null) {
         _history.add(message);
         // TODO: Append role?
         _history.add(candidate.content);
