@@ -137,10 +137,7 @@ final class ChatSession {
     final parts = <Part>[];
     void addBufferedText() {
       if (textBuffer.isEmpty) return;
-      // TODO: When updating min SDK remove workaround.
-      // if (previousText case final singleText?) {
-      final singleText = previousText;
-      if (singleText != null) {
+      if (previousText case final singleText?) {
         parts.add(singleText);
         previousText = null;
       } else {
