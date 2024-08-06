@@ -34,9 +34,9 @@ Future<void> generate(GenerationConfig? generationConfig, String apiKey) async {
 }
 
 Future<void> main() async {
-  final apiKey = Platform.environment['GOOGLE_API_KEY'];
+  final apiKey = Platform.environment['GEMINI_API_KEY'];
   if (apiKey == null) {
-    stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
+    stderr.writeln(r'No $GEMINI_API_KEY environment variable');
     exit(1);
   }
   await generate(null, apiKey);

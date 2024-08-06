@@ -12,7 +12,7 @@ create a key in Google AI Studio: https://aistudio.google.com/app/apikey.
 When running the app, include your API key using the `--dart-define` flag:
 
 ```bash
-flutter run --dart-define=API_KEY=$GOOGLE_API_KEY
+flutter run --dart-define=API_KEY=$GEMINI_API_KEY
 ```
 
 If you use VSCode, you can [specify `--dart-define`
