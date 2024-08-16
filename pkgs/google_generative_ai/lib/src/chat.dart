@@ -70,8 +70,10 @@ final class ChatSession {
           safetySettings: _safetySettings, generationConfig: _generationConfig);
       if (response.candidates case [final candidate, ...]) {
         _history.add(message);
-        // TODO: Append role?
-        _history.add(candidate.content);
+        final normalizedContent = candidate.content.role == null
+            ? Content('model', candidate.content.parts)
+            : candidate.content;
+        _history.add(normalizedContent);
       }
       return response;
     } finally {

@@ -2,6 +2,7 @@
 
 - Add support for model side Code Execution. Enable code execution by
   configuring `Tools` with a `codeExecution` argument.
+- Use a default role `'model'` when a chat response comes back with no role.
 
 ## 0.4.4
 
