@@ -17,6 +17,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../google_generative_ai.dart';
 import 'version.dart';
 
 const clientName = 'genai-dart/$packageVersion';
@@ -61,6 +62,11 @@ final class HttpApiClient implements ApiClient {
       headers: await _headers(),
       body: _utf8Json.encode(body),
     );
+    if (response.statusCode >= 500) {
+      throw GenerativeAIException(
+          'Server Error, Status Code: ${response.statusCode}');
+    }
+
     return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
   }
 
