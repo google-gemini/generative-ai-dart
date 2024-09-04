@@ -17,7 +17,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../google_generative_ai.dart';
+import 'error.dart';
 import 'version.dart';
 
 const clientName = 'genai-dart/$packageVersion';
