@@ -79,6 +79,7 @@ export 'src/content.dart'
 export 'src/error.dart'
     show
         GenerativeAIException,
+        GenerativeAISdkException,
         InvalidApiKey,
         ServerException,
         UnsupportedUserLocation;

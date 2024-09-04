@@ -53,6 +53,25 @@ final class ServerException implements GenerativeAIException {
   String toString() => message;
 }
 
+/// Exception indicating a stale package version or implementation bug.
+///
+/// This exception indicates a likely problem with the SDK implementation such
+/// as an inability to parse a new response format. Resolution paths may include
+/// updating to a new version of the SDK, or filing an issue.
+final class GenerativeAISdkException implements Exception {
+  final String message;
+
+  GenerativeAISdkException(this.message);
+
+  @override
+  String toString() => '$message\n'
+      'This indicates a problem with the Google Generative AI SDK. '
+      'Try updating to the latest version '
+      '(https://pub.dev/packages/google_generative_ai/versions), '
+      'or file an issue at '
+      'https://github.com/google-gemini/generative-ai-dart/issues.';
+}
+
 GenerativeAIException parseError(Object jsonObject) {
   return switch (jsonObject) {
     {
@@ -62,6 +81,9 @@ GenerativeAIException parseError(Object jsonObject) {
       InvalidApiKey(message),
     {'message': UnsupportedUserLocation._message} => UnsupportedUserLocation(),
     {'message': final String message} => ServerException(message),
-    _ => throw FormatException('Unhandled Server Error format', jsonObject)
+    _ => throw unhandledFormat('server error', jsonObject)
   };
 }
+
+Exception unhandledFormat(String name, Object? jsonObject) =>
+    GenerativeAISdkException('Unhandled format for $name: $jsonObject');

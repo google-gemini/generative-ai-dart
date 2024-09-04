@@ -15,6 +15,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'error.dart';
+
 /// The base structured datatype containing multi-part content of a message.
 final class Content {
   /// The producer of the content.
@@ -57,7 +59,7 @@ Content parseContent(Object jsonObject) {
           _ => null,
         },
         parts.map(_parsePart).toList()),
-    _ => throw FormatException('Unhandled Content format', jsonObject),
+    _ => throw unhandledFormat('Content', jsonObject),
   };
 }
 
@@ -91,7 +93,7 @@ Part _parsePart(Object? jsonObject) {
       }
     } =>
       CodeExecutionResult(Outcome._parse(outcome), output),
-    _ => throw FormatException('Unhandled Part format', jsonObject),
+    _ => throw unhandledFormat('Part', jsonObject),
   };
 }
 
@@ -213,7 +215,7 @@ enum Language {
   static Language _parse(Object jsonObject) => switch (jsonObject) {
         'LANGUAGE_UNSPECIFIED' => unspecified,
         'PYTHON' => python,
-        _ => throw FormatException('Unhandled Language format', jsonObject),
+        _ => throw unhandledFormat('Language', jsonObject),
       };
 
   String toJson() => switch (this) {
@@ -234,7 +236,7 @@ enum Outcome {
         'OUTCOME_OK' => ok,
         'OUTCOME_FAILED' => failed,
         'OUTCOME_DEADLINE_EXCEEDED' => deadlineExceeded,
-        _ => throw FormatException('Unhandled Language format', jsonObject),
+        _ => throw unhandledFormat('Language', jsonObject),
       };
 
   String toJson() => switch (this) {
