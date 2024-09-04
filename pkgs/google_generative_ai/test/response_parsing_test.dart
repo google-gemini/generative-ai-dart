@@ -57,10 +57,10 @@ void main() {
       expect(
         () => parseGenerateContentResponse(decoded),
         throwsA(
-          isA<FormatException>().having(
+          isA<GenerativeAISdkException>().having(
             (e) => e.message,
             'message',
-            startsWith('Unhandled Content format'),
+            startsWith('Unhandled format for Content:'),
           ),
         ),
       );
