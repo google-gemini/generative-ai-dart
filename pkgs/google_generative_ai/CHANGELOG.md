@@ -1,3 +1,7 @@
+## 0.4.6
+
+- Throw a more relevant exception for server error HTTP responses.
+
 ## 0.4.5
 
 - Add support for model side Code Execution. Enable code execution by
