@@ -346,8 +346,7 @@ enum HarmProbability {
         'LOW' => HarmProbability.low,
         'MEDIUM' => HarmProbability.medium,
         'HIGH' => HarmProbability.high,
-        _ => throw FormatException(
-            'Unhandled HarmProbability unhandledFormat', jsonObject),
+        _ => throw unhandledFormat('HarmProbability', jsonObject),
       };
 }
 
@@ -620,7 +619,7 @@ EmbedContentResponse parseEmbedContentResponse(Object jsonObject) {
     {'embedding': final Object embedding} =>
       EmbedContentResponse(_parseContentEmbedding(embedding)),
     {'error': final Object error} => throw parseError(error),
-    _ => throw FormatException('EmbedContentResponse', jsonObject)
+    _ => throw unhandledFormat('EmbedContentResponse', jsonObject)
   };
 }
 
