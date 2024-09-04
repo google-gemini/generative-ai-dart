@@ -64,7 +64,7 @@ final class HttpApiClient implements ApiClient {
     );
     if (response.statusCode >= 500) {
       throw GenerativeAIException(
-          'Server Error, Status Code: ${response.statusCode}');
+          'Server Error [${response.statusCode}]: ${response.body}');
     }
 
     return _utf8Json.decode(response.bodyBytes) as Map<String, Object?>;
