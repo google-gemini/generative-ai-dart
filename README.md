@@ -72,8 +72,7 @@ print(response.text);
 ## Documentation
 
 See the
-[Gemini API Cookbook](https://github.com/google-gemini/gemini-api-cookbook/) or
-[ai.google.dev](https://ai.google.dev) for complete documentation.
+[ai.google.dev]([https://ai.google.dev](https://ai.google.dev/gemini-api/docs)) for complete documentation.
 
 ## Contributing
 
