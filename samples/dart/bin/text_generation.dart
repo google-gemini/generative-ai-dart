@@ -17,9 +17,9 @@ import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 final apiKey = () {
-  final apiKey = Platform.environment['GEMINI_API_KEY'];
+  final apiKey = Platform.environment['GOOGLE_API_KEY'];
   if (apiKey == null) {
-    stderr.writeln(r'No $GEMINI_API_KEY environment variable');
+    stderr.writeln(r'No $GOOGLE_API_KEY environment variable');
     exit(1);
   }
   return apiKey;
@@ -27,11 +27,18 @@ final apiKey = () {
 
 Future<void> textGenTextOnlyPrompt() async {
   // [START text_gen_text_only_prompt]
+  import 'package:google_generative_ai/google_generative_ai.dart';
+
+  final apiKey = Platform.environment['GOOGLE_API_KEY'];
+  if (apiKey == null) {
+    print('No \$GOOGLE_API_KEY environment variable');
+    exit(1);
+  }
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
   );
-  final prompt = 'Write a story about a magic backpack.';
+  final prompt = 'Explain how AI works';
 
   final response = await model.generateContent([Content.text(prompt)]);
   print(response.text);
@@ -44,7 +51,7 @@ Future<void> textGenTextOnlyPromptStreaming() async {
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
   );
-  final prompt = 'Write a story about a magic backpack.';
+  final prompt = 'Explain how AI works';
 
   final responses = model.generateContentStream([Content.text(prompt)]);
   await for (final response in responses) {
