@@ -27,6 +27,8 @@ final apiKey = () {
 
 Future<void> functionCalling() async {
   // [START function_calling]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   Map<String, Object?> setLightValues(Map<String, Object?> args) {
     return args;
   }

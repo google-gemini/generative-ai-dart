@@ -33,6 +33,8 @@ final apiKey = () {
 
 Future<void> codeExecutionBasic() async {
   // [START code_execution_basic]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     // Specify a Gemini model appropriate for your use case
     model: 'gemini-1.5-flash',
@@ -50,6 +52,8 @@ Future<void> codeExecutionBasic() async {
 
 Future<void> codeExecutionChat() async {
   // [START code_execution_chat]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     // Specify a Gemini model appropriate for your use case
     model: 'gemini-1.5-flash',
