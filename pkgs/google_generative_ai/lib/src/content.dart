@@ -77,8 +77,20 @@ Part _parsePart(Object? jsonObject) {
       'functionResponse': {'name': String _, 'response': Map<String, Object?> _}
     } =>
       throw UnimplementedError('FunctionResponse part not yet supported'),
-    {'inlineData': {'mimeType': String _, 'data': String _}} =>
-      throw UnimplementedError('inlineData content part not yet supported'),
+    {
+      'inlineData': {
+        'mimeType': final String mimeType,
+        'data': final String data
+      }
+    } =>
+      DataPart(mimeType, base64Decode(data)),
+    {
+      'fileData': {
+        'mimeType': final String mimeType,
+        'fileUri': final String fileUri
+      }
+    } =>
+      FilePart(mimeType, Uri.parse(fileUri)),
     {
       'executableCode': {
         'language': final String language,
@@ -124,11 +136,12 @@ final class DataPart implements Part {
 ///
 /// The [uri] should refer to a file uploaded to the Google AI File Service API.
 final class FilePart implements Part {
+  final String mimeType;
   final Uri uri;
-  FilePart(this.uri);
+  FilePart(this.mimeType, this.uri);
   @override
   Object toJson() => {
-        'file_data': {'file_uri': '$uri'}
+        'fileData': {'mimeType': mimeType, 'fileUri': '$uri'}
       };
 }
 
