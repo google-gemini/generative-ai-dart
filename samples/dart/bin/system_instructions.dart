@@ -27,6 +27,8 @@ final apiKey = () {
 
 Future<void> systemInstructions() async {
   // [START system_instructions]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,

@@ -27,6 +27,8 @@ final apiKey = () {
 
 Future<void> jsonControlledGeneration() async {
   // [START json_controlled_generation]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final schema = Schema.array(
       description: 'List of recipes',
       items: Schema.object(properties: {
@@ -50,6 +52,8 @@ Future<void> jsonControlledGeneration() async {
 
 Future<void> jsonNoSchema() async {
   // [START json_no_schema]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
       model: 'gemini-1.5-pro',
       apiKey: apiKey,

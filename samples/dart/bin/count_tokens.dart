@@ -27,6 +27,8 @@ final apiKey = () {
 
 Future<void> tokensTextOnly() async {
   // [START tokens_text_only]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -39,6 +41,8 @@ Future<void> tokensTextOnly() async {
 
 Future<void> tokensChat() async {
   // [START tokens_chat]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -66,6 +70,8 @@ Future<void> tokensChat() async {
 
 Future<void> tokensMultimodalImageInline() async {
   // [START tokens_multimodal_image_inline]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -95,6 +101,8 @@ Future<void> tokensMultimodalImageInline() async {
 
 Future<void> tokensSystemInstructions() async {
   // [START tokens_system_instruction]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   var model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -117,6 +125,8 @@ Future<void> tokensSystemInstructions() async {
 
 Future<void> tokensTools() async {
   // [START tokens_tools]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   var model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,

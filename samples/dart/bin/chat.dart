@@ -27,6 +27,8 @@ final apiKey = () {
 
 Future<void> chat() async {
   // [START chat]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -46,6 +48,8 @@ Future<void> chat() async {
 
 Future<void> chatStreaming() async {
   // [START chat_streaming]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -71,6 +75,8 @@ Future<void> chatStreaming() async {
 
 Future<void> chatStreamingWithImages() async {
   // [START chat_streaming_with_images]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,

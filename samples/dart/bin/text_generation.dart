@@ -27,6 +27,8 @@ final apiKey = () {
 
 Future<void> textGenTextOnlyPrompt() async {
   // [START text_gen_text_only_prompt]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -40,6 +42,8 @@ Future<void> textGenTextOnlyPrompt() async {
 
 Future<void> textGenTextOnlyPromptStreaming() async {
   // [START text_gen_text_only_prompt_streaming]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -55,6 +59,8 @@ Future<void> textGenTextOnlyPromptStreaming() async {
 
 Future<void> textGenMultimodalOneImagePrompt() async {
   // [START text_gen_multimodal_one_image_prompt]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -76,6 +82,8 @@ Future<void> textGenMultimodalOneImagePrompt() async {
 
 Future<void> textGenMultimodalOneImagePromptStreaming() async {
   // [START text_gen_multimodal_one_image_prompt_streaming]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -99,6 +107,8 @@ Future<void> textGenMultimodalOneImagePromptStreaming() async {
 
 Future<void> textGenMultimodalMultiImagePrompt() async {
   // [START text_gen_multimodal_multi_image_prompt]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
@@ -125,6 +135,8 @@ Future<void> textGenMultimodalMultiImagePrompt() async {
 
 Future<void> textGenMultimodalMultiImagePromptStreaming() async {
   // [START text_gen_multimodal_multi_image_prompt_streaming]
+  // Make sure to include this import:
+  // import 'package:google_generative_ai/google_generative_ai.dart';
   final model = GenerativeModel(
     model: 'gemini-1.5-flash',
     apiKey: apiKey,
