@@ -650,6 +650,36 @@ void main() {
       expect(generateContentResponse.candidates.single.text,
           'Initial text And more text');
     });
+
+    test('thoughts are not included as text', () async {
+      final response = '''
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Thinking really hard.",
+            "thought": true
+          },
+          {
+            "text": "Responding really well."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ]
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final generateContentResponse = parseGenerateContentResponse(decoded);
+      expect(generateContentResponse.text, 'Responding really well.');
+      expect(generateContentResponse.candidates.single.text,
+          'Responding really well.');
+    });
   });
 
   group('parses and throws error responses', () {

@@ -1,3 +1,7 @@
+## 0.4.8
+
+- Support parsing thought text parts and omit them from the joined `text` field.
+
 ## 0.4.7
 
 - Update the README.md to indicate that this package is deprecated; using the

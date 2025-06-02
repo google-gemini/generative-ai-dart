@@ -65,6 +65,8 @@ Content parseContent(Object jsonObject) {
 
 Part _parsePart(Object? jsonObject) {
   return switch (jsonObject) {
+    {'text': final String text, 'thought': true} =>
+      TextPart(text, isThought: true),
     {'text': final String text} => TextPart(text),
     {
       'functionCall': {
@@ -104,7 +106,8 @@ abstract interface class Part {
 
 final class TextPart implements Part {
   final String text;
-  TextPart(this.text);
+  final bool isThought;
+  TextPart(this.text, {this.isThought = false});
   @override
   Object toJson() => {'text': text};
 }
