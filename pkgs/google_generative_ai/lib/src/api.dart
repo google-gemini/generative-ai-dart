@@ -51,11 +51,16 @@ final class GenerateContentResponse {
 
   final UsageMetadata? usageMetadata;
 
+  final String modelVersion;
+  final String responseId;
+
   // TODO(natebosch): Change `promptFeedback` to a named argument.
   GenerateContentResponse(
     this.candidates,
     this.promptFeedback, {
     this.usageMetadata,
+    this.modelVersion = '',
+    this.responseId = '',
   });
 
   /// The text content of the text parts of the first of [candidates], if any.
@@ -87,6 +92,14 @@ final class GenerateContentResponse {
           },
         [final candidate, ...] => candidate.text,
       };
+
+  /// The inline data parts of the first candidate in [candidates], if any.
+  ///
+  /// Returns an empty list if there are no candidates, or if the first
+  /// candidate has no [DataPart] parts. There is no error thrown if the
+  /// prompt or response were blocked.
+  Iterable<DataPart> get inlineDatas =>
+      candidates.firstOrNull?.content.parts.whereType<DataPart>() ?? const [];
 
   /// The function call parts of the first candidate in [candidates], if any.
   ///
@@ -160,7 +173,7 @@ final class PromptFeedback {
 
 /// Metadata on the generation request's token usage.
 final class UsageMetadata {
-  /// Number of tokens in the prompt.
+  /// Number of tokens in the prompt. When cachedContent is set, this is still the total effective prompt size meaning this includes the number of tokens in the cached content.
   final int? promptTokenCount;
 
   /// Total number of tokens across the generated candidates.
@@ -169,10 +182,38 @@ final class UsageMetadata {
   /// Total token count for the generation request (prompt + candidates).
   final int? totalTokenCount;
 
+  /// number for tokens use thinking.
+  final int? thoughtsTokenCount;
+
+  /// Number of tokens in the cached part of the prompt (the cached content)
+  final int? cachedContentTokenCount;
+
+  /// Number of tokens present in tool-use prompt(s)
+  final int? toolUsePromptTokenCount;
+
+  /// List of modalities that were processed in the request input.
+  final List<Map<String, dynamic>>? promptTokensDetails;
+
+  /// List of modalities of the cached content in the request input.
+  final List<Map<String, dynamic>>? cacheTokensDetails;
+
+  /// List of modalities that were returned in the response.
+  final List<Map<String, dynamic>>? candidatesTokensDetails;
+
+  /// List of modalities that were processed for tool-use request inputs.
+  final List<Map<String, dynamic>>? toolUsePromptTokensDetails;
+
   UsageMetadata({
     this.promptTokenCount,
     this.candidatesTokenCount,
     this.totalTokenCount,
+    this.thoughtsTokenCount,
+    this.cachedContentTokenCount,
+    this.toolUsePromptTokenCount,
+    this.promptTokensDetails,
+    this.candidatesTokensDetails,
+    this.cacheTokensDetails,
+    this.toolUsePromptTokensDetails,
   });
 }
 
@@ -521,6 +562,22 @@ final class GenerationConfig {
   ///   a schema; currently this is limited to `application/json`.
   final Schema? responseSchema;
 
+  /// The modalities that should be included in the response.
+  ///
+  /// Supported values:
+  /// - `text`: Text output.
+  /// - `image`: Image output.
+  final List<String>? responseModalities;
+
+  /// The thinkingBudget parameter guides the model on the number of thinking tokens to use when generating a response.
+  ///
+  /// disable thinking by setting thinkingBudget to 0. Setting the thinkingBudget to -1 turns on dynamic thinking.
+  ///
+  /// Note: only supported in Gemini 2.5 Flash (Range:128~32768), 2.5 Pro(Range:0~24576), and 2.5 Flash-Lite(Range:512~24576).
+  // final int? thinkingBudget;
+  // final bool? includeThoughts;
+  final Map<String, dynamic>? thinkingConfig;
+
   GenerationConfig({
     this.candidateCount,
     this.stopSequences = const [],
@@ -530,6 +587,8 @@ final class GenerationConfig {
     this.topK,
     this.responseMimeType,
     this.responseSchema,
+    this.responseModalities,
+    this.thinkingConfig,
   });
 
   Map<String, Object?> toJson() => {
@@ -545,6 +604,10 @@ final class GenerationConfig {
           'responseMimeType': responseMimeType,
         if (responseSchema case final responseSchema?)
           'responseSchema': responseSchema,
+        if (responseModalities case final responseModalities?)
+          'responseModalities': responseModalities,
+        if (thinkingConfig case final thinkingConfig?)
+          'thinkingConfig': thinkingConfig,
       };
 }
 
@@ -595,8 +658,24 @@ GenerateContentResponse parseGenerateContentResponse(Object jsonObject) {
       _parseUsageMetadata(usageMetadata),
     _ => null,
   };
-  return GenerateContentResponse(candidates, promptFeedback,
-      usageMetadata: usageMedata);
+
+  final modelVersion = switch (jsonObject) {
+    {'modelVersion': final modelVersion?} => modelVersion.toString(),
+    _ => '',
+  };
+
+  final responseId = switch (jsonObject) {
+    {'responseId': final responseId?} => responseId.toString(),
+    _ => '',
+  };
+
+  return GenerateContentResponse(
+    candidates,
+    promptFeedback,
+    usageMetadata: usageMedata,
+    modelVersion: modelVersion,
+    responseId: responseId,
+  );
 }
 
 CountTokensResponse parseCountTokensResponse(Object jsonObject) {
@@ -702,10 +781,57 @@ UsageMetadata _parseUsageMetadata(Object jsonObject) {
     {'totalTokenCount': final int totalTokenCount} => totalTokenCount,
     _ => null,
   };
+  final thoughtsTokenCount = switch (jsonObject) {
+    {'thoughtsTokenCount': final int thoughtsTokenCount} => thoughtsTokenCount,
+    _ => null,
+  };
+  final cachedContentTokenCount = switch (jsonObject) {
+    {'cachedContentTokenCount': final int cachedContentTokenCount} =>
+      cachedContentTokenCount,
+    _ => null,
+  };
+  final toolUsePromptTokenCount = switch (jsonObject) {
+    {'toolUsePromptTokenCount': final int toolUsePromptTokenCount} =>
+      toolUsePromptTokenCount,
+    _ => null,
+  };
+
+  final promptTokensDetails = switch (jsonObject) {
+    {'promptTokensDetails': final List promptTokensDetails} =>
+      List<Map<String, dynamic>>.from(promptTokensDetails),
+    _ => null,
+  };
+
+  final candidatesTokensDetails = switch (jsonObject) {
+    {'candidatesTokensDetails': final List candidatesTokensDetails} =>
+      List<Map<String, dynamic>>.from(candidatesTokensDetails),
+    _ => null,
+  };
+
+  final cacheTokensDetails = switch (jsonObject) {
+    {'cacheTokensDetails': final List cacheTokensDetails} =>
+      List<Map<String, dynamic>>.from(cacheTokensDetails),
+    _ => null,
+  };
+
+  final toolUsePromptTokensDetails = switch (jsonObject) {
+    {'toolUsePromptTokensDetails': final List toolUsePromptTokensDetails} =>
+      List<Map<String, dynamic>>.from(toolUsePromptTokensDetails),
+    _ => null,
+  };
+
   return UsageMetadata(
-      promptTokenCount: promptTokenCount,
-      candidatesTokenCount: candidatesTokenCount,
-      totalTokenCount: totalTokenCount);
+    promptTokenCount: promptTokenCount,
+    candidatesTokenCount: candidatesTokenCount,
+    totalTokenCount: totalTokenCount,
+    thoughtsTokenCount: thoughtsTokenCount,
+    toolUsePromptTokenCount: toolUsePromptTokenCount,
+    cachedContentTokenCount: cachedContentTokenCount,
+    promptTokensDetails: promptTokensDetails,
+    candidatesTokensDetails: candidatesTokensDetails,
+    cacheTokensDetails: cacheTokensDetails,
+    toolUsePromptTokensDetails: toolUsePromptTokensDetails,
+  );
 }
 
 SafetyRating _parseSafetyRating(Object? jsonObject) {

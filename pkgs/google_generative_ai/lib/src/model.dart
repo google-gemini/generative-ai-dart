@@ -62,6 +62,8 @@ final class GenerativeModel {
   final Content? _systemInstruction;
   final ToolConfig? _toolConfig;
 
+  final String? _cachedContent;
+
   /// Create a [GenerativeModel] backed by the generative model named [model].
   ///
   /// The [model] argument can be a model name (such as
@@ -103,6 +105,7 @@ final class GenerativeModel {
     RequestOptions? requestOptions,
     Content? systemInstruction,
     ToolConfig? toolConfig,
+    String? cachedContent,
   }) =>
       GenerativeModel._withClient(
         client: HttpApiClient(apiKey: apiKey, httpClient: httpClient),
@@ -113,6 +116,7 @@ final class GenerativeModel {
         tools: tools,
         systemInstruction: systemInstruction,
         toolConfig: toolConfig,
+        cachedContent: cachedContent,
       );
 
   GenerativeModel._withClient({
@@ -124,6 +128,7 @@ final class GenerativeModel {
     required List<Tool>? tools,
     required Content? systemInstruction,
     required ToolConfig? toolConfig,
+    required String? cachedContent,
   })  : _model = _normalizeModelName(model),
         _baseUri = baseUri,
         _safetySettings = safetySettings,
@@ -131,6 +136,7 @@ final class GenerativeModel {
         _tools = tools,
         _systemInstruction = systemInstruction,
         _toolConfig = toolConfig,
+        _cachedContent = cachedContent,
         _client = client;
 
   /// Returns the model code for a user friendly model name.
@@ -334,6 +340,9 @@ final class GenerativeModel {
       if (toolConfig != null) 'toolConfig': toolConfig.toJson(),
       if (_systemInstruction case final systemInstruction?)
         'systemInstruction': systemInstruction.toJson(),
+      if (_cachedContent case final cachedContent?
+          when cachedContent.isNotEmpty)
+        'cachedContent': cachedContent,
     };
   }
 }
@@ -357,6 +366,7 @@ GenerativeModel createModelWithClient({
   Content? systemInstruction,
   List<Tool>? tools,
   ToolConfig? toolConfig,
+  String? cachedContent,
 }) =>
     GenerativeModel._withClient(
       client: client,
@@ -367,6 +377,7 @@ GenerativeModel createModelWithClient({
       systemInstruction: systemInstruction,
       tools: tools,
       toolConfig: toolConfig,
+      cachedContent: cachedContent,
     );
 
 /// Creates a model with an overridden base URL to communicate with a different
@@ -385,6 +396,7 @@ GenerativeModel createModelWithBaseUri({
   List<Tool>? tools,
   Content? systemInstruction,
   ToolConfig? toolConfig,
+  String? cachedContent,
 }) =>
     GenerativeModel._withClient(
       client: HttpApiClient(apiKey: apiKey, requestHeaders: requestHeaders),
@@ -395,4 +407,5 @@ GenerativeModel createModelWithBaseUri({
       systemInstruction: systemInstruction,
       tools: tools,
       toolConfig: toolConfig,
+      cachedContent: cachedContent,
     );
